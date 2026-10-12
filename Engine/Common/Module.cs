@@ -152,7 +152,8 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
                 $"Module '{Identifier}' cannot be destroyed while in state '{_state.Get()}'."
             );
 
-        _state.Destroy();
+        if (!_state.Destroyed)
+            _state.Destroy();
 
         base.OnDestroy();
     }
@@ -247,17 +248,33 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
                 $"Module '{Identifier}' cannot be started from state '{currentState}'."
             );
 
-        _state.Set(ModuleState.Starting);
+        var started = false;
 
         try
         {
+            _state.Set(ModuleState.Starting);
             OnStart();
-
+            started = true;
             _state.Set(ModuleState.Running);
         }
-        catch (Exception)
+        catch (Exception exception)
         {
-            _state.Set(ModuleState.Idle);
+            // The engine rolls back modules whose startup completed.
+            if (started)
+                throw;
+
+            try
+            {
+                _state.Set(ModuleState.Idle);
+            }
+            catch (Exception notificationFailure)
+            {
+                throw new AggregateException(
+                    "Module startup and state notification failed.",
+                    exception,
+                    notificationFailure
+                );
+            }
 
             throw;
         }
@@ -279,17 +296,29 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
                 $"Module '{Identifier}' cannot be stopped from state '{currentState}'."
             );
 
-        _state.Set(ModuleState.Stopping);
+        var stopped = false;
 
         try
         {
+            _state.Set(ModuleState.Stopping);
             OnStop();
-
+            stopped = true;
             _state.Set(ModuleState.Idle);
         }
-        catch (Exception)
+        catch (Exception exception)
         {
-            _state.Set(ModuleState.Running);
+            try
+            {
+                _state.Set(stopped ? ModuleState.Idle : ModuleState.Running);
+            }
+            catch (Exception notificationFailure)
+            {
+                throw new AggregateException(
+                    "Module shutdown and state notification failed.",
+                    exception,
+                    notificationFailure
+                );
+            }
 
             throw;
         }

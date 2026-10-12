@@ -10,14 +10,14 @@ namespace Mirage.SDL3.Windowing;
 /// </summary>
 /// <remarks>
 /// All native operations must run on the SDL video thread. SDL's event queue is
-/// process-wide; update one designated window to pump it, or introduce a central
-/// event dispatcher when using multiple windows.
+/// process-wide; events are routed to their window and retained until its next update.
 /// </remarks>
 public sealed class SDL3Window : Window
 {
     private static readonly TimeSpan TitleInterval = TimeSpan.FromMilliseconds(250);
     private static readonly Dictionary<uint, SDL3Window> Windows = [];
     private readonly List<SDL.Event> _events = [];
+    private readonly List<SDL.Event> _pendingEvents = [];
     private uint _id;
     private long _lastTitleChange;
     private bool _titlePending;
@@ -42,8 +42,9 @@ public sealed class SDL3Window : Window
         });
     }
 
-    /// <summary>Gets SDL events consumed by this window during its last update.</summary>
-    /// <remarks>The queue is shared, so events may refer to other windows.</remarks>
+    /// <summary>Gets SDL events delivered to this window during its last update.</summary>
+    /// <remarks>Window events are routed by SDL's associated window. Events without
+    /// an associated window are delivered to every open Mirage window.</remarks>
     public IReadOnlyList<SDL.Event> FrameEvents => _events;
 
     /// <summary>Gets the borrowed native handle; zero while closed.</summary>
@@ -136,6 +137,7 @@ public sealed class SDL3Window : Window
         Native = IntPtr.Zero;
         _id = 0;
         _events.Clear();
+        _pendingEvents.Clear();
         _titlePending = false;
         SDL.DestroyWindow(native);
         VideoRuntime.Release();
@@ -239,15 +241,23 @@ public sealed class SDL3Window : Window
             return;
         while (SDL.PollEvent(out var e))
         {
-            _events.Add(e);
             var type = (SDL.EventType)e.Type;
             if (type == SDL.EventType.Quit)
             {
-                Close();
+                foreach (var window in Windows.Values.ToArray())
+                    window.Close();
                 break;
             }
-            if (!Windows.TryGetValue(e.Window.WindowID, out var target))
+            var native = SDL.GetWindowFromEvent(in e);
+            if (native == IntPtr.Zero)
+            {
+                foreach (var window in Windows.Values)
+                    window._pendingEvents.Add(e);
                 continue;
+            }
+            if (!Windows.TryGetValue(SDL.GetWindowID(native), out var target))
+                continue;
+            target._pendingEvents.Add(e);
             if (type == SDL.EventType.WindowCloseRequested)
             {
                 target.Close();
@@ -276,6 +286,8 @@ public sealed class SDL3Window : Window
         }
         if (Native == IntPtr.Zero)
             return;
+        _events.AddRange(_pendingEvents);
+        _pendingEvents.Clear();
         var now = Stopwatch.GetTimestamp();
         if (_titlePending && Stopwatch.GetElapsedTime(_lastTitleChange, now) >= TitleInterval)
         {

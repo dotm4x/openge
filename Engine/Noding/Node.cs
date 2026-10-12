@@ -330,6 +330,8 @@ public class Node : Destroyable, IIdentifiable<Guid>
     private readonly Preparator _preparator = new();
     private NodeContext? _context;
     private bool _restoringParent;
+    private HashSet<Node>? _loadRollbackPreserved;
+    private bool _loadRollbackInitialized;
 
     /// <summary>
     /// Gets the mutable name of the node.
@@ -722,6 +724,10 @@ public class Node : Destroyable, IIdentifiable<Guid>
     /// <see cref="OnLoad"/> is invoked after this node enters the loaded state
     /// and before its subnodes are loaded. Persistent subnodes that remained
     /// loaded are not loaded again.
+    /// If loading a subnode fails, newly loaded subnodes are unloaded in reverse order,
+    /// including persistent ones, and completed initialization is undone through OnUnload.
+    /// Previously loaded subnodes are preserved. If rollback fails, this node remains
+    /// loaded so Unload can retry cleanup. An incomplete OnLoad must clean up its own resources.
     /// </remarks>
     /// <exception cref="DestroyedObjectException">
     /// Thrown when the node has already been destroyed.
@@ -748,10 +754,13 @@ public class Node : Destroyable, IIdentifiable<Guid>
         _preparator.Ensure(ComposeContents, ConfigureContents);
 
         Loaded = true;
+        var initialized = false;
+        var previouslyLoaded = Subnodes.Where(node => node.Loaded).ToHashSet();
 
         try
         {
             OnLoad();
+            initialized = true;
 
             foreach (var node in Subnodes)
             {
@@ -759,9 +768,49 @@ public class Node : Destroyable, IIdentifiable<Guid>
                     node.Load();
             }
         }
-        catch
+        catch (Exception exception)
         {
-            Loaded = false;
+            List<Exception> failures = [];
+            foreach (var node in Subnodes.ToArray().Reverse())
+            {
+                if (!node.Loaded || previouslyLoaded.Contains(node))
+                    continue;
+
+                try
+                {
+                    node.Unload();
+                }
+                catch (Exception cleanupFailure)
+                {
+                    failures.Add(cleanupFailure);
+                    break;
+                }
+            }
+
+            if (failures.Count == 0)
+            {
+                try
+                {
+                    if (initialized)
+                        OnUnload();
+                    Loaded = false;
+                }
+                catch (Exception cleanupFailure)
+                {
+                    failures.Add(cleanupFailure);
+                }
+            }
+
+            if (failures.Count != 0)
+            {
+                _loadRollbackPreserved = previouslyLoaded;
+                _loadRollbackInitialized = initialized;
+                throw new AggregateException(
+                    "Node loading and rollback failed. Unload to retry cleanup.",
+                    [exception, .. failures]
+                );
+            }
+
             throw;
         }
     }
@@ -784,6 +833,8 @@ public class Node : Destroyable, IIdentifiable<Guid>
     /// Persistent subnodes retain their current loaded state. Non-persistent
     /// subnodes are unloaded before their parent. <see cref="OnUnload"/> is
     /// invoked before this node leaves the loaded state.
+    /// After a failed load rollback, this also retries cleanup of newly loaded persistent
+    /// subnodes while preserving subnodes that were already loaded before the attempt.
     /// </remarks>
     /// <exception cref="DestroyedObjectException">
     /// Thrown when the node has already been destroyed.
@@ -798,14 +849,23 @@ public class Node : Destroyable, IIdentifiable<Guid>
         if (!Loaded)
             throw new InvalidOperationException($"{this} is not loaded");
 
-        foreach (var node in Subnodes)
+        var preserved = _loadRollbackPreserved;
+        var rollingBack = preserved is not null;
+        var nodes = rollingBack ? Subnodes.ToArray().Reverse() : Subnodes;
+        foreach (var node in nodes)
         {
-            if (node is { Persistent: false, Loaded: true })
+            if (
+                node.Loaded
+                && (preserved is not null ? !preserved.Contains(node) : !node.Persistent)
+            )
                 node.Unload();
         }
 
-        OnUnload();
+        if (!rollingBack || _loadRollbackInitialized)
+            OnUnload();
         Loaded = false;
+        _loadRollbackPreserved = null;
+        _loadRollbackInitialized = false;
     }
 
     internal NodeManager? RootOwner { get; set; }

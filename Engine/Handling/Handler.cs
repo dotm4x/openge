@@ -42,7 +42,7 @@ public abstract class InputHandler : Module, IUpdatable
     /// Thrown when the initial devices contain duplicate identifiers.
     /// </exception>
     protected InputHandler(int index, Window window, IEnumerable<InputDevice>? devices = null)
-        : base($"InputHandler-{index}", ["Logger"])
+        : base($"InputHandler-{index}", ["Logger", "WindowManager"])
     {
         Window = window;
 

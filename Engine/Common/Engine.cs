@@ -41,6 +41,8 @@ public enum EngineState
 /// shared context, and starting and stopping them in dependency order.
 /// It owns and destroys its registered modules. Passing modules to the constructor or
 /// returning them from composition transfers ownership; do not register them in another engine.
+/// If destruction fails, call Destroy again to release remaining modules. Successfully
+/// destroyed modules are skipped, and startup is rejected once destruction has begun.
 /// </remarks>
 public abstract class Engine : Destroyable
 {
@@ -48,6 +50,7 @@ public abstract class Engine : Destroyable
     private readonly Store<EngineState> _state = new(EngineState.Idle);
     private readonly Preparator _preparator = new();
     private bool _injected;
+    private bool _destroying;
     private IReadOnlyList<Module>? _moduleOrder;
 
     /// <summary>
@@ -166,6 +169,8 @@ public abstract class Engine : Destroyable
         for (var index = startedModules.Count - 1; index >= 0; index--)
         {
             var module = startedModules[index];
+            if (module.State.Get() != ModuleState.Running)
+                continue;
 
             try
             {
@@ -221,8 +226,13 @@ public abstract class Engine : Destroyable
                 $"Engine cannot be destroyed while in state '{currentState}'"
             );
 
-        foreach (var module in (_moduleOrder ?? _modules.Values.ToArray()).Reverse())
-            module.Destroy();
+        _destroying = true;
+
+        foreach (var module in (_moduleOrder ?? [.. _modules.Values]).Reverse())
+        {
+            if (!module.Destroyed)
+                module.Destroy();
+        }
 
         _modules.Clear();
 
@@ -288,7 +298,8 @@ public abstract class Engine : Destroyable
     /// module dependencies contain a circular reference.
     /// </exception>
     /// <exception cref="AggregateException">
-    /// Startup failed and rollback also failed. The first inner exception is the startup failure.
+    /// Startup failed and rollback or recovery notification also failed.
+    /// The first inner exception is the startup failure.
     /// </exception>
     public void Start()
     {
@@ -303,12 +314,14 @@ public abstract class Engine : Destroyable
             );
         }
 
-        _state.Set(EngineState.Starting);
+        if (_destroying)
+            throw new InvalidOperationException("Engine destruction has already started.");
 
         List<Module> startedModules = [];
 
         try
         {
+            _state.Set(EngineState.Starting);
             _preparator.Ensure(ComposeContents, ConfigureContents);
 
             var sortedModules = ResolveModuleOrder();
@@ -326,8 +339,15 @@ public abstract class Engine : Destroyable
 
             foreach (var module in sortedModules)
             {
-                module.Start();
-                startedModules.Add(module);
+                try
+                {
+                    module.Start();
+                }
+                finally
+                {
+                    if (module.State.Get() == ModuleState.Running)
+                        startedModules.Add(module);
+                }
             }
 
             _state.Set(EngineState.Running);
@@ -337,7 +357,14 @@ public abstract class Engine : Destroyable
         catch (Exception exception)
         {
             var failures = RollbackStartedModules(startedModules);
-            _state.Set(failures.Count == 0 ? EngineState.Idle : EngineState.Failed);
+            try
+            {
+                _state.Set(failures.Count == 0 ? EngineState.Idle : EngineState.Failed);
+            }
+            catch (Exception notificationFailure)
+            {
+                failures.Add(notificationFailure);
+            }
 
             if (failures.Count != 0)
                 throw new AggregateException(
@@ -385,10 +412,9 @@ public abstract class Engine : Destroyable
                 $"Engine cannot be stopped from state '{currentState}'"
             );
 
-        _state.Set(EngineState.Stopping);
-
         try
         {
+            _state.Set(EngineState.Stopping);
             var sortedModules = _moduleOrder ?? ResolveModuleOrder();
 
             for (var index = sortedModules.Count - 1; index >= 0; index--)
@@ -403,9 +429,20 @@ public abstract class Engine : Destroyable
 
             _state.Set(EngineState.Idle);
         }
-        catch (Exception)
+        catch (Exception exception)
         {
-            _state.Set(EngineState.Failed);
+            try
+            {
+                _state.Set(EngineState.Failed);
+            }
+            catch (Exception notificationFailure)
+            {
+                throw new AggregateException(
+                    "Engine shutdown and state notification failed.",
+                    exception,
+                    notificationFailure
+                );
+            }
 
             throw;
         }
