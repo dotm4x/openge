@@ -57,7 +57,7 @@ protected override IEnumerable<LogOutput> Compose()
 
 Here the logger adopts the output and destroys it during teardown.
 
-A processing view can be an explicit exception. An update channel may process modules already owned by a game, for example. Such a `Compose()` method returns borrowed references and must document that exception. Do not create an otherwise ownerless destroyable inside a borrowed composition API.
+A processing view can be an explicit exception. An update channel may process modules already owned by an engine, for example. Such a `Compose()` method returns borrowed references and must document that exception. Do not create an otherwise ownerless destroyable inside a borrowed composition API.
 
 Account for partial failure. Retain responsibility for objects already adopted if a later composition or configuration step throws. Release newly created objects that cannot be registered, without destroying objects that belong elsewhere. Iterators remain responsible for resources they allocate but never yield.
 
@@ -69,7 +69,7 @@ Account for partial failure. Retain responsibility for objects already adopted i
 private SourcedLogger Logger => Require<Logger>("Logger").From(Identifier);
 ```
 
-Using this logger does not transfer its lifetime to the current module. Its game remains responsible for destruction.
+Using this logger does not transfer its lifetime to the current module. Its engine remains responsible for destruction.
 
 Apply the same reasoning to shared textures, images, materials, windows, and scene objects. A wrapper may own its stores or native handles while borrowing the resource those objects refer to. State those distinctions explicitly.
 

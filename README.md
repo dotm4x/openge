@@ -29,14 +29,14 @@ It is built around small systems that can be composed together while keeping the
 - Update scheduling
 - Window management
 - Reactive events and state
-- Modular game composition
+- Modular engine composition
 
 ## Example
 
-A Mirage game is assembled from modules.
+A Mirage engine is assembled from modules.
 
 ```csharp
-internal sealed class MyGame : Game
+internal sealed class MyEngine : Engine
 {
     public readonly MyWindowManager Windows;
     public readonly MyNodeManager Nodes;
@@ -45,7 +45,7 @@ internal sealed class MyGame : Game
     public readonly MyRenderer Renderer;
     public readonly MyScheduler Scheduler;
 
-    public MyGame()
+    public MyEngine()
     {
         Windows = new MyWindowManager();
         Nodes = new MyNodeManager();
@@ -80,7 +80,7 @@ internal sealed class MyGame : Game
 }
 ```
 
-The game owns these modules and coordinates their lifecycle. Individual modules remain responsible for their own part of the engine.
+The engine owns these modules and coordinates their lifecycle. Individual modules remain responsible for their own part of the engine.
 
 ## Nodes
 
@@ -162,7 +162,7 @@ Together, they follow a simple lifecycle:
 Construct → Compose → Configure → Start / Use
 ```
 
-This pattern is used throughout Mirage where it makes sense, including games, nodes, input devices, rendering spaces, scheduling channels, windows, and simulation spaces.
+This pattern is used throughout Mirage where it makes sense, including engines, nodes, input devices, rendering spaces, scheduling channels, windows, and simulation spaces.
 
 `Configure()` can then connect behavior after composition has taken place.
 
@@ -172,7 +172,7 @@ The general lifecycle is:
 Construct → Compose → Configure → Start / Use
 ```
 
-The same pattern is used across the engine where it makes sense, including games, nodes, input devices, rendering spaces, scheduling channels, windows, and simulation spaces.
+The same pattern is used across the engine where it makes sense, including engines, nodes, input devices, rendering spaces, scheduling channels, windows, and simulation spaces.
 
 ## Architecture
 
