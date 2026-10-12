@@ -1,6 +1,7 @@
 using Mirage.Common;
 using Mirage.Common.Collections;
 using Mirage.Common.Interfaces;
+using Mirage.Common.Primitives;
 using Mirage.Logging;
 
 namespace Mirage.Importing;
@@ -33,10 +34,7 @@ public record ImportContext(string Identifier, string Path) : IIdentifiable<stri
 public class Importer : Module
 {
     private readonly Dictionary<ResourceKey, Resource> _resources = [];
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the registered resource decoders.
@@ -79,18 +77,10 @@ public class Importer : Module
 
     private SourcedLogger Logger => Require<Logger>("Logger").From(Identifier);
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
         if (InjectedDependencies is not null)
             Logger.Log("Composing module contents.", LogMessageKind.Debug);
-        _compositionStarted = true;
-
         foreach (var decoder in Compose())
         {
             try
@@ -105,25 +95,15 @@ public class Importer : Module
                 throw;
             }
         }
-
-        _composed = true;
         if (InjectedDependencies is not null)
             Logger.Log("Composition completed.", LogMessageKind.Debug);
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
         if (InjectedDependencies is not null)
             Logger.Log("Configuring module.", LogMessageKind.Debug);
-        _configurationStarted = true;
         Configure();
-        _configured = true;
         if (InjectedDependencies is not null)
             Logger.Log("Configuration completed.", LogMessageKind.Debug);
     }
@@ -213,8 +193,7 @@ public class Importer : Module
     protected override void OnStart()
     {
         Logger.Log("Starting module.");
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
         Logger.Log("Module started.");
     }
 
@@ -262,8 +241,7 @@ public class Importer : Module
         ThrowIfDestroyed();
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
 
         if (InjectedDependencies is not null)
             Logger.Log(

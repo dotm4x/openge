@@ -1,6 +1,7 @@
 using Mirage.Common.Collections;
 using Mirage.Common.Interfaces;
 using Mirage.Common.Lifecycle;
+using Mirage.Common.Primitives;
 using Mirage.Scheduling.Interfaces;
 
 namespace Mirage.Scheduling.Channels;
@@ -50,10 +51,7 @@ public enum UpdateChannelPriority
 public class UpdateChannel : Destroyable, IIdentifiable<string>
 {
     private double _accumulator;
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the updatable entries contained in this channel.
@@ -126,16 +124,8 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
     /// <inheritdoc />
     public string Identifier { get; }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
-        _compositionStarted = true;
-
         var composedObjects = Compose().ToArray();
         HashSet<IUpdatable> objects = [];
 
@@ -147,21 +137,11 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
 
         foreach (var entry in composedObjects)
             Entries.Add(entry);
-
-        _composed = true;
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
-        _configurationStarted = true;
         Configure();
-        _configured = true;
     }
 
     private void PerformUpdate(UpdateContext context)
@@ -253,8 +233,7 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
     {
         ThrowIfDestroyed();
 
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
 
         var effectiveUpdateRate = TargetUpdateRate;
         if (schedulerTargetUpdateRate > 0)
@@ -289,7 +268,6 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
     internal void Prepare()
     {
         ThrowIfDestroyed();
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
     }
 }

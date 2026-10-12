@@ -1,6 +1,7 @@
 using Mirage.Common.Events;
 using Mirage.Common.Interfaces;
 using Mirage.Common.Lifecycle;
+using Mirage.Common.Primitives;
 using Mirage.Graphics;
 using Mirage.Graphics.Commands;
 using Mirage.Graphics.Interfaces;
@@ -37,10 +38,7 @@ public enum RenderSpacePriority
 /// </remarks>
 public class RenderSpace : Destroyable, IIdentifiable<string>
 {
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the camera used to render this space.
@@ -103,37 +101,17 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     /// <inheritdoc />
     public string Identifier { get; }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
-        _compositionStarted = true;
-
         var composedObjects = Compose().ToArray();
 
         foreach (var entry in composedObjects)
             Entries.Add(entry);
-
-        _composed = true;
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
-        _configurationStarted = true;
-
         Configure();
-
-        _configured = true;
     }
 
     /// <summary>
@@ -224,8 +202,7 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     {
         ThrowIfDestroyed();
 
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
 
         var commands = new List<IRenderCommand>();
 

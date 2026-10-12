@@ -1,6 +1,7 @@
-﻿using Mirage.Common;
+using Mirage.Common;
 using Mirage.Common.Collections;
 using Mirage.Common.Lifecycle;
+using Mirage.Common.Primitives;
 using Mirage.Logging.Outputs;
 
 namespace Mirage.Logging;
@@ -11,10 +12,7 @@ namespace Mirage.Logging;
 /// <remarks>The logger owns and destroys its registered outputs.</remarks>
 public class Logger : Module
 {
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the outputs registered with the logger.
@@ -41,16 +39,8 @@ public class Logger : Module
         }
     }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
-        _compositionStarted = true;
-
         foreach (var output in Compose())
         {
             try
@@ -65,21 +55,11 @@ public class Logger : Module
                 throw;
             }
         }
-
-        _composed = true;
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
-        _configurationStarted = true;
         Configure();
-        _configured = true;
     }
 
     /// <summary>
@@ -130,8 +110,7 @@ public class Logger : Module
     /// <inheritdoc />
     protected override void OnStart()
     {
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
 
         base.OnStart();
     }

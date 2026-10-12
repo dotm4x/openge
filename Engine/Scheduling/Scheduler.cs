@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Mirage.Common;
 using Mirage.Common.Collections;
+using Mirage.Common.Primitives;
 using Mirage.Logging;
 using Mirage.Scheduling.Channels;
 
@@ -17,10 +18,7 @@ namespace Mirage.Scheduling;
 /// </remarks>
 public class Scheduler : Module
 {
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the identifiable set of channels managed by the scheduler.
@@ -85,17 +83,9 @@ public class Scheduler : Module
     /// </summary>
     public double DeltaTime { get; private set; }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
         Logger.Log("Composing module contents.", LogMessageKind.Debug);
-        _compositionStarted = true;
-
         foreach (var channel in Compose())
         {
             try
@@ -110,23 +100,13 @@ public class Scheduler : Module
                 throw;
             }
         }
-
-        _composed = true;
         Logger.Log("Composition completed.", LogMessageKind.Debug);
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
         Logger.Log("Configuring module.", LogMessageKind.Debug);
-        _configurationStarted = true;
         Configure();
-        _configured = true;
         Logger.Log("Configuration completed.", LogMessageKind.Debug);
     }
 
@@ -173,8 +153,7 @@ public class Scheduler : Module
     protected override void OnStart()
     {
         Logger.Log("Starting module.");
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
         foreach (var channel in Channels)
         {
             channel.Prepare();

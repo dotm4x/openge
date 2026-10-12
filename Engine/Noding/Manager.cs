@@ -16,10 +16,7 @@ namespace Mirage.Noding;
 public class NodeManager : Module
 {
     private readonly Store<Node> _activeRoot;
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
     private NodeContext? _nodeContext;
     private bool _restoringRoots;
 
@@ -89,17 +86,9 @@ public class NodeManager : Module
     /// </remarks>
     public ReactiveDictionary<string, Node> Roots { get; } = [];
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
         Logger.Log("Composing module contents.", LogMessageKind.Debug);
-        _compositionStarted = true;
-
         foreach (var root in Compose())
         {
             try
@@ -114,23 +103,13 @@ public class NodeManager : Module
                 throw;
             }
         }
-
-        _composed = true;
         Logger.Log("Composition completed.", LogMessageKind.Debug);
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
         Logger.Log("Configuring module.", LogMessageKind.Debug);
-        _configurationStarted = true;
         Configure();
-        _configured = true;
         Logger.Log("Configuration completed.", LogMessageKind.Debug);
     }
 
@@ -397,8 +376,7 @@ public class NodeManager : Module
     protected override void OnStart()
     {
         Logger.Log("Starting module.");
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
 
         _nodeContext ??= new NodeContext(InjectedDependencies);
 

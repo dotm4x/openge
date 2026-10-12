@@ -1,4 +1,5 @@
 using Mirage.Common;
+using Mirage.Common.Primitives;
 using Mirage.Logging;
 using Mirage.Scheduling;
 using Mirage.Scheduling.Interfaces;
@@ -20,10 +21,7 @@ namespace Mirage.Windowing;
 public class WindowManager : Module, IUpdatable
 {
     private readonly Dictionary<string, Window> _windows = [];
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the managed windows, indexed by identifier.
@@ -70,17 +68,9 @@ public class WindowManager : Module, IUpdatable
             window.Update(context);
     }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
         Logger.Log("Composing module contents.", LogMessageKind.Debug);
-        _compositionStarted = true;
-
         foreach (var window in Compose())
         {
             if (!_windows.TryAdd(window.Identifier, window))
@@ -93,23 +83,13 @@ public class WindowManager : Module, IUpdatable
                 );
             }
         }
-
-        _composed = true;
         Logger.Log("Composition completed.", LogMessageKind.Debug);
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
         Logger.Log("Configuring module.", LogMessageKind.Debug);
-        _configurationStarted = true;
         Configure();
-        _configured = true;
         Logger.Log("Configuration completed.", LogMessageKind.Debug);
     }
 
@@ -167,8 +147,7 @@ public class WindowManager : Module, IUpdatable
     protected override void OnStart()
     {
         Logger.Log("Starting module.");
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
 
         List<Window> openedWindows = [];
 

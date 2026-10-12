@@ -156,23 +156,27 @@ protected override void Configure()
 }
 ```
 
-Together, they follow a simple lifecycle:
+`Mirage.Common.Primitives.Preparator` controls these phases throughout the engine:
 
-```text
-Construct → Compose → Configure → Start / Use
+```csharp
+private readonly Preparator _preparator = new();
+
+// ComposeContents registers the results of the object's Compose() hooks.
+_preparator.Ensure(ComposeContents, Configure);
 ```
 
-This pattern is used throughout Mirage where it makes sense, including engines, nodes, input devices, rendering spaces, scheduling channels, windows, and simulation spaces.
+Composition completes before configuration, and each phase runs at most once. `State`
+exposes the current `PreparationState`; `Prepared` becomes true after both phases succeed.
+Reentrant preparation is rejected. If either phase throws, preparation permanently fails
+and the original exception propagates. Startup failures after successful preparation do
+not reset it, so later lifecycle cycles reuse the prepared contents.
 
-`Configure()` can then connect behavior after composition has taken place.
+Nodes use `EnsureComposed()` during dependency injection and finish preparation when
+loaded. This preserves access to injected dependencies in `Configure()`. The preparator
+controls ordering only: each owner still registers its contents and handles their cleanup.
+It does not introduce preparation hooks into `Module` or replace startup and shutdown.
 
-The general lifecycle is:
-
-```text
-Construct → Compose → Configure → Start / Use
-```
-
-The same pattern is used across the engine where it makes sense, including engines, nodes, input devices, rendering spaces, scheduling channels, windows, and simulation spaces.
+See [Preparation](Contributing/Preparation.md) for integration and failure rules.
 
 ## Architecture
 

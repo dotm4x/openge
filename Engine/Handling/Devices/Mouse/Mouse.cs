@@ -1,6 +1,7 @@
 using System.Numerics;
 using Mirage.Common.Collections;
 using Mirage.Common.Events;
+using Mirage.Common.Primitives;
 using Mirage.Handling.Devices.Mouse.Events;
 
 namespace Mirage.Handling.Devices.Mouse;
@@ -15,10 +16,7 @@ namespace Mirage.Handling.Devices.Mouse;
 public abstract class Mouse : InputDevice
 {
     private readonly Store<Vector2> _position = new(Vector2.Zero);
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the identifiable set of registered mouse button events.
@@ -61,16 +59,8 @@ public abstract class Mouse : InputDevice
         Position = _position;
     }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
-        _compositionStarted = true;
-
         foreach (var @event in Compose())
         {
             try
@@ -85,21 +75,11 @@ public abstract class Mouse : InputDevice
                 throw;
             }
         }
-
-        _composed = true;
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
-        _configurationStarted = true;
         Configure();
-        _configured = true;
     }
 
     /// <summary>
@@ -134,8 +114,7 @@ public abstract class Mouse : InputDevice
     /// </summary>
     protected void EnsureInitialized()
     {
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
     }
 
     /// <inheritdoc />
