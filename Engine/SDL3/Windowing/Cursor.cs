@@ -1,11 +1,11 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Mirage.Graphics.Resources;
-using Mirage.Windowing.Windows.SDL3;
-using SDL3;
+using Mirage.Windowing;
 using Image = Mirage.Graphics.Resources.Image;
+using SDL = global::SDL3.SDL;
 
-namespace Mirage.Windowing.SDL3;
+namespace Mirage.SDL3.Windowing;
 
 /// <summary>Implements a Mirage cursor with SDL3 system or RGBA image cursors.</summary>
 /// <remarks>

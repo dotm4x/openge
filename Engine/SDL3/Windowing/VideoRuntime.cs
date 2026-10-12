@@ -1,6 +1,6 @@
-using SDL3;
+using SDL = global::SDL3.SDL;
 
-namespace Mirage.Windowing.Windows.SDL3;
+namespace Mirage.SDL3.Windowing;
 
 internal static class VideoRuntime
 {

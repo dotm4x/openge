@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Mirage.Graphics.Geometry;
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.Rendering.SDL3.Resources;
+namespace Mirage.SDL3.Rendering.Resources;
 
 internal sealed class SDL3Pipeline : IDisposable
 {

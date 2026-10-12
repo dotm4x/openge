@@ -1,8 +1,8 @@
+using Mirage.Handling;
 using Mirage.Handling.Devices;
-using Mirage.Windowing.SDL3;
-using Mirage.Windowing.Windows.SDL3;
+using Mirage.SDL3.Windowing;
 
-namespace Mirage.Handling.SDL3;
+namespace Mirage.SDL3.Handling;
 
 /// <summary>
 /// Provides SDL3 input contexts to registered input devices.

@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 using System.Text;
 using Mirage.Graphics.Resources;
 
-namespace Mirage.Rendering.SDL3;
+namespace Mirage.SDL3.Rendering;
 
 internal readonly record struct SDL3ShaderLayout(uint Samplers, uint UniformBuffers);
 

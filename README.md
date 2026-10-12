@@ -178,6 +178,7 @@ Noding
 Numerics
 Rendering
 Scheduling
+SDL3
 Spatial
 Windowing
 ```
@@ -185,6 +186,24 @@ Windowing
 They cover different parts of the engine without requiring everything to belong to one large framework.
 
 For example, the node hierarchy describes the game world, while rendering, input, scheduling, and windowing remain separate systems.
+
+## SDL3 integration
+
+Reference `Engine/SDL3/Mirage.SDL3.csproj` in applications that use SDL3.
+`Mirage.SDL3` is the official integration assembly and references the core engine
+projects directly. Core projects do not depend on SDL3.
+
+The integration exposes `SDL3Window` and `SDLCursor` in `Mirage.SDL3.Windowing`,
+`SDL3InputHandler` and `SDL3InputContext` in `Mirage.SDL3.Handling`, and
+`SDL3RenderBackend` in `Mirage.SDL3.Rendering`. Keyboard and mouse implementations
+are in `Mirage.SDL3.Handling.Devices.Keyboard` and
+`Mirage.SDL3.Handling.Devices.Mouse`. Update imports from the former
+`Mirage.Handling.SDL3`, `Mirage.Rendering.SDL3`, and `Mirage.Windowing.SDL3` namespaces.
+
+Construct these types directly when composing an application. The input handler
+and rendering backend borrow their window; stop and destroy their owners before
+destroying the window. SDL3 package versions and native runtime dependencies are
+maintained by the integration project.
 
 ## Philosophy
 

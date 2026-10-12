@@ -1,7 +1,8 @@
+using Mirage.Handling;
 using Mirage.Windowing;
-using SDL3;
+using SDL = global::SDL3.SDL;
 
-namespace Mirage.Handling.SDL3;
+namespace Mirage.SDL3.Handling;
 
 /// <summary>
 /// Provides SDL3 input events for one input update.

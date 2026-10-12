@@ -1,7 +1,7 @@
 using Mirage.Handling.Devices.Keyboard;
-using SDL3;
+using SDL = global::SDL3.SDL;
 
-namespace Mirage.Handling.SDL3.Devices.Keyboard;
+namespace Mirage.SDL3.Handling.Devices.Keyboard;
 
 /// <summary>
 /// Converts SDL physical scancodes to Mirage keyboard keys.

@@ -1,10 +1,9 @@
 using System.Diagnostics;
 using System.Numerics;
-using Mirage.Windowing.Windows;
-using Mirage.Windowing.Windows.SDL3;
-using SDL3;
+using Mirage.Windowing;
+using SDL = global::SDL3.SDL;
 
-namespace Mirage.Windowing.SDL3;
+namespace Mirage.SDL3.Windowing;
 
 /// <summary>
 /// Implements a Mirage window using SDL3.

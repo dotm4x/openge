@@ -6,11 +6,12 @@ using Mirage.Graphics.Geometry;
 using Mirage.Graphics.Interfaces;
 using Mirage.Graphics.Primitives;
 using Mirage.Graphics.Resources;
-using Mirage.Rendering.SDL3.Resources;
-using Mirage.Windowing.SDL3;
-using SDL3;
+using Mirage.Rendering;
+using Mirage.SDL3.Rendering.Resources;
+using Mirage.SDL3.Windowing;
+using SDL = global::SDL3.SDL;
 
-namespace Mirage.Rendering.SDL3;
+namespace Mirage.SDL3.Rendering;
 
 /// <summary>Executes clear and two-dimensional geometry commands using SDL GPU.</summary>
 /// <remarks>
@@ -184,7 +185,6 @@ public sealed class SDL3RenderBackend : RenderBackend
 
     private MeshBuffers GetMesh(GraphicMesh2D mesh)
     {
-
         if (_meshes.TryGetValue(mesh, out var result))
             return result;
 

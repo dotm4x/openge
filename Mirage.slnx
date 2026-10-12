@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Engine/">
+    <Project Path="Engine/SDL3/Mirage.SDL3.csproj" />
     <Project Path="Engine/Spatial/Mirage.Spatial.csproj" />
     <Project Path="Engine/Windowing/Mirage.Windowing.csproj" />
     <File Path="Engine\Handling\Devices\Mouse\Events\Move.cs" />
