@@ -176,8 +176,6 @@ loaded. This preserves access to injected dependencies in `Configure()`. The pre
 controls ordering only: each owner still registers its contents and handles their cleanup.
 It does not introduce preparation hooks into `Module` or replace startup and shutdown.
 
-See [Preparation](Contributing/Preparation.md) for integration and failure rules.
-
 ## Architecture
 
 Mirage is split into focused projects:
