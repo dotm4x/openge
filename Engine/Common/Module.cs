@@ -102,9 +102,9 @@ public enum ModuleState
 /// </summary>
 /// <remarks>
 /// <para>
-/// Represents a game module with a managed lifecycle and declared dependencies.
+/// Represents an engine module with a managed lifecycle and declared dependencies.
 /// </para>
-/// Modules are initialized and managed by a <see cref="Game"/> instance.
+/// Modules are initialized and managed by a <see cref="Engine"/> instance.
 /// Their dependencies are injected before the module is started.
 /// </remarks>
 /// <param name="identifier">
@@ -131,7 +131,7 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
     /// <remarks>
     /// The container contains only dependencies explicitly declared through
     /// <see cref="Dependencies"/>. It becomes available after the module has
-    /// been injected by its owning game. Injected dependencies are borrowed and must not
+    /// been injected by its owning engine. Injected dependencies are borrowed and must not
     /// be destroyed by this module.
     /// </remarks>
     protected ModuleContainer InjectedDependencies { get; private set; } = null!;
@@ -178,7 +178,7 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
     /// </summary>
     /// <typeparam name="TModule">The expected type of the dependency.</typeparam>
     /// <param name="name">The identifier of the dependency.</param>
-    /// <returns>The borrowed injected dependency. Its lifetime belongs to the game.</returns>
+    /// <returns>The borrowed injected dependency. Its lifetime belongs to the engine.</returns>
     /// <exception cref="InvalidOperationException">
     /// Thrown when the module has not been injected, the dependency was not
     /// registered, or the dependency is not of the requested type.

@@ -5,7 +5,7 @@ namespace Mirage.Logging;
 /// <summary>
 /// Provides logging operations associated with a fixed source.
 /// </summary>
-/// <remarks>The underlying logger is borrowed; its lifetime belongs to its game.</remarks>
+/// <remarks>The underlying logger is borrowed; its lifetime belongs to its engine.</remarks>
 /// <param name="logger">The logger used to dispatch messages.</param>
 /// <param name="source">The source associated with logged messages.</param>
 public class SourcedLogger(Logger logger, string source)

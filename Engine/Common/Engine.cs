@@ -4,27 +4,27 @@ using Mirage.Common.Lifecycle;
 namespace Mirage.Common;
 
 /// <summary>
-/// Represents the current lifecycle state of a game.
+/// Represents the current lifecycle state of an engine.
 /// </summary>
-public enum GameState
+public enum EngineState
 {
     /// <summary>
-    /// Indicates that the game is idle and not currently running.
+    /// Indicates that the engine is idle and not currently running.
     /// </summary>
     Idle,
 
     /// <summary>
-    /// Indicates that the game is currently starting.
+    /// Indicates that the engine is currently starting.
     /// </summary>
     Starting,
 
     /// <summary>
-    /// Indicates that the game is running.
+    /// Indicates that the engine is running.
     /// </summary>
     Running,
 
     /// <summary>
-    /// Indicates that the game is currently stopping.
+    /// Indicates that the engine is currently stopping.
     /// </summary>
     Stopping,
 }
@@ -33,15 +33,15 @@ public enum GameState
 /// Coordinates the lifecycle, dependency resolution and its registered modules.
 /// </summary>
 /// <remarks>
-/// A game manages its modules by resolving their dependencies, injecting their
+/// An engine manages its modules by resolving their dependencies, injecting their
 /// shared context, and starting and stopping them in dependency order.
 /// It owns and destroys its registered modules. Passing modules to the constructor or
-/// returning them from composition transfers ownership; do not register them in another game.
+/// returning them from composition transfers ownership; do not register them in another engine.
 /// </remarks>
-public abstract class Game : Destroyable
+public abstract class Engine : Destroyable
 {
     private readonly Dictionary<string, Module> _modules = [];
-    private readonly Store<GameState> _state = new(GameState.Idle);
+    private readonly Store<EngineState> _state = new(EngineState.Idle);
     private bool _composed;
     private bool _compositionStarted;
     private bool _configurationStarted;
@@ -50,7 +50,7 @@ public abstract class Game : Destroyable
     private IReadOnlyList<Module>? _moduleOrder;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Game"/> class.
+    /// Initializes a new instance of the <see cref="Engine"/> class.
     /// </summary>
     /// <param name="modules">
     /// The initial modules to register.
@@ -58,7 +58,7 @@ public abstract class Game : Destroyable
     /// <exception cref="InvalidOperationException">
     /// Thrown when multiple modules have the same identifier.
     /// </exception>
-    protected Game(params IEnumerable<Module> modules)
+    protected Engine(params IEnumerable<Module> modules)
     {
         foreach (var module in modules)
         {
@@ -75,14 +75,14 @@ public abstract class Game : Destroyable
     }
 
     /// <summary>
-    /// Gets the modules registered in the game, indexed by identifier.
+    /// Gets the modules registered in the engine, indexed by identifier.
     /// </summary>
     public IReadOnlyDictionary<string, Module> Modules { get; }
 
     /// <summary>
-    /// Gets a read-only view of the game's current lifecycle state.
+    /// Gets a read-only view of the engine's current lifecycle state.
     /// </summary>
-    public IReadOnlyStore<GameState> State { get; }
+    public IReadOnlyStore<EngineState> State { get; }
 
     private void EnsureComposed()
     {
@@ -198,10 +198,10 @@ public abstract class Game : Destroyable
     /// </summary>
     /// <returns>The modules to register, in enumeration order.</returns>
     /// <remarks>
-    /// Composition occurs once when the game first starts, before dependency resolution and injection.
+    /// Composition occurs once when the engine first starts, before dependency resolution and injection.
     /// Constructor-provided objects are registered before composed objects.
     /// All composed objects are registered before configuration occurs.
-    /// The game owns and destroys its registered modules.
+    /// The engine owns and destroys its registered modules.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
     protected virtual IEnumerable<Module> Compose()
@@ -227,9 +227,9 @@ public abstract class Game : Destroyable
     {
         var currentState = _state.Get();
 
-        if (currentState != GameState.Idle)
+        if (currentState != EngineState.Idle)
             throw new InvalidOperationException(
-                $"Game cannot be destroyed while in state '{currentState}'"
+                $"Engine cannot be destroyed while in state '{currentState}'"
             );
 
         foreach (var module in (_moduleOrder ?? _modules.Values.ToArray()).Reverse())
@@ -243,18 +243,18 @@ public abstract class Game : Destroyable
     }
 
     /// <summary>
-    /// Called when the game has successfully started all modules.
+    /// Called when the engine has successfully started all modules.
     /// </summary>
     /// <remarks>
-    /// Override this method to perform game-specific startup logic.
+    /// Override this method to perform engine-specific startup logic.
     /// </remarks>
     protected virtual void OnStart() { }
 
     /// <summary>
-    /// Called when the game has successfully stopped all running modules.
+    /// Called when the engine has successfully stopped all running modules.
     /// </summary>
     /// <remarks>
-    /// Override this method to perform game-specific shutdown logic.
+    /// Override this method to perform engine-specific shutdown logic.
     /// </remarks>
     protected virtual void OnStop() { }
 
@@ -277,21 +277,21 @@ public abstract class Game : Destroyable
     }
 
     /// <summary>
-    /// Starts the game and all registered modules.
+    /// Starts the engine and all registered modules.
     /// </summary>
     /// <remarks>
     /// Module dependencies are resolved before startup. Each module receives
     /// its dependencies through dependency injection before its startup logic
     /// is executed.
     ///
-    /// After all modules have started successfully, the game transitions to
-    /// <see cref="GameState.Running"/> and <see cref="OnStart"/> is invoked.
+    /// After all modules have started successfully, the engine transitions to
+    /// <see cref="EngineState.Running"/> and <see cref="OnStart"/> is invoked.
     /// </remarks>
     /// <exception cref="DestroyedObjectException">
-    /// Thrown when the game has already been destroyed.
+    /// Thrown when the engine has already been destroyed.
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the game is not idle, a module dependency is missing, or
+    /// Thrown when the engine is not idle, a module dependency is missing, or
     /// module dependencies contain a circular reference.
     /// </exception>
     public void Start()
@@ -300,14 +300,14 @@ public abstract class Game : Destroyable
 
         var currentState = _state.Get();
 
-        if (currentState != GameState.Idle)
+        if (currentState != EngineState.Idle)
         {
             throw new InvalidOperationException(
-                $"Game cannot be started from state '{currentState}'."
+                $"Engine cannot be started from state '{currentState}'."
             );
         }
 
-        _state.Set(GameState.Starting);
+        _state.Set(EngineState.Starting);
 
         List<Module> startedModules = [];
 
@@ -335,7 +335,7 @@ public abstract class Game : Destroyable
                 startedModules.Add(module);
             }
 
-            _state.Set(GameState.Running);
+            _state.Set(EngineState.Running);
 
             OnStart();
         }
@@ -343,34 +343,34 @@ public abstract class Game : Destroyable
         {
             RollbackStartedModules(startedModules);
 
-            _state.Set(GameState.Idle);
+            _state.Set(EngineState.Idle);
 
             throw;
         }
     }
 
     /// <summary>
-    /// Stops the game and all running modules in reverse dependency order.
+    /// Stops the engine and all running modules in reverse dependency order.
     /// </summary>
     /// <remarks>
-    /// The game transitions to <see cref="GameState.Stopping"/> before its
+    /// The engine transitions to <see cref="EngineState.Stopping"/> before its
     /// modules are stopped.
     ///
     /// Modules are stopped in reverse dependency order. After all running
     /// modules have stopped successfully, <see cref="OnStop"/> is invoked
-    /// while the game remains in the stopping state.
+    /// while the engine remains in the stopping state.
     ///
-    /// Once shutdown logic has completed successfully, the game transitions
-    /// to <see cref="GameState.Idle"/>.
+    /// Once shutdown logic has completed successfully, the engine transitions
+    /// to <see cref="EngineState.Idle"/>.
     ///
-    /// If stopping fails, the game returns to
-    /// <see cref="GameState.Running"/> and the exception is rethrown.
+    /// If stopping fails, the engine returns to
+    /// <see cref="EngineState.Running"/> and the exception is rethrown.
     /// </remarks>
     /// <exception cref="DestroyedObjectException">
-    /// Thrown when the game has already been destroyed.
+    /// Thrown when the engine has already been destroyed.
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the game is not running.
+    /// Thrown when the engine is not running.
     /// </exception>
     public void Stop()
     {
@@ -378,12 +378,12 @@ public abstract class Game : Destroyable
 
         var currentState = _state.Get();
 
-        if (currentState != GameState.Running)
+        if (currentState != EngineState.Running)
             throw new InvalidOperationException(
-                $"Game cannot be stopped from state '{currentState}'"
+                $"Engine cannot be stopped from state '{currentState}'"
             );
 
-        _state.Set(GameState.Stopping);
+        _state.Set(EngineState.Stopping);
 
         try
         {
@@ -399,11 +399,11 @@ public abstract class Game : Destroyable
 
             OnStop();
 
-            _state.Set(GameState.Idle);
+            _state.Set(EngineState.Idle);
         }
         catch (Exception)
         {
-            _state.Set(GameState.Running);
+            _state.Set(EngineState.Running);
 
             throw;
         }

@@ -668,7 +668,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
     /// Gets an injected module dependency of the node manager that owns this node.
     /// </summary>
     /// <typeparam name="TModule">The type of module to retrieve.</typeparam>
-    /// <returns>The borrowed injected module, which is owned by the game.</returns>
+    /// <returns>The borrowed injected module, which is owned by the engine.</returns>
     /// <exception cref="InvalidOperationException">
     /// Thrown when the node has not been injected or no single dependency
     /// matches the specified type.
@@ -689,7 +689,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
     /// </summary>
     /// <typeparam name="TModule">The expected type of the module.</typeparam>
     /// <param name="identifier">The identifier of the module to retrieve.</param>
-    /// <returns>The borrowed injected module, which is owned by the game.</returns>
+    /// <returns>The borrowed injected module, which is owned by the engine.</returns>
     /// <exception cref="InvalidOperationException">
     /// Thrown when the node has not been injected, the dependency is unavailable,
     /// or the dependency is not of the requested type.
