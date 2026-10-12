@@ -4,15 +4,10 @@ using Mirage.Graphics.Resources;
 
 namespace Mirage.Rendering.SDL3;
 
-/// <summary>Describes the resource counts discovered in a validated shader.</summary>
 internal readonly record struct SDL3ShaderLayout(uint Samplers, uint UniformBuffers);
 
-/// <summary>Reflects the limited shader ABI supported by Render2DCommand.</summary>
-/// <remarks>
-/// This is not a general-purpose SPIR-V validator. It reads trusted compiler output,
-/// checks descriptor sets and resource types, and rejects resources the command cannot supply.
-/// Each module must have one entry point. The vertex uniform contains four float4 MVP rows.
-/// </remarks>
+// Inspects trusted compiler output for the limited Render2DCommand shader ABI.
+// Requires one entry point and four float4 MVP rows in the vertex uniform.
 internal static class SDL3SpirV
 {
     private static NotSupportedException Unsupported(string message) => new(message);

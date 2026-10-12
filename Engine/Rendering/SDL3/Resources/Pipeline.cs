@@ -5,16 +5,10 @@ using SDL = global::SDL3.SDL;
 
 namespace Mirage.Rendering.SDL3.Resources;
 
-/// <summary>Owns a triangle-list pipeline with straight-alpha blending and no depth test.</summary>
 internal sealed class SDL3Pipeline : IDisposable
 {
     private readonly IntPtr _device;
 
-    /// <summary>Creates a 2D pipeline for a specific shader pair and target format.</summary>
-    /// <param name="device">The borrowed GPU device.</param>
-    /// <param name="vertex">The borrowed vertex shader.</param>
-    /// <param name="fragment">The borrowed fragment shader.</param>
-    /// <param name="targetFormat">The format returned for the window swapchain.</param>
     public unsafe SDL3Pipeline(
         IntPtr device,
         SDL3Shader vertex,
@@ -104,10 +98,8 @@ internal sealed class SDL3Pipeline : IDisposable
             throw SDL3Gpu.Error("Creating a 2D graphics pipeline");
     }
 
-    /// <summary>Gets the native handle, or zero after disposal.</summary>
     public IntPtr Native { get; private set; }
 
-    /// <summary>Schedules release of the pipeline without destroying its shaders.</summary>
     public void Dispose()
     {
         if (Native == IntPtr.Zero)

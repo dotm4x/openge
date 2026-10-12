@@ -4,14 +4,10 @@ using SDL = global::SDL3.SDL;
 
 namespace Mirage.Rendering.SDL3.Resources;
 
-/// <summary>Owns a validated SPIR-V shader compatible with the Render2D shader ABI.</summary>
 internal sealed class SDL3Shader : IDisposable
 {
     private readonly IntPtr _device;
 
-    /// <summary>Reflects the resource bindings, validates the ABI, and creates the native shader.</summary>
-    /// <param name="device">The borrowed GPU device.</param>
-    /// <param name="source">The borrowed, compiled shader.</param>
     public unsafe SDL3Shader(IntPtr device, Shader source)
     {
         _device = device;
@@ -44,16 +40,12 @@ internal sealed class SDL3Shader : IDisposable
             throw SDL3Gpu.Error("Creating a GPU shader");
     }
 
-    /// <summary>Gets the reflected sampler and uniform-buffer counts.</summary>
     public SDL3ShaderLayout Layout { get; }
 
-    /// <summary>Gets the native handle, or zero after disposal.</summary>
     public IntPtr Native { get; private set; }
 
-    /// <summary>Gets the borrowed source used for cache lifetime checks.</summary>
     public Shader Source { get; }
 
-    /// <summary>Schedules release without destroying the source shader.</summary>
     public void Dispose()
     {
         if (Native == IntPtr.Zero)

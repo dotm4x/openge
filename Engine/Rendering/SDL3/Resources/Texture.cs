@@ -3,12 +3,10 @@ using SDL3;
 
 namespace Mirage.Rendering.SDL3.Resources;
 
-/// <summary>Owns a single-level RGBA8 SDL GPU texture and records its initial upload.</summary>
 internal sealed class SDL3Texture : IDisposable
 {
     private readonly IntPtr _device;
 
-    /// <summary>Creates a sampled texture. No render pass may be open during this call.</summary>
     public SDL3Texture(IntPtr device, IntPtr commandBuffer, Texture source)
     {
         _device = device;
@@ -79,10 +77,8 @@ internal sealed class SDL3Texture : IDisposable
         }
     }
 
-    /// <summary>Gets the native handle, or zero after disposal.</summary>
     public IntPtr Native { get; private set; }
 
-    /// <summary>Schedules release of the texture without destroying the source image.</summary>
     public void Dispose()
     {
         if (Native == IntPtr.Zero)
