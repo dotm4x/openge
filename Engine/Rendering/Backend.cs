@@ -66,12 +66,10 @@ public abstract class RenderBackend(string identifier) : Destroyable, IIdentifia
     public void Render(IEnumerable<IRenderCommand> commands, IRenderContext? context = null)
     {
         ThrowIfDestroyed();
-        ArgumentNullException.ThrowIfNull(commands);
         if (!_frameStarted)
             throw new InvalidOperationException("BeginFrame must be called before Render.");
         foreach (var command in commands)
         {
-            ArgumentNullException.ThrowIfNull(command);
             OnRender(command, context);
         }
     }

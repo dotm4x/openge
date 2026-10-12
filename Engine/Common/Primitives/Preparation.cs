@@ -53,12 +53,9 @@ public sealed class Preparator
     /// Use this phase separately when dependencies must be injected into composed contents
     /// before configuration. Later calls to <see cref="Ensure"/> reuse that composition.
     /// </remarks>
-    /// <exception cref="ArgumentNullException">The callback is null.</exception>
     /// <exception cref="InvalidOperationException">Preparation is active or has failed.</exception>
     public void EnsureComposed(Action compose)
     {
-        ArgumentNullException.ThrowIfNull(compose);
-
         if (State is PreparationState.Composed or PreparationState.Prepared)
             return;
 
@@ -73,13 +70,9 @@ public sealed class Preparator
     /// </summary>
     /// <param name="compose">The operation that composes and registers contents.</param>
     /// <param name="configure">The operation that configures composed contents.</param>
-    /// <exception cref="ArgumentNullException">A callback is null.</exception>
     /// <exception cref="InvalidOperationException">Preparation is active or has failed.</exception>
     public void Ensure(Action compose, Action configure)
     {
-        ArgumentNullException.ThrowIfNull(compose);
-        ArgumentNullException.ThrowIfNull(configure);
-
         EnsureComposed(compose);
 
         if (Prepared)

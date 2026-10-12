@@ -67,7 +67,6 @@ public sealed class SDL3RenderBackend : RenderBackend
     public SDL3RenderBackend(SDL3Window window, bool debugMode = false, bool vsync = true)
         : base("SDL3")
     {
-        ArgumentNullException.ThrowIfNull(window);
         _window = window;
         _debugMode = debugMode;
         _vsync = vsync;
@@ -120,7 +119,6 @@ public sealed class SDL3RenderBackend : RenderBackend
 
     private static void CheckAlive(Resource resource)
     {
-        ArgumentNullException.ThrowIfNull(resource);
         if (resource.Destroyed)
             throw new ObjectDisposedException(resource.GetType().Name);
     }
@@ -186,7 +184,6 @@ public sealed class SDL3RenderBackend : RenderBackend
 
     private MeshBuffers GetMesh(GraphicMesh2D mesh)
     {
-        ArgumentNullException.ThrowIfNull(mesh);
 
         if (_meshes.TryGetValue(mesh, out var result))
             return result;
@@ -324,8 +321,6 @@ public sealed class SDL3RenderBackend : RenderBackend
 
     private unsafe void Render2D(Render2DCommand command, IRenderContext context)
     {
-        ArgumentNullException.ThrowIfNull(context.Camera);
-        ArgumentNullException.ThrowIfNull(command.Mesh);
         CheckAlive(command.Material);
         if (command.Mesh.Vertices.IsEmpty)
             return;
