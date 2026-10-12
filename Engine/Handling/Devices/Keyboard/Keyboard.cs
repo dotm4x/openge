@@ -1,4 +1,5 @@
 using Mirage.Common.Collections;
+using Mirage.Common.Primitives;
 
 namespace Mirage.Handling.Devices.Keyboard;
 
@@ -11,10 +12,7 @@ namespace Mirage.Handling.Devices.Keyboard;
 /// </remarks>
 public abstract class Keyboard : InputDevice
 {
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the identifiable set of registered keyboard events.
@@ -41,16 +39,8 @@ public abstract class Keyboard : InputDevice
             Events.Add(@event);
     }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
-        _compositionStarted = true;
-
         foreach (var @event in Compose())
         {
             try
@@ -65,21 +55,11 @@ public abstract class Keyboard : InputDevice
                 throw;
             }
         }
-
-        _composed = true;
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
-        _configurationStarted = true;
         Configure();
-        _configured = true;
     }
 
     /// <summary>
@@ -114,8 +94,7 @@ public abstract class Keyboard : InputDevice
     /// </summary>
     protected void EnsureInitialized()
     {
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
     }
 
     /// <inheritdoc />

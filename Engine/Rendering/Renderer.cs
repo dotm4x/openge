@@ -3,6 +3,7 @@ using Mirage.Common;
 using Mirage.Common.Collections;
 using Mirage.Common.Events;
 using Mirage.Common.Lifecycle;
+using Mirage.Common.Primitives;
 using Mirage.Graphics.Commands;
 using Mirage.Graphics.Interfaces;
 using Mirage.Graphics.Primitives;
@@ -35,10 +36,7 @@ public class Renderer : Module, IUpdatable
 {
     private readonly Store<RenderBackend> _activeBackend;
 
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the identifiable set of rendering backends managed by the renderer.
@@ -173,17 +171,9 @@ public class Renderer : Module, IUpdatable
         }
     }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
         Logger.Log("Composing module contents.", LogMessageKind.Debug);
-
-        _compositionStarted = true;
 
         foreach (var backend in ComposeBackends())
         {
@@ -215,26 +205,14 @@ public class Renderer : Module, IUpdatable
             }
         }
 
-        _composed = true;
-
         Logger.Log("Composition completed.", LogMessageKind.Debug);
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
         Logger.Log("Configuring module.", LogMessageKind.Debug);
 
-        _configurationStarted = true;
-
         Configure();
-
-        _configured = true;
 
         Logger.Log("Configuration completed.", LogMessageKind.Debug);
     }
@@ -345,8 +323,7 @@ public class Renderer : Module, IUpdatable
     {
         Logger.Log("Starting module.");
 
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
 
         Logger.Log(
             $"Module started with {Backends.Count} rendering backends and "

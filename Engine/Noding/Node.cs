@@ -3,6 +3,7 @@ using Mirage.Common.Collections;
 using Mirage.Common.Events;
 using Mirage.Common.Interfaces;
 using Mirage.Common.Lifecycle;
+using Mirage.Common.Primitives;
 using Mirage.Logging;
 
 namespace Mirage.Noding;
@@ -326,10 +327,7 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
 /// </remarks>
 public class Node : Destroyable, IIdentifiable<Guid>
 {
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
     private NodeContext? _context;
     private bool _restoringParent;
 
@@ -446,16 +444,8 @@ public class Node : Destroyable, IIdentifiable<Guid>
     /// <inheritdoc />
     public Guid Identifier { get; } = Guid.NewGuid();
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
-        _compositionStarted = true;
-
         foreach (var node in Compose())
         {
             try
@@ -470,21 +460,11 @@ public class Node : Destroyable, IIdentifiable<Guid>
                 throw;
             }
         }
-
-        _composed = true;
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
-        _configurationStarted = true;
         Configure();
-        _configured = true;
     }
 
     private void OnParentChanged(Node? parent)
@@ -765,8 +745,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
             );
         }
 
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
 
         Loaded = true;
 
@@ -847,7 +826,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
 
         _context = context;
 
-        EnsureComposed();
+        _preparator.EnsureComposed(ComposeContents);
 
         foreach (var node in Subnodes)
             node.Inject(context);

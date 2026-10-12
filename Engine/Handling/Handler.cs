@@ -1,5 +1,6 @@
 using Mirage.Common;
 using Mirage.Common.Collections;
+using Mirage.Common.Primitives;
 using Mirage.Handling.Devices;
 using Mirage.Logging;
 using Mirage.Scheduling;
@@ -19,10 +20,7 @@ namespace Mirage.Handling;
 public abstract class InputHandler : Module, IUpdatable
 {
     private readonly IdentifiableSet<string, InputDevice> _devices = [];
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the read-only identifiable set of devices owned by this handler.
@@ -88,17 +86,9 @@ public abstract class InputHandler : Module, IUpdatable
         }
     }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
         Logger.Log("Composing module contents.", LogMessageKind.Debug);
-
-        _compositionStarted = true;
 
         foreach (var device in Compose())
         {
@@ -115,26 +105,14 @@ public abstract class InputHandler : Module, IUpdatable
             }
         }
 
-        _composed = true;
-
         Logger.Log("Composition completed.", LogMessageKind.Debug);
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
         Logger.Log("Configuring module.", LogMessageKind.Debug);
 
-        _configurationStarted = true;
-
         Configure();
-
-        _configured = true;
 
         Logger.Log("Configuration completed.", LogMessageKind.Debug);
     }
@@ -184,8 +162,7 @@ public abstract class InputHandler : Module, IUpdatable
     {
         Logger.Log("Starting module.");
 
-        EnsureComposed();
-        EnsureConfigured();
+        _preparator.Ensure(ComposeContents, ConfigureContents);
 
         foreach (var device in _devices)
         {

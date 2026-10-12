@@ -1,5 +1,6 @@
 using Mirage.Common.Events;
 using Mirage.Common.Lifecycle;
+using Mirage.Common.Primitives;
 
 namespace Mirage.Common;
 
@@ -42,10 +43,7 @@ public abstract class Engine : Destroyable
 {
     private readonly Dictionary<string, Module> _modules = [];
     private readonly Store<EngineState> _state = new(EngineState.Idle);
-    private bool _composed;
-    private bool _compositionStarted;
-    private bool _configurationStarted;
-    private bool _configured;
+    private readonly Preparator _preparator = new();
     private bool _injected;
     private IReadOnlyList<Module>? _moduleOrder;
 
@@ -84,16 +82,8 @@ public abstract class Engine : Destroyable
     /// </summary>
     public IReadOnlyStore<EngineState> State { get; }
 
-    private void EnsureComposed()
+    private void ComposeContents()
     {
-        if (_composed)
-            return;
-
-        if (_compositionStarted)
-            throw new InvalidOperationException("Composition has already started or failed.");
-
-        _compositionStarted = true;
-
         foreach (var module in Compose())
         {
             if (!_modules.TryAdd(module.Identifier, module))
@@ -106,21 +96,11 @@ public abstract class Engine : Destroyable
                 );
             }
         }
-
-        _composed = true;
     }
 
-    private void EnsureConfigured()
+    private void ConfigureContents()
     {
-        if (_configured)
-            return;
-
-        if (_configurationStarted)
-            throw new InvalidOperationException("Configuration has already started or failed.");
-
-        _configurationStarted = true;
         Configure();
-        _configured = true;
     }
 
     private IReadOnlyList<Module> ResolveModuleOrder()
@@ -313,8 +293,7 @@ public abstract class Engine : Destroyable
 
         try
         {
-            EnsureComposed();
-            EnsureConfigured();
+            _preparator.Ensure(ComposeContents, ConfigureContents);
 
             var sortedModules = ResolveModuleOrder();
             _moduleOrder = sortedModules;
