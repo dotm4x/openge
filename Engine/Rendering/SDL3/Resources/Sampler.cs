@@ -3,14 +3,10 @@ using SDL = global::SDL3.SDL;
 
 namespace Mirage.Rendering.SDL3.Resources;
 
-/// <summary>Owns the SDL sampler corresponding to an immutable Mirage sampler.</summary>
 internal sealed class SDL3Sampler : IDisposable
 {
     private readonly IntPtr _device;
 
-    /// <summary>Creates a native sampler using the source filtering and addressing modes.</summary>
-    /// <param name="device">The borrowed GPU device.</param>
-    /// <param name="source">The immutable sampler description.</param>
     public SDL3Sampler(IntPtr device, TextureSampler source)
     {
         _device = device;
@@ -35,10 +31,8 @@ internal sealed class SDL3Sampler : IDisposable
             throw SDL3Gpu.Error("Creating a GPU sampler");
     }
 
-    /// <summary>Gets the native handle, or zero after disposal.</summary>
     public IntPtr Native { get; private set; }
 
-    /// <summary>Schedules release without destroying the source resource.</summary>
     public void Dispose()
     {
         if (Native == IntPtr.Zero)

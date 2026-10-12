@@ -28,6 +28,9 @@ public enum EngineState
     /// Indicates that the engine is currently stopping.
     /// </summary>
     Stopping,
+
+    /// <summary>Indicates incomplete startup rollback or shutdown. Call Stop to retry shutdown.</summary>
+    Failed,
 }
 
 /// <summary>
@@ -156,8 +159,10 @@ public abstract class Engine : Destroyable
         }
     }
 
-    private static void RollbackStartedModules(IReadOnlyList<Module> startedModules)
+    private static List<Exception> RollbackStartedModules(IReadOnlyList<Module> startedModules)
     {
+        List<Exception> failures = [];
+
         for (var index = startedModules.Count - 1; index >= 0; index--)
         {
             var module = startedModules[index];
@@ -166,11 +171,15 @@ public abstract class Engine : Destroyable
             {
                 module.Stop();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                // ignored
+                failures.Add(exception);
+                // Keep dependencies available when a consumer could not stop.
+                break;
             }
         }
+
+        return failures;
     }
 
     /// <summary>
@@ -266,6 +275,10 @@ public abstract class Engine : Destroyable
     ///
     /// After all modules have started successfully, the engine transitions to
     /// <see cref="EngineState.Running"/> and <see cref="OnStart"/> is invoked.
+    /// If startup fails, completed modules are stopped in reverse dependency order.
+    /// A rollback failure leaves the engine Failed and preserves the startup exception
+    /// as the first inner exception of an aggregate. Call Stop to retry shutdown.
+    /// Each module must clean up resources acquired by its own incomplete startup.
     /// </remarks>
     /// <exception cref="DestroyedObjectException">
     /// Thrown when the engine has already been destroyed.
@@ -273,6 +286,9 @@ public abstract class Engine : Destroyable
     /// <exception cref="InvalidOperationException">
     /// Thrown when the engine is not idle, a module dependency is missing, or
     /// module dependencies contain a circular reference.
+    /// </exception>
+    /// <exception cref="AggregateException">
+    /// Startup failed and rollback also failed. The first inner exception is the startup failure.
     /// </exception>
     public void Start()
     {
@@ -318,11 +334,16 @@ public abstract class Engine : Destroyable
 
             OnStart();
         }
-        catch
+        catch (Exception exception)
         {
-            RollbackStartedModules(startedModules);
+            var failures = RollbackStartedModules(startedModules);
+            _state.Set(failures.Count == 0 ? EngineState.Idle : EngineState.Failed);
 
-            _state.Set(EngineState.Idle);
+            if (failures.Count != 0)
+                throw new AggregateException(
+                    "Engine startup and rollback failed.",
+                    [exception, .. failures]
+                );
 
             throw;
         }
@@ -342,14 +363,16 @@ public abstract class Engine : Destroyable
     /// Once shutdown logic has completed successfully, the engine transitions
     /// to <see cref="EngineState.Idle"/>.
     ///
-    /// If stopping fails, the engine returns to
-    /// <see cref="EngineState.Running"/> and the exception is rethrown.
+    /// If stopping fails, the engine enters <see cref="EngineState.Failed"/> and
+    /// the exception is rethrown. Call Stop again to retry remaining running modules
+    /// and the shutdown hook. Dependencies remain running until their consumers stop.
+    /// Startup and destruction are rejected until shutdown succeeds.
     /// </remarks>
     /// <exception cref="DestroyedObjectException">
     /// Thrown when the engine has already been destroyed.
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the engine is not running.
+    /// Thrown when the engine is neither running nor awaiting failed shutdown recovery.
     /// </exception>
     public void Stop()
     {
@@ -357,7 +380,7 @@ public abstract class Engine : Destroyable
 
         var currentState = _state.Get();
 
-        if (currentState != EngineState.Running)
+        if (currentState is not (EngineState.Running or EngineState.Failed))
             throw new InvalidOperationException(
                 $"Engine cannot be stopped from state '{currentState}'"
             );
@@ -382,7 +405,7 @@ public abstract class Engine : Destroyable
         }
         catch (Exception)
         {
-            _state.Set(EngineState.Running);
+            _state.Set(EngineState.Failed);
 
             throw;
         }

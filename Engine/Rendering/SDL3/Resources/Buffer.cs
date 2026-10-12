@@ -3,13 +3,10 @@ using SDL3;
 
 namespace Mirage.Rendering.SDL3.Resources;
 
-/// <summary>Owns an immutable SDL GPU vertex or index buffer.</summary>
-/// <remarks>The device is borrowed and must outlive this object.</remarks>
 internal sealed class SDL3Buffer : IDisposable
 {
     private readonly IntPtr _device;
 
-    /// <summary>Creates a buffer and records its initial upload outside a render pass.</summary>
     public SDL3Buffer(
         IntPtr device,
         IntPtr commandBuffer,
@@ -56,13 +53,10 @@ internal sealed class SDL3Buffer : IDisposable
         }
     }
 
-    /// <summary>Gets the native handle, or zero after disposal.</summary>
     public IntPtr Native { get; private set; }
 
-    /// <summary>Gets the buffer size in bytes.</summary>
     public uint Size { get; }
 
-    /// <summary>Schedules release once pending GPU work no longer uses the buffer.</summary>
     public void Dispose()
     {
         if (Native == IntPtr.Zero)
@@ -72,7 +66,6 @@ internal sealed class SDL3Buffer : IDisposable
     }
 }
 
-/// <summary>Owns a temporary, initialized CPU-to-GPU transfer buffer.</summary>
 internal sealed class SDL3TransferBuffer : IDisposable
 {
     private readonly IntPtr _device;
@@ -123,7 +116,6 @@ internal sealed class SDL3TransferBuffer : IDisposable
     }
 }
 
-/// <summary>Shares error reporting between the native resource wrappers.</summary>
 internal static class SDL3Gpu
 {
     public static InvalidOperationException Error(string operation) =>

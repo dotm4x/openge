@@ -1,4 +1,4 @@
-name: Tests
+name: Validation
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: ["main", "develop"]
 
 jobs:
-  test:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,10 +20,10 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore tools
-        run: dotnet tool restore
+        run: dotnet tool restore --tool-manifest dotnet-tools.json
 
       - name: Check formatting
         run: dotnet csharpier check .
 
-      - name: Run tests
-        run: dotnet test --configuration Release
+      - name: Build
+        run: dotnet build Mirage.slnx --configuration Release

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -9,7 +9,7 @@
     <ProjectReference Include="..\Common\Mirage.Common.csproj" />
     <ProjectReference Include="..\Logging\Mirage.Logging.csproj" />
     <ProjectReference Include="..\Graphics\Mirage.Graphics.csproj" />
-    <ProjectReference Include="..\Math\Mirage.Numerics.csproj" />
+    <ProjectReference Include="..\Numerics\Mirage.Numerics.csproj" />
     <ProjectReference Include="..\Scheduling\Mirage.Scheduling.csproj" />
   </ItemGroup>
 

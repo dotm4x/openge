@@ -1,14 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\Engine\Logging\Mirage.Logging.csproj" />
     <ProjectReference Include="..\Engine\Common\Mirage.Common.csproj" />
     <ProjectReference Include="..\Engine\Rendering\Mirage.Rendering.csproj" />
     <ProjectReference Include="..\Engine\Graphics\Mirage.Graphics.csproj" />
     <ProjectReference Include="..\Engine\Handling\Mirage.Handling.csproj" />
     <ProjectReference Include="..\Engine\Noding\Mirage.Noding.csproj" />
-    <ProjectReference Include="..\Engine\Math\Mirage.Math.csproj" />
-    <ProjectReference Include="..\Engine\Physics\Mirage.Physics.csproj" />
+    <ProjectReference Include="..\Engine\Numerics\Mirage.Numerics.csproj" />
     <ProjectReference Include="..\Engine\Scheduling\Mirage.Scheduling.csproj" />
-    <ProjectReference Include="..\Engine\Simulating\Mirage.Simulating.csproj" />
     <ProjectReference Include="..\Engine\Spatial\Mirage.Spatial.csproj" />
     <ProjectReference Include="..\Engine\Windowing\Mirage.Windowing.csproj" />
   </ItemGroup>

@@ -22,9 +22,8 @@ It is built around small systems that can be composed together while keeping the
 - Hierarchical node system
 - 2D spatial nodes and cameras
 - Space-based rendering
-- Shapes, textures, text, and meshes
+- Clear and 2D mesh rendering with textures and materials
 - Keyboard and mouse input
-- 2D physics and simulation spaces
 - Resource importing and decoding
 - Update scheduling
 - Window management
@@ -33,54 +32,42 @@ It is built around small systems that can be composed together while keeping the
 
 ## Example
 
-A Mirage engine is assembled from modules.
+A Mirage engine is assembled from modules. This complete example matches the
+[Sandbox](Sandbox/Program.cs): it loads a small node tree, stops, and releases its owners.
+It does not open a window or run a game loop.
 
 ```csharp
-internal sealed class MyEngine : Engine
+using Mirage.Common;
+using Mirage.Logging;
+using Mirage.Logging.Outputs;
+using Mirage.Noding;
+using Mirage.Spatial.Nodes;
+
+var engine = new SandboxEngine();
+engine.Start();
+engine.Stop();
+engine.Destroy();
+
+internal sealed class SandboxEngine : Engine
 {
-    public readonly MyWindowManager Windows;
-    public readonly MyNodeManager Nodes;
-    public readonly MyInputHandler Input;
-    public readonly MySimulator Simulator;
-    public readonly MyRenderer Renderer;
-    public readonly MyScheduler Scheduler;
-
-    public MyEngine()
-    {
-        Windows = new MyWindowManager();
-        Nodes = new MyNodeManager();
-        Simulator = new MySimulator();
-
-        Renderer = new MyRenderer(
-            Windows.Main,
-            Nodes,
-            Nodes.Main.Camera
-        );
-
-        Input = new MyInputHandler(Windows.Main);
-
-        Scheduler = new MyScheduler(
-            Windows,
-            Input,
-            Nodes,
-            Simulator,
-            Renderer
-        );
-    }
-
     protected override IEnumerable<Module> Compose()
     {
-        yield return Windows;
-        yield return Nodes;
-        yield return Input;
-        yield return Simulator;
-        yield return Renderer;
-        yield return Scheduler;
+        yield return new Logger([new ConsoleOutput()]);
+        yield return new NodeManager(new SandboxRoot());
+    }
+}
+
+internal sealed class SandboxRoot() : Node("Main")
+{
+    protected override IEnumerable<Node> Compose()
+    {
+        yield return new Node2D("Player");
     }
 }
 ```
 
-The engine owns these modules and coordinates their lifecycle. Individual modules remain responsible for their own part of the engine.
+The engine owns its modules. `NodeManager` depends on `Logger`, so the engine starts
+logging first and keeps it available until the node manager has stopped and been destroyed.
 
 ## Nodes
 
@@ -99,10 +86,14 @@ Main
 Nodes can compose other nodes and can be added or moved while the game is running.
 
 ```csharp
+using Mirage.Graphics.Nodes;
+using Mirage.Noding;
+using Mirage.Spatial.Nodes;
+
 internal sealed class MyRoot : Node
 {
-    public readonly Camera Camera = new();
-    public readonly Player Player = new();
+    public readonly Camera2D Camera = new();
+    public readonly Node2D Player = new("Player");
 
     public MyRoot()
         : base("Main") { }
@@ -115,29 +106,17 @@ internal sealed class MyRoot : Node
 }
 ```
 
-A `NodeManager` can expose selected module dependencies to its nodes. This allows game nodes to access systems they depend on without passing those systems through every constructor.
-
-```csharp
-internal sealed class Player() : SpatialNode("Player")
-{
-    private MyInputHandler Input =>
-        Require<MyInputHandler>();
-
-    protected override void Configure()
-    {
-        Input.Keyboard.MoveLeft.Connect(OnMoveLeft);
-        Input.Keyboard.MoveRight.Connect(OnMoveRight);
-    }
-}
-```
-
-Dependencies available to nodes are explicitly selected by their `NodeManager`.
+A `NodeManager` exposes explicitly selected module dependencies to managed nodes.
+Nodes can use `Require<TModule>()` during `Configure()` after their dependency context
+has been injected. Retain connections to borrowed publishers and disconnect them before
+the subscribing node is destroyed.
 
 ## Composition & Configuration
 
 Mirage uses composition to declare owned objects and configuration to connect them after they have been composed.
 
-`Compose()` defines the objects that belong to a system:
+The following conceptual fragments assume a subclass with initialized `Keyboard` and
+`Mouse` devices, a `Jump` event, and an `OnJump` callback. `Compose()` declares contents:
 
 ```csharp
 protected override IEnumerable<InputDevice> Compose()
@@ -176,6 +155,15 @@ loaded. This preserves access to injected dependencies in `Configure()`. The pre
 controls ordering only: each owner still registers its contents and handles their cleanup.
 It does not introduce preparation hooks into `Module` or replace startup and shutdown.
 
+## Lifecycle failures
+
+If startup fails, `Engine` stops completed modules in reverse dependency order.
+If a module cannot stop, rollback leaves its dependencies available, enters `Failed`,
+and throws an `AggregateException` containing the startup failure first and the cleanup
+failure afterward. A failed `Stop()` also enters `Failed`. Call `Stop()` again to retry
+remaining running modules and the shutdown hook; startup and destruction require `Idle`.
+Each module remains responsible for cleanup after its own incomplete startup.
+
 ## Architecture
 
 Mirage is split into focused projects:
@@ -185,19 +173,18 @@ Common
 Graphics
 Handling
 Importing
-Math
+Logging
 Noding
-Physics
+Numerics
 Rendering
 Scheduling
-Simulating
 Spatial
 Windowing
 ```
 
 They cover different parts of the engine without requiring everything to belong to one large framework.
 
-For example, the node hierarchy describes the game world, while rendering, input, physics, scheduling, and windowing remain separate systems.
+For example, the node hierarchy describes the game world, while rendering, input, scheduling, and windowing remain separate systems.
 
 ## Philosophy
 
@@ -223,6 +210,10 @@ Active development takes place on the `develop` branch.
 
 ```bash
 git checkout develop
+dotnet tool restore --tool-manifest dotnet-tools.json
+dotnet csharpier check .
+dotnet build Mirage.slnx --configuration Release
+dotnet run --project Sandbox/Sandbox.csproj --configuration Release
 ```
 
 > [!NOTE]

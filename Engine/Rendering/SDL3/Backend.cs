@@ -556,7 +556,6 @@ public sealed class SDL3RenderBackend : RenderBackend
         }
     }
 
-    /// <summary>Groups native buffers for one cached immutable mesh.</summary>
     private sealed class MeshBuffers : IDisposable
     {
         public required uint IndexCount { get; init; }

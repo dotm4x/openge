@@ -279,6 +279,12 @@ public class Renderer : Module, IUpdatable
     /// <inheritdoc />
     protected override void OnDestroy()
     {
+        var state = State.Get();
+        if (state != ModuleState.Idle)
+            throw new InvalidOperationException(
+                $"Renderer cannot be destroyed while in state '{state}'."
+            );
+
         foreach (var space in Spaces.ToArray())
         {
             space.Destroy();

@@ -18,14 +18,6 @@ public class SDL3Mouse : Handling.Devices.Mouse.Mouse
     public SDL3Mouse(params MouseButtonEvent[] events)
         : base(events) { }
 
-    /// <summary>
-    /// Converts an SDL mouse button identifier to a Mirage mouse button.
-    /// </summary>
-    /// <param name="button">The SDL mouse button identifier.</param>
-    /// <returns>
-    /// The corresponding Mirage mouse button, or <see langword="null"/>
-    /// when the button is unsupported.
-    /// </returns>
     private static MouseButton? FromSDLButton(byte button)
     {
         return button switch
