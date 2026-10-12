@@ -163,6 +163,7 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
     /// </summary>
     /// <remarks>
     /// Override this method to perform module-specific startup logic.
+    /// If this hook throws, OnStop is invoked to clean up incomplete startup.
     /// </remarks>
     protected virtual void OnStart() { }
 
@@ -171,6 +172,8 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
     /// </summary>
     /// <remarks>
     /// Override this method to perform module-specific shutdown logic.
+    /// This hook also cleans up an incomplete OnStart and must tolerate partial initialization.
+    /// Failed cleanup preserves dependencies for a later shutdown retry.
     /// </remarks>
     protected virtual void OnStop() { }
 
@@ -249,10 +252,12 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
             );
 
         var started = false;
+        var startEntered = false;
 
         try
         {
             _state.Set(ModuleState.Starting);
+            startEntered = true;
             OnStart();
             started = true;
             _state.Set(ModuleState.Running);
@@ -263,18 +268,44 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
             if (started)
                 throw;
 
+            List<Exception> failures = [];
+            var cleanupFailed = false;
+            if (startEntered)
+            {
+                try
+                {
+                    _state.Set(ModuleState.Stopping);
+                }
+                catch (Exception notificationFailure)
+                {
+                    failures.Add(notificationFailure);
+                }
+
+                try
+                {
+                    OnStop();
+                }
+                catch (Exception cleanupFailure)
+                {
+                    cleanupFailed = true;
+                    failures.Add(cleanupFailure);
+                }
+            }
+
             try
             {
-                _state.Set(ModuleState.Idle);
+                _state.Set(cleanupFailed ? ModuleState.Running : ModuleState.Idle);
             }
             catch (Exception notificationFailure)
             {
-                throw new AggregateException(
-                    "Module startup and state notification failed.",
-                    exception,
-                    notificationFailure
-                );
+                failures.Add(notificationFailure);
             }
+
+            if (failures.Count != 0)
+                throw new AggregateException(
+                    "Module startup and recovery failed.",
+                    [exception, .. failures]
+                );
 
             throw;
         }

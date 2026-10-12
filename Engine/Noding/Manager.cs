@@ -19,6 +19,7 @@ public class NodeManager : Module
     private readonly Preparator _preparator = new();
     private NodeContext? _nodeContext;
     private bool _restoringRoots;
+    private Node[]? _switchRollback;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NodeManager"/> class.
@@ -234,6 +235,7 @@ public class NodeManager : Module
     private void SwitchLoadedRoot(Node current, Node next)
     {
         ValidateLoadableRoot(next);
+        var previouslyLoaded = Traverse(next).Where(node => node.Loaded).ToHashSet();
 
         current.Unload();
 
@@ -248,14 +250,67 @@ public class NodeManager : Module
         }
         catch (Exception exception)
         {
-            Logger.Log(
-                $"Failed to load root '{next.Name.Get()}'; restoring '{current.Name.Get()}': {exception.Message}",
-                LogMessageKind.Warn
-            );
-            if (!current.Loaded)
-                current.Load();
+            List<Exception> failures = [];
+            var rollbackNodes = Traverse(next)
+                .Reverse()
+                .Where(node => node.Loaded && !previouslyLoaded.Contains(node))
+                .ToArray();
+            foreach (var node in rollbackNodes)
+            {
+                if (!node.Loaded)
+                    continue;
+
+                try
+                {
+                    node.Unload();
+                }
+                catch (Exception cleanupFailure)
+                {
+                    failures.Add(cleanupFailure);
+                    _switchRollback = rollbackNodes;
+                    break;
+                }
+            }
+
+            var selected = next.Loaded ? next : current;
+            try
+            {
+                _activeRoot.Set(selected);
+            }
+            catch (Exception notificationFailure)
+            {
+                failures.Add(notificationFailure);
+            }
+
+            if (!next.Loaded && !current.Loaded)
+            {
+                try
+                {
+                    current.Load();
+                }
+                catch (Exception restorationFailure)
+                {
+                    failures.Add(restorationFailure);
+                }
+            }
+
+            if (failures.Count != 0)
+                throw new AggregateException(
+                    $"Switching root from '{current.Name.Get()}' to '{next.Name.Get()}' and recovery failed.",
+                    [exception, .. failures]
+                );
 
             throw;
+        }
+    }
+
+    private static IEnumerable<Node> Traverse(Node node)
+    {
+        yield return node;
+        foreach (var subnode in node.Subnodes)
+        {
+            foreach (var descendant in Traverse(subnode))
+                yield return descendant;
         }
     }
 
@@ -395,12 +450,20 @@ public class NodeManager : Module
     /// <inheritdoc />
     protected override void OnStop()
     {
-        var active = _activeRoot.Get();
+        foreach (var node in _switchRollback ?? [])
+        {
+            if (node.Loaded)
+                node.Unload();
+        }
+        _switchRollback = null;
 
-        if (active.Loaded)
-            active.Unload();
+        foreach (var root in Roots.Values.Reverse())
+        {
+            if (root.Loaded)
+                root.Unload();
+        }
 
-        Logger.Log($"NodeManager unloaded active root '{active.Name.Get()}'.");
+        Logger.Log("NodeManager unloaded its loaded roots.");
         Logger.Log("Module stopped.");
     }
 
@@ -411,7 +474,11 @@ public class NodeManager : Module
     /// <remarks>
     /// When the node manager is idle, the root is selected without being loaded.
     /// When the node manager is running, the current root is unloaded and the selected
-    /// root is loaded immediately.
+    /// root is loaded immediately. If loading or publishing the selection fails, the
+    /// newly loaded nodes are unloaded, including persistent ones, and the previous
+    /// selection is restored before it is reloaded. Previously loaded nodes are preserved.
+    /// Recovery failures are aggregated with the original error. Shutdown also cleans
+    /// up roots left loaded by a failed recovery.
     /// </remarks>
     /// <exception cref="Mirage.Common.Lifecycle.DestroyedObjectException">
     /// Thrown when the manager has been destroyed.
@@ -422,15 +489,20 @@ public class NodeManager : Module
     /// </exception>
     /// <exception cref="InvalidOperationException">
     /// Thrown when the requested root does not exist, cannot be loaded, or the
-    /// node manager is currently starting or stopping.
+    /// node manager is currently starting or stopping, or switch rollback cleanup is pending.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown when the node manager has an unrecognized module state.
     /// </exception>
+    /// <exception cref="AggregateException">Switching roots and recovery both failed.</exception>
     public void Switch(string identifier)
     {
         ThrowIfDestroyed();
         ArgumentException.ThrowIfNullOrWhiteSpace(identifier);
+        if (_switchRollback is not null)
+            throw new InvalidOperationException(
+                "A failed root switch must finish shutdown cleanup before another switch."
+            );
 
         if (!Roots.TryGetValue(identifier, out var next))
         {

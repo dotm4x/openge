@@ -162,7 +162,52 @@ If a module cannot stop, rollback leaves its dependencies available, enters `Fai
 and throws an `AggregateException` containing the startup failure first and the cleanup
 failure afterward. A failed `Stop()` also enters `Failed`. Call `Stop()` again to retry
 remaining running modules and the shutdown hook; startup and destruction require `Idle`.
-Each module remains responsible for cleanup after its own incomplete startup.
+If a module's `OnStart()` fails, its `OnStop()` runs to clean up incomplete startup.
+Shutdown hooks must tolerate partial initialization. If cleanup fails, the engine
+keeps dependencies available for a shutdown retry.
+
+
+An application owns the engine and runs its borrowed scheduler after startup.
+Keep shutdown at that application boundary. This fragment assumes `engine` and
+`scheduler` come from the application's composition code:
+
+```csharp
+Exception? failure = null;
+try
+{
+    engine.Start();
+    scheduler.Run();
+}
+catch (Exception exception)
+{
+    failure = exception;
+}
+finally
+{
+    try
+    {
+        if (engine.State.Get() is EngineState.Running or EngineState.Failed)
+            engine.Stop();
+
+        if (engine.State.Get() == EngineState.Idle)
+            engine.Destroy();
+    }
+    catch (Exception cleanupFailure)
+    {
+        failure = failure is null
+            ? cleanupFailure
+            : new AggregateException(failure, cleanupFailure);
+    }
+}
+
+if (failure is not null)
+    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+```
+
+If shutdown leaves the engine `Failed`, retain its reference and retry `Stop()`
+before destruction. Cleanup errors preserve the original failure instead of
+replacing it. Failures after decoder selection include the path, requested resource type and decoder
+in `Exception.Data`; scheduler errors identify the failing update channel there.
 
 ## Architecture
 

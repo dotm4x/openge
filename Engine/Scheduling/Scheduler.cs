@@ -188,10 +188,21 @@ public class Scheduler : Module
     /// When <see cref="TargetUpdateRate"/> is non-positive, the scheduler runs
     /// without an explicit rate limit.
     ///
-    /// The loop ends when the scheduler is no longer running.
+    /// The loop ends when the scheduler is no longer running. An update failure exits
+    /// the loop and includes Mirage.UpdateChannel in Exception.Data. The application
+    /// must stop its owning engine before destroying it; the scheduler does not own modules.
     /// </remarks>
+    /// <exception cref="InvalidOperationException">The scheduler is not running.</exception>
+    /// <exception cref="Mirage.Common.Lifecycle.DestroyedObjectException">The scheduler has been destroyed.</exception>
+    /// <exception cref="AggregateException">An update and reporting its failure both failed.</exception>
     public void Run()
     {
+        ThrowIfDestroyed();
+        if (State.Get() != ModuleState.Running)
+            throw new InvalidOperationException(
+                "The scheduler must be running before entering its update loop."
+            );
+
         if (InjectedDependencies is not null)
             Logger.Log(
                 $"Starting update loop with target rate {TargetUpdateRate} Hz and {Channels.Count} channels."
@@ -208,17 +219,32 @@ public class Scheduler : Module
 
             foreach (var channel in Channels.OrderByDescending(channel => channel.Priority))
             {
+                if (State.Get() != ModuleState.Running)
+                    break;
+
                 try
                 {
                     channel.Update(DeltaTime, TargetUpdateRate);
                 }
                 catch (Exception exception)
                 {
-                    if (InjectedDependencies is not null)
-                        Logger.Log(
-                            $"Update channel '{channel.Identifier}' failed: {exception.Message}",
-                            LogMessageKind.Warn
+                    exception.Data["Mirage.UpdateChannel"] = channel.Identifier;
+                    try
+                    {
+                        if (InjectedDependencies is not null)
+                            Logger.Log(
+                                $"Update channel '{channel.Identifier}' failed: {exception.Message}",
+                                LogMessageKind.Warn
+                            );
+                    }
+                    catch (Exception loggingFailure)
+                    {
+                        throw new AggregateException(
+                            "Updating a channel and reporting its failure failed.",
+                            exception,
+                            loggingFailure
                         );
+                    }
                     throw;
                 }
             }

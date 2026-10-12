@@ -85,7 +85,13 @@ public sealed class SDL3RenderBackend : RenderBackend
         var success = acquired
             ? SDL.SubmitGPUCommandBuffer(commandBuffer)
             : SDL.CancelGPUCommandBuffer(commandBuffer);
-        if (!success || !acquired)
+        if (!success)
+        {
+            var error = SDL3Gpu.Error("Abandoning the GPU frame");
+            ReleaseResources();
+            throw error;
+        }
+        if (!acquired)
             ReleaseResources();
     }
 
@@ -248,8 +254,16 @@ public sealed class SDL3RenderBackend : RenderBackend
         if (_shaders.TryGetValue(shader, out var result))
             return result;
         result = new SDL3Shader(_device, shader);
-        _shaders.Add(shader, result);
-        return result;
+        try
+        {
+            _shaders.Add(shader, result);
+            return result;
+        }
+        catch
+        {
+            result.Dispose();
+            throw;
+        }
     }
 
     private SDL.GPUTextureSamplerBinding GetTextureBinding(TextureBinding binding)
@@ -261,12 +275,28 @@ public sealed class SDL3RenderBackend : RenderBackend
         {
             EndPass();
             texture = new SDL3Texture(_device, _commandBuffer, binding.Texture);
-            _textures.Add(binding.Texture, texture);
+            try
+            {
+                _textures.Add(binding.Texture, texture);
+            }
+            catch
+            {
+                texture.Dispose();
+                throw;
+            }
         }
         if (!_samplers.TryGetValue(binding.Sampler, out var sampler))
         {
             sampler = new SDL3Sampler(_device, binding.Sampler);
-            _samplers.Add(binding.Sampler, sampler);
+            try
+            {
+                _samplers.Add(binding.Sampler, sampler);
+            }
+            catch
+            {
+                sampler.Dispose();
+                throw;
+            }
         }
         return new SDL.GPUTextureSamplerBinding
         {
@@ -338,7 +368,15 @@ public sealed class SDL3RenderBackend : RenderBackend
         if (!_pipelines.TryGetValue(key, out var pipeline))
         {
             pipeline = new SDL3Pipeline(_device, vertex, fragment, _targetFormat);
-            _pipelines.Add(key, pipeline);
+            try
+            {
+                _pipelines.Add(key, pipeline);
+            }
+            catch
+            {
+                pipeline.Dispose();
+                throw;
+            }
         }
         var mesh = GetMesh(command.Mesh);
         // A material slot has the same index in both stages. Unused trailing slots are ignored.
@@ -468,9 +506,20 @@ public sealed class SDL3RenderBackend : RenderBackend
             }
             _targetFormat = SDL.GetGPUSwapchainTextureFormat(_device, _claimedWindow);
         }
-        catch
+        catch (Exception exception)
         {
-            AbandonFrame();
+            try
+            {
+                AbandonFrame();
+            }
+            catch (Exception cleanupFailure)
+            {
+                throw new AggregateException(
+                    "GPU frame operation and cleanup failed.",
+                    exception,
+                    cleanupFailure
+                );
+            }
             throw;
         }
     }
@@ -482,7 +531,8 @@ public sealed class SDL3RenderBackend : RenderBackend
         AbandonFrame();
         if (_device != IntPtr.Zero)
         {
-            SDL.WaitForGPUIdle(_device);
+            if (!SDL.WaitForGPUIdle(_device))
+                throw SDL3Gpu.Error("Waiting for the GPU before destruction");
             ReleaseResources();
             if (_claimedWindow != IntPtr.Zero && _window.Native == _claimedWindow)
                 SDL.ReleaseWindowFromGPUDevice(_device, _claimedWindow);
@@ -504,9 +554,20 @@ public sealed class SDL3RenderBackend : RenderBackend
                 BeginPass();
             EndPass();
         }
-        catch
+        catch (Exception exception)
         {
-            AbandonFrame();
+            try
+            {
+                AbandonFrame();
+            }
+            catch (Exception cleanupFailure)
+            {
+                throw new AggregateException(
+                    "GPU frame operation and cleanup failed.",
+                    exception,
+                    cleanupFailure
+                );
+            }
             throw;
         }
         var commandBuffer = _commandBuffer;

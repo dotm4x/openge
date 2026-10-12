@@ -136,6 +136,8 @@ public class Renderer : Module, IUpdatable
     public IReadOnlyStore<RenderBackend> ActiveBackend { get; }
 
     /// <inheritdoc />
+    /// <remarks>Frame completion is attempted even when command collection or rendering fails.
+    /// If both fail, the rendering error is the first inner exception of an aggregate.</remarks>
     public virtual void Update(UpdateContext context)
     {
         ThrowIfDestroyed();
@@ -149,6 +151,7 @@ public class Renderer : Module, IUpdatable
         var viewport = new Viewport(Vector2.Zero, Window.Size.Get());
 
         backend.BeginFrame();
+        Exception? renderingFailure = null;
 
         try
         {
@@ -165,9 +168,25 @@ public class Renderer : Module, IUpdatable
                 backend.Render(space.Collect(renderContext), renderContext);
             }
         }
+        catch (Exception exception)
+        {
+            renderingFailure = exception;
+            throw;
+        }
         finally
         {
-            backend.EndFrame();
+            try
+            {
+                backend.EndFrame();
+            }
+            catch (Exception frameFailure) when (renderingFailure is not null)
+            {
+                throw new AggregateException(
+                    "Rendering and frame completion failed.",
+                    renderingFailure,
+                    frameFailure
+                );
+            }
         }
     }
 

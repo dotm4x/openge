@@ -285,10 +285,11 @@ public abstract class Engine : Destroyable
     ///
     /// After all modules have started successfully, the engine transitions to
     /// <see cref="EngineState.Running"/> and <see cref="OnStart"/> is invoked.
-    /// If startup fails, completed modules are stopped in reverse dependency order.
+    /// If startup fails, completed modules and incomplete startups awaiting cleanup
+    /// are stopped in reverse dependency order.
     /// A rollback failure leaves the engine Failed and preserves the startup exception
     /// as the first inner exception of an aggregate. Call Stop to retry shutdown.
-    /// Each module must clean up resources acquired by its own incomplete startup.
+    /// Each module cleans up resources from incomplete startup through its OnStop hook.
     /// </remarks>
     /// <exception cref="DestroyedObjectException">
     /// Thrown when the engine has already been destroyed.

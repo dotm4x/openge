@@ -161,12 +161,25 @@ public class WindowManager : Module, IUpdatable
         }
         catch (Exception exception)
         {
-            Logger.Log(
-                $"Window startup failed; closing {openedWindows.Count} opened windows: {exception.Message}",
-                LogMessageKind.Warn
-            );
+            List<Exception> failures = [];
             for (var index = openedWindows.Count - 1; index >= 0; index--)
-                openedWindows[index].Close();
+            {
+                try
+                {
+                    if (openedWindows[index].Opened.Get())
+                        openedWindows[index].Close();
+                }
+                catch (Exception cleanupFailure)
+                {
+                    failures.Add(cleanupFailure);
+                }
+            }
+
+            if (failures.Count != 0)
+                throw new AggregateException(
+                    "Window startup and rollback failed.",
+                    [exception, .. failures]
+                );
 
             throw;
         }

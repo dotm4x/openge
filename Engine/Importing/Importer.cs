@@ -34,6 +34,7 @@ public record ImportContext(string Identifier, string Path) : IIdentifiable<stri
 public class Importer : Module
 {
     private readonly Dictionary<ResourceKey, Resource> _resources = [];
+    private readonly HashSet<Resource> _pendingCleanup = [];
     private readonly Preparator _preparator = new();
 
     /// <summary>
@@ -181,10 +182,21 @@ public class Importer : Module
 
         _resources.Clear();
 
-        foreach (var decoder in Decoders.ToArray())
-            decoder.Destroy();
+        foreach (var resource in _pendingCleanup.ToArray())
+        {
+            if (!resource.Destroyed)
+                resource.Destroy();
+        }
+        _pendingCleanup.Clear();
 
-        Decoders.Destroy();
+        foreach (var decoder in Decoders.ToArray())
+        {
+            if (!decoder.Destroyed)
+                decoder.Destroy();
+        }
+
+        if (!Decoders.Destroyed)
+            Decoders.Destroy();
         if (InjectedDependencies is not null)
             Logger.Log("Module resources destroyed.");
     }
@@ -218,7 +230,11 @@ public class Importer : Module
     /// </returns>
     /// <remarks>
     /// Resources are cached by requested type and normalized relative path.
-    /// The importer owns the returned resource.
+    /// The importer owns the returned resource. A decoded resource is destroyed if
+    /// it cannot be adopted by the cache. Failures after decoder selection retain their original type
+    /// and include Mirage.ResourcePath, Mirage.ResourceType and Mirage.Decoder in Exception.Data.
+    /// Cleanup failures are aggregated with the original import error. Resources whose
+    /// cleanup failed remain owned by the importer and are retried during its destruction.
     /// </remarks>
     /// <exception cref="Mirage.Common.Lifecycle.DestroyedObjectException">
     /// Thrown when the importer has been destroyed.
@@ -235,6 +251,7 @@ public class Importer : Module
     /// <exception cref="InvalidOperationException">
     /// Thrown when multiple decoders match or a decoder returns the wrong resource type.
     /// </exception>
+    /// <exception cref="AggregateException">Importing and releasing an unadopted resource both failed.</exception>
     public TResource Import<TResource>(string path)
         where TResource : Resource
     {
@@ -304,41 +321,53 @@ public class Importer : Module
                 );
         }
 
-        using var stream = File.OpenRead(absolutePath);
-
-        var context = new ImportContext(identifier, absolutePath);
-
-        Resource decoded;
+        var decoder = candidates[0];
+        Resource? decoded = null;
         try
         {
-            decoded = candidates[0].Decode(context, stream);
+            using var stream = File.OpenRead(absolutePath);
+            var context = new ImportContext(identifier, absolutePath);
+            decoded = decoder.Decode(context, stream);
+
+            if (decoded is not TResource resource)
+                throw new InvalidOperationException(
+                    $"Decoder '{decoder.GetType().Name}' returned "
+                        + $"'{decoded?.GetType().Name ?? "null"}' instead of '{typeof(TResource).Name}'."
+                );
+
+            _resources.Add(key, resource);
+            decoded = null; // The cache now owns the resource.
+            if (InjectedDependencies is not null)
+                Logger.Log($"Imported resource '{identifier}' as {typeof(TResource).Name}.");
+
+            return resource;
         }
         catch (Exception exception)
         {
-            if (InjectedDependencies is not null)
-                Logger.Log(
-                    $"Failed to decode resource '{identifier}': {exception.Message}",
-                    LogMessageKind.Warn
-                );
+            exception.Data["Mirage.ResourcePath"] = absolutePath;
+            exception.Data["Mirage.ResourceType"] = typeof(TResource).FullName;
+            exception.Data["Mirage.Decoder"] = decoder.GetType().FullName;
+
+            if (decoded is { Destroyed: false })
+            {
+                _pendingCleanup.Add(decoded);
+                try
+                {
+                    decoded.Destroy();
+                    _pendingCleanup.Remove(decoded);
+                }
+                catch (Exception cleanupFailure)
+                {
+                    throw new AggregateException(
+                        $"Importing resource '{identifier}' and cleanup failed.",
+                        exception,
+                        cleanupFailure
+                    );
+                }
+            }
+
             throw;
         }
-
-        if (decoded is not TResource resource)
-        {
-            decoded.Destroy();
-
-            throw new InvalidOperationException(
-                $"Decoder '{candidates[0].GetType().Name}' returned "
-                    + $"'{decoded.GetType().Name}' instead of "
-                    + $"'{typeof(TResource).Name}'."
-            );
-        }
-
-        _resources.Add(key, resource);
-        if (InjectedDependencies is not null)
-            Logger.Log($"Imported resource '{identifier}' as {typeof(TResource).Name}.");
-
-        return resource;
     }
 
     private readonly record struct ResourceKey(Type Type, string Identifier);
