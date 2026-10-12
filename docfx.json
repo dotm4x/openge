@@ -4,8 +4,9 @@
       "src": [
         {
           "src": ".",
-          "files": ["Engine/**/*.csproj"],
-          "exclude": ["Engine/Sandbox/**/*.csproj"]
+          "files": [
+            "Engine/**/*.csproj"
+          ]
         }
       ],
       "dest": "api"
@@ -13,10 +14,21 @@
   ],
   "build": {
     "content": [
-      { "files": ["index.md"] },
-      { "files": ["api/**.yml"] }
+      {
+        "files": [
+          "index.md"
+        ]
+      },
+      {
+        "files": [
+          "api/**.yml"
+        ]
+      }
     ],
     "output": "_site",
-    "template": ["default", "modern"]
+    "template": [
+      "default",
+      "modern"
+    ]
   }
 }

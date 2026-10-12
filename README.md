@@ -32,8 +32,8 @@ It is built around small systems that can be composed together while keeping the
 
 ## Example
 
-A Mirage engine is assembled from modules. This complete example matches the
-[Sandbox](Sandbox/Program.cs): it loads a small node tree, stops, and releases its owners.
+A Mirage engine is assembled from modules. This complete example loads a small
+node tree, stops, and releases its owners.
 It does not open a window or run a game loop.
 
 ```csharp
@@ -43,21 +43,21 @@ using Mirage.Logging.Outputs;
 using Mirage.Noding;
 using Mirage.Spatial.Nodes;
 
-var engine = new SandboxEngine();
+var engine = new ExampleEngine();
 engine.Start();
 engine.Stop();
 engine.Destroy();
 
-internal sealed class SandboxEngine : Engine
+internal sealed class ExampleEngine : Engine
 {
     protected override IEnumerable<Module> Compose()
     {
         yield return new Logger([new ConsoleOutput()]);
-        yield return new NodeManager(new SandboxRoot());
+        yield return new NodeManager(new ExampleRoot());
     }
 }
 
-internal sealed class SandboxRoot() : Node("Main")
+internal sealed class ExampleRoot() : Node("Main")
 {
     protected override IEnumerable<Node> Compose()
     {
@@ -213,8 +213,22 @@ git checkout develop
 dotnet tool restore --tool-manifest dotnet-tools.json
 dotnet csharpier check .
 dotnet build Mirage.slnx --configuration Release
-dotnet run --project Sandbox/Sandbox.csproj --configuration Release
 ```
+
+Create experimental applications outside this repository and reference the required
+Mirage projects directly. For example, an external application's project file can include:
+
+```xml
+<ItemGroup>
+  <ProjectReference Include="../Mirage/Engine/Common/Mirage.Common.csproj" />
+  <ProjectReference Include="../Mirage/Engine/Logging/Mirage.Logging.csproj" />
+  <ProjectReference Include="../Mirage/Engine/Noding/Mirage.Noding.csproj" />
+  <ProjectReference Include="../Mirage/Engine/Spatial/Mirage.Spatial.csproj" />
+</ItemGroup>
+```
+
+Adjust these relative paths to your checkout. Project references build the current
+Mirage source without installing NuGet packages or modifying the engine's solution.
 
 > [!NOTE]
 > Mirage is not stable yet. Documentation and examples may change as the engine develops.

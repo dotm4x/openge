@@ -1,5 +1,4 @@
 <Solution>
-  <Project Path="Sandbox/Sandbox.csproj" />
   <Folder Name="/Engine/">
     <Project Path="Engine/Spatial/Mirage.Spatial.csproj" />
     <Project Path="Engine/Windowing/Mirage.Windowing.csproj" />
