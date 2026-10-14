@@ -1,5 +1,3 @@
 ﻿namespace OpenGE.Presentating;
 
-public class Class1
-{
-}
+public class Class1 { }
