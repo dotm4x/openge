@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Numerics;
 using OpenGE.Windowing;
-using SDL = global::SDL3.SDL;
+using SDL3;
 
 namespace OpenGE.SDL3.Windowing;
 

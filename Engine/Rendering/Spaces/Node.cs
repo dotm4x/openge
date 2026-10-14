@@ -1,5 +1,6 @@
 using OpenGE.Graphics.Commands;
 using OpenGE.Graphics.Interfaces;
+using OpenGE.Graphics.Resources.Targets;
 using OpenGE.Noding;
 
 namespace OpenGE.Rendering.Spaces;
@@ -13,6 +14,9 @@ namespace OpenGE.Rendering.Spaces;
 /// The node manager and its nodes are borrowed and are never destroyed by this object.
 /// Nodes are traversed in hierarchy order, and commands produced by each renderable
 /// node preserve their original order.
+///
+/// The rendering target is borrowed. When no target is specified, commands
+/// are rendered to the window associated with the renderer.
 /// </remarks>
 /// <param name="manager">
 /// The node manager providing the active root.
@@ -27,12 +31,16 @@ namespace OpenGE.Rendering.Spaces;
 /// The rendering priority. The default is
 /// <see cref="RenderSpacePriority.Normal"/>.
 /// </param>
+/// <param name="target">
+/// The initial offscreen rendering target, or null to render to the window.
+/// </param>
 public class NodeRenderSpace(
     NodeManager manager,
     ICamera camera,
     string identifier = "nodes",
+    RenderTarget? target = null,
     RenderSpacePriority priority = RenderSpacePriority.Normal
-) : RenderSpace(identifier, camera, priority)
+) : RenderSpace(identifier, camera, target, priority)
 {
     private static IEnumerable<IRenderCommand> CollectNode(Node node, IRenderContext context)
     {

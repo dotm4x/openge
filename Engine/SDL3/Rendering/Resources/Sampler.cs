@@ -1,5 +1,5 @@
-using OpenGE.Graphics.Resources;
-using SDL = global::SDL3.SDL;
+using OpenGE.Graphics.Resources.Textures;
+using SDL3;
 
 namespace OpenGE.SDL3.Rendering.Resources;
 

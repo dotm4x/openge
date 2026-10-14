@@ -23,9 +23,9 @@ namespace OpenGE.Rendering;
 /// for its associated window.
 ///
 /// Rendering spaces collect backend-independent commands from their renderable
-/// objects using the active camera and a viewport derived from the current
-/// window size. The active rendering backend then executes those commands in
-/// space priority order.
+/// objects using the active camera and a viewport derived from their rendering
+/// target. Spaces without an explicit target render to the associated window.
+/// The active rendering backend executes commands in space priority order.
 ///
 /// The renderer owns and destroys its registered rendering backends and spaces.
 /// Registration transfers ownership of backends and spaces to the renderer.
@@ -136,8 +136,10 @@ public class Renderer : Module, IUpdatable
     public IReadOnlyStore<RenderBackend> ActiveBackend { get; }
 
     /// <inheritdoc />
-    /// <remarks>Frame completion is attempted even when command collection or rendering fails.
-    /// If both fail, the rendering error is the first inner exception of an aggregate.</remarks>
+    /// <remarks>
+    /// Frame completion is attempted even when command collection or rendering fails.
+    /// If both fail, the rendering error is the first inner exception of an aggregate.
+    /// </remarks>
     public virtual void Update(UpdateContext context)
     {
         ThrowIfDestroyed();
@@ -148,7 +150,6 @@ public class Renderer : Module, IUpdatable
         }
 
         var backend = _activeBackend.Get();
-        var viewport = new Viewport(Vector2.Zero, Window.Size.Get());
 
         backend.BeginFrame();
         Exception? renderingFailure = null;
@@ -159,13 +160,17 @@ public class Renderer : Module, IUpdatable
 
             foreach (var space in Spaces.OrderBy(space => space.Priority))
             {
+                var target = space.Target.Get();
+
+                var viewport = new Viewport(Vector2.Zero, target?.Size ?? Window.Size.Get());
+
                 var renderContext = new RenderContext(
                     context.DeltaTime,
                     space.Camera.Get(),
                     viewport
                 );
 
-                backend.Render(space.Collect(renderContext), renderContext);
+                backend.Render(space.Collect(renderContext), target, renderContext);
             }
         }
         catch (Exception exception)

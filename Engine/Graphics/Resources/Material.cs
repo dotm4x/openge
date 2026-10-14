@@ -1,4 +1,5 @@
 using OpenGE.Common;
+using OpenGE.Graphics.Resources.Textures;
 
 namespace OpenGE.Graphics.Resources;
 

@@ -5,6 +5,7 @@ using OpenGE.Common.Primitives;
 using OpenGE.Graphics;
 using OpenGE.Graphics.Commands;
 using OpenGE.Graphics.Interfaces;
+using OpenGE.Graphics.Resources.Targets;
 
 namespace OpenGE.Rendering.Spaces;
 
@@ -62,6 +63,14 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     public readonly RenderSpacePriority Priority;
 
     /// <summary>
+    /// Gets the offscreen rendering target, or null to render to the window.
+    /// </summary>
+    /// <remarks>
+    /// The target is borrowed and is not destroyed with the space.
+    /// </remarks>
+    public readonly Store<RenderTarget?> Target;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="RenderSpace"/> class.
     /// </summary>
     /// <param name="identifier">
@@ -70,6 +79,7 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     /// <param name="camera">
     /// The initial camera used to render this space.
     /// </param>
+    /// <param name="target"></param>
     /// <param name="priority">
     /// The rendering priority. The default is
     /// <see cref="RenderSpacePriority.Normal"/>.
@@ -83,6 +93,7 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     public RenderSpace(
         string identifier,
         ICamera camera,
+        RenderTarget? target = null,
         RenderSpacePriority priority = RenderSpacePriority.Normal,
         IEnumerable<IRenderable>? entries = null
     )
@@ -92,6 +103,7 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
 
         Identifier = identifier;
         Camera = new Store<ICamera>(camera);
+        Target = new Store<RenderTarget?>(target);
         Priority = priority;
 
         foreach (var entry in entries ?? [])
@@ -173,6 +185,7 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     {
         Entries.Clear();
         Camera.Destroy();
+        Target.Destroy();
 
         base.OnDestroy();
     }

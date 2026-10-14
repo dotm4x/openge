@@ -6,6 +6,8 @@ using OpenGE.Graphics.Geometry;
 using OpenGE.Graphics.Interfaces;
 using OpenGE.Graphics.Primitives;
 using OpenGE.Graphics.Resources;
+using OpenGE.Graphics.Resources.Targets;
+using OpenGE.Graphics.Resources.Textures;
 using OpenGE.Rendering;
 using OpenGE.SDL3.Rendering.Resources;
 using OpenGE.SDL3.Windowing;
@@ -47,6 +49,10 @@ public sealed class SDL3RenderBackend : RenderBackend
         ReferenceEqualityComparer.Instance
     );
 
+    private readonly HashSet<RenderTarget> _initializedTargets = new(
+        ReferenceEqualityComparer.Instance
+    );
+
     private readonly bool _vsync;
     private readonly SDL3Window _window;
     private IntPtr _claimedWindow;
@@ -56,10 +62,14 @@ public sealed class SDL3RenderBackend : RenderBackend
     private Vector2 _logicalSize;
     private IntPtr _renderPass;
     private IntPtr _swapchainTexture;
+    private IntPtr _currentTexture;
+    private RenderTarget? _currentTarget;
     private SDL.GPUTextureFormat _targetFormat;
-    private bool _targetInitialized;
+    private bool _windowInitialized;
     private int _threadId;
     private uint _width;
+    private uint _swapchainWidth;
+    private uint _swapchainHeight;
 
     /// <summary>Creates a backend for one borrowed SDL window.</summary>
     /// <param name="window">The window to render into.</param>
@@ -100,13 +110,18 @@ public sealed class SDL3RenderBackend : RenderBackend
         if (_renderPass != IntPtr.Zero && clear is null)
             return;
         EndPass();
-        var shouldClear = clear.HasValue || !_targetInitialized;
+        // The swapchain must be initialized each frame. Offscreen textures
+        // retain their contents across frames and target switches.
+        var initialized = _currentTarget is null
+            ? _windowInitialized
+            : _initializedTargets.Contains(_currentTarget);
+        var shouldClear = clear.HasValue || !initialized;
         var color = clear.GetValueOrDefault();
         SDL.GPUColorTargetInfo[] targets =
         [
             new()
             {
-                Texture = _swapchainTexture,
+                Texture = _currentTexture,
                 LoadOp = shouldClear ? SDL.GPULoadOp.Clear : SDL.GPULoadOp.Load,
                 StoreOp = SDL.GPUStoreOp.Store,
                 ClearColor = new SDL.FColor
@@ -121,7 +136,10 @@ public sealed class SDL3RenderBackend : RenderBackend
         _renderPass = SDL.BeginGPURenderPass(_commandBuffer, targets, 1, IntPtr.Zero);
         if (_renderPass == IntPtr.Zero)
             throw SDL3Gpu.Error("Beginning a GPU render pass");
-        _targetInitialized = true;
+        if (_currentTarget is null)
+            _windowInitialized = true;
+        else
+            _initializedTargets.Add(_currentTarget);
     }
 
     private static void CheckAlive(Resource resource)
@@ -269,7 +287,12 @@ public sealed class SDL3RenderBackend : RenderBackend
     private SDL.GPUTextureSamplerBinding GetTextureBinding(TextureBinding binding)
     {
         CheckAlive(binding.Texture);
-        CheckAlive(binding.Texture.Image);
+        if (binding.Texture is ImageTexture imageTexture)
+            CheckAlive(imageTexture.Image);
+        if (ReferenceEquals(binding.Texture, _currentTarget))
+            throw new InvalidOperationException(
+                "A render target cannot be sampled while it is the active rendering destination."
+            );
         CheckAlive(binding.Sampler);
         if (!_textures.TryGetValue(binding.Texture, out var texture))
         {
@@ -322,6 +345,7 @@ public sealed class SDL3RenderBackend : RenderBackend
         _textures.Clear();
         _samplers.Clear();
         _shaders.Clear();
+        _initializedTargets.Clear();
     }
 
     private void RemoveDestroyedResources()
@@ -330,7 +354,11 @@ public sealed class SDL3RenderBackend : RenderBackend
             _pipelines,
             key => key.Vertex.Source.Destroyed || key.Fragment.Source.Destroyed
         );
-        RemoveWhere(_textures, key => key.Destroyed || key.Image.Destroyed);
+        RemoveWhere(
+            _textures,
+            key => key.Destroyed || key is ImageTexture image && image.Image.Destroyed
+        );
+        _initializedTargets.RemoveWhere(target => target.Destroyed);
         RemoveWhere(_samplers, key => key.Destroyed);
         RemoveWhere(_shaders, key => key.Destroyed);
     }
@@ -414,9 +442,12 @@ public sealed class SDL3RenderBackend : RenderBackend
 
     private void ResetFrame()
     {
-        _commandBuffer = _swapchainTexture = _renderPass = IntPtr.Zero;
-        _targetInitialized = false;
+        _commandBuffer = _swapchainTexture = _renderPass = _currentTexture = IntPtr.Zero;
+        _currentTarget = null;
+        _windowInitialized = false;
         _width = _height = 0;
+        _swapchainWidth = _swapchainHeight = 0;
+        _logicalSize = Vector2.Zero;
     }
 
     private bool SetView(IRenderContext context)
@@ -440,7 +471,7 @@ public sealed class SDL3RenderBackend : RenderBackend
             || position.Y + size.Y > _logicalSize.Y
         )
             throw new ArgumentException(
-                "The viewport must fit inside the logical window bounds.",
+                "The viewport must fit inside the current rendering target bounds.",
                 nameof(context)
             );
         var scale = new Vector2(_width / _logicalSize.X, _height / _logicalSize.Y);
@@ -491,8 +522,8 @@ public sealed class SDL3RenderBackend : RenderBackend
                     _commandBuffer,
                     _claimedWindow,
                     out _swapchainTexture,
-                    out _width,
-                    out _height
+                    out _swapchainWidth,
+                    out _swapchainHeight
                 )
             )
                 throw SDL3Gpu.Error("Acquiring the swapchain texture");
@@ -505,6 +536,9 @@ public sealed class SDL3RenderBackend : RenderBackend
                 return;
             }
             _targetFormat = SDL.GetGPUSwapchainTextureFormat(_device, _claimedWindow);
+            _currentTexture = _swapchainTexture;
+            _width = _swapchainWidth;
+            _height = _swapchainHeight;
         }
         catch (Exception exception)
         {
@@ -550,8 +584,13 @@ public sealed class SDL3RenderBackend : RenderBackend
             return;
         try
         {
-            if (_swapchainTexture != IntPtr.Zero && !_targetInitialized)
+            EndPass();
+            // Present a defined window image even if all spaces were offscreen.
+            if (_swapchainTexture != IntPtr.Zero && !_windowInitialized)
+            {
+                SelectTarget(null);
                 BeginPass();
+            }
             EndPass();
         }
         catch (Exception exception)
@@ -584,11 +623,61 @@ public sealed class SDL3RenderBackend : RenderBackend
         }
     }
 
+    /// <summary>
+    /// Selects the swapchain or an offscreen GPU texture for subsequent commands.
+    /// </summary>
+    protected override void OnBeginRender(RenderTarget? target)
+    {
+        CheckThread();
+        if (_commandBuffer == IntPtr.Zero)
+            return;
+        SelectTarget(target);
+    }
+
+    private void SelectTarget(RenderTarget? target)
+    {
+        if (ReferenceEquals(_currentTarget, target))
+            return;
+
+        EndPass();
+        if (target is null)
+        {
+            _currentTarget = null;
+            _currentTexture = _swapchainTexture;
+            _logicalSize = _window.Size.Get();
+            _width = _swapchainWidth;
+            _height = _swapchainHeight;
+            _targetFormat = SDL.GetGPUSwapchainTextureFormat(_device, _claimedWindow);
+            return;
+        }
+
+        CheckAlive(target);
+        if (!_textures.TryGetValue(target, out var texture))
+        {
+            texture = new SDL3Texture(_device, _commandBuffer, target);
+            try
+            {
+                _textures.Add(target, texture);
+            }
+            catch
+            {
+                texture.Dispose();
+                throw;
+            }
+        }
+        _currentTarget = target;
+        _currentTexture = texture.Native;
+        _logicalSize = target.Size;
+        _width = checked((uint)target.Size.X);
+        _height = checked((uint)target.Size.Y);
+        _targetFormat = SDL.GPUTextureFormat.R8G8B8A8Unorm;
+    }
+
     /// <inheritdoc />
     protected override void OnRender(IRenderCommand command, IRenderContext? context)
     {
         CheckThread();
-        if (_swapchainTexture == IntPtr.Zero)
+        if (_currentTexture == IntPtr.Zero)
             return; // A minimized/occluded window may have no drawable texture.
         switch (command)
         {
