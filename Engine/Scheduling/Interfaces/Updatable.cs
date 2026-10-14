@@ -1,6 +1,6 @@
-using Mirage.Scheduling;
+using OpenGE.Scheduling;
 
-namespace Mirage.Scheduling.Interfaces;
+namespace OpenGE.Scheduling.Interfaces;
 
 /// <summary>
 /// Defines an object that can participate in scheduled updates.

@@ -1,7 +1,7 @@
-using Mirage.Common;
-using Mirage.Common.Lifecycle;
+using OpenGE.Common;
+using OpenGE.Common.Lifecycle;
 
-namespace Mirage.Importing;
+namespace OpenGE.Importing;
 
 /// <summary>
 /// Represents a decoder capable of creating resources from encoded data.

@@ -1,6 +1,6 @@
-using Mirage.Common.Lifecycle;
+using OpenGE.Common.Lifecycle;
 
-namespace Mirage.Common;
+namespace OpenGE.Common;
 
 /// <summary>
 /// Represents reusable data that can be shared between objects.

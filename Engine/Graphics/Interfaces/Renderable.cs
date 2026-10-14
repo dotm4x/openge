@@ -1,4 +1,4 @@
-namespace Mirage.Graphics.Interfaces;
+namespace OpenGE.Graphics.Interfaces;
 
 /// <summary>
 /// Defines an object that can produce rendering data during a rendering frame.

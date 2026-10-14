@@ -1,8 +1,8 @@
-using Mirage.Graphics.Resources;
-using Mirage.Importing;
+using OpenGE.Graphics.Resources;
+using OpenGE.Importing;
 using StbImageSharp;
 
-namespace Mirage.Graphics.Decoders;
+namespace OpenGE.Graphics.Decoders;
 
 /// <summary>
 /// Decodes supported image files into RGBA8 <see cref="Image"/> resources.

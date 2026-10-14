@@ -1,4 +1,4 @@
-namespace Mirage.Common.Lifecycle;
+namespace OpenGE.Common.Lifecycle;
 
 /// <summary>
 /// Defines an object that can be acquired and released by a pool.

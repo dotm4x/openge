@@ -1,6 +1,6 @@
-using Mirage.Common;
+using OpenGE.Common;
 
-namespace Mirage.Graphics.Resources;
+namespace OpenGE.Graphics.Resources;
 
 /// <summary>
 /// Specifies the stage in the graphics pipeline at which a shader executes.

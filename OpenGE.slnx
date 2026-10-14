@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/Engine/">
+    <Project Path="Engine/SDL3/OpenGE.SDL3.csproj" />
+    <Project Path="Engine/Spatial/OpenGE.Spatial.csproj" />
+    <Project Path="Engine/Windowing/OpenGE.Windowing.csproj" />
+    <Project Path="Engine/Common/OpenGE.Common.csproj" />
+    <Project Path="Engine/Graphics/OpenGE.Graphics.csproj" />
+    <Project Path="Engine/Presentating/OpenGE.Presentating.csproj" />
+    <Project Path="Engine/Noding/OpenGE.Noding.csproj" />
+    <Project Path="Engine/Importing/OpenGE.Importing.csproj" />
+    <Project Path="Engine/Scheduling/OpenGE.Scheduling.csproj" />
+    <Project Path="Engine/Logging/OpenGE.Logging.csproj" />
+    <Project Path="Engine\Numerics\OpenGE.Numerics.csproj" />
+    <Project Path="Engine\Rendering\OpenGE.Rendering.csproj" />
+    <Project Path="Engine\Handling\OpenGE.Handling.csproj" />
+  </Folder>
+</Solution>

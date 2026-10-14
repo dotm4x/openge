@@ -1,4 +1,4 @@
-namespace Mirage.Scheduling;
+namespace OpenGE.Scheduling;
 
 /// <summary>
 /// Provides timing information for a scheduled update.

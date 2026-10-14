@@ -1,7 +1,7 @@
-using Mirage.Graphics.Commands;
-using Mirage.Graphics.Interfaces;
+using OpenGE.Graphics.Commands;
+using OpenGE.Graphics.Interfaces;
 
-namespace Mirage.Graphics;
+namespace OpenGE.Graphics;
 
 /// <summary>
 /// Represents the ordered rendering commands produced by a renderable object.

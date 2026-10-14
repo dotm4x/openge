@@ -1,4 +1,4 @@
-namespace Mirage.Handling.Devices.Keyboard;
+namespace OpenGE.Handling.Devices.Keyboard;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="KeyboardEventPayload"/> class.

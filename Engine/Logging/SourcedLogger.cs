@@ -1,6 +1,6 @@
-using Mirage.Common.Lifecycle;
+using OpenGE.Common.Lifecycle;
 
-namespace Mirage.Logging;
+namespace OpenGE.Logging;
 
 /// <summary>
 /// Provides logging operations associated with a fixed source.

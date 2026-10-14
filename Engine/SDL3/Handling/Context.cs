@@ -1,8 +1,8 @@
-using Mirage.Handling;
-using Mirage.Windowing;
+using OpenGE.Handling;
+using OpenGE.Windowing;
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.SDL3.Handling;
+namespace OpenGE.SDL3.Handling;
 
 /// <summary>
 /// Provides SDL3 input events for one input update.

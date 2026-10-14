@@ -1,9 +1,9 @@
-using Mirage.Common.Interfaces;
-using Mirage.Common.Lifecycle;
-using Mirage.Graphics.Commands;
-using Mirage.Graphics.Interfaces;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Graphics.Commands;
+using OpenGE.Graphics.Interfaces;
 
-namespace Mirage.Rendering;
+namespace OpenGE.Rendering;
 
 /// <summary>Executes backend-independent rendering commands within explicit frames.</summary>
 /// <param name="identifier">The nonempty backend identifier.</param>

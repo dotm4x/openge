@@ -1,8 +1,8 @@
-using Mirage.Handling;
-using Mirage.Handling.Devices;
-using Mirage.SDL3.Windowing;
+using OpenGE.Handling;
+using OpenGE.Handling.Devices;
+using OpenGE.SDL3.Windowing;
 
-namespace Mirage.SDL3.Handling;
+namespace OpenGE.SDL3.Handling;
 
 /// <summary>
 /// Provides SDL3 input contexts to registered input devices.

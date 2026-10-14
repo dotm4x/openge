@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Mirage.Handling.Devices.Mouse.Events;
+namespace OpenGE.Handling.Devices.Mouse.Events;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="MouseButtonEventPayload"/> class.

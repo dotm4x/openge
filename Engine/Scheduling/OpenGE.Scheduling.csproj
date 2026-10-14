@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\Common\Mirage.Common.csproj" />
-    <ProjectReference Include="..\Logging\Mirage.Logging.csproj" />
-    <ProjectReference Include="..\Noding\Mirage.Noding.csproj" />
+    <ProjectReference Include="..\Common\OpenGE.Common.csproj" />
+    <ProjectReference Include="..\Logging\OpenGE.Logging.csproj" />
+    <ProjectReference Include="..\Noding\OpenGE.Noding.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

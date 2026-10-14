@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\OpenGE.Common.csproj" />
+    <ProjectReference Include="..\Logging\OpenGE.Logging.csproj" />
+    <ProjectReference Include="..\Noding\OpenGE.Noding.csproj" />
+    <ProjectReference Include="..\Scheduling\OpenGE.Scheduling.csproj" />
+    <ProjectReference Include="..\Windowing\OpenGE.Windowing.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,8 +1,8 @@
 using System.Numerics;
-using Mirage.Graphics.Geometry;
-using Mirage.Graphics.Resources;
+using OpenGE.Graphics.Geometry;
+using OpenGE.Graphics.Resources;
 
-namespace Mirage.Graphics.Commands;
+namespace OpenGE.Graphics.Commands;
 
 /// <summary>
 /// Represents a command for rendering two-dimensional geometry.

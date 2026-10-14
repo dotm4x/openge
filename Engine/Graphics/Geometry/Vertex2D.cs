@@ -1,7 +1,7 @@
 using System.Numerics;
-using Mirage.Graphics.Primitives;
+using OpenGE.Graphics.Primitives;
 
-namespace Mirage.Graphics.Geometry;
+namespace OpenGE.Graphics.Geometry;
 
 /// <summary>
 /// Represents a two-dimensional vertex prepared for graphical rendering.

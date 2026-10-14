@@ -1,4 +1,4 @@
-namespace Mirage.Logging.Outputs;
+namespace OpenGE.Logging.Outputs;
 
 /// <summary>
 /// Represents a console logging output that formats and writes

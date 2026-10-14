@@ -1,7 +1,7 @@
-using Mirage.Graphics.Primitives;
-using Mirage.Numerics.Geometry;
+using OpenGE.Graphics.Primitives;
+using OpenGE.Numerics.Geometry;
 
-namespace Mirage.Graphics.Geometry;
+namespace OpenGE.Graphics.Geometry;
 
 /// <summary>
 /// Represents indexed two-dimensional geometry prepared for graphical rendering.

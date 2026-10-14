@@ -1,4 +1,4 @@
-namespace Mirage.Common.Primitives;
+namespace OpenGE.Common.Primitives;
 
 /// <summary>
 /// Represents a phase of one-time preparation.

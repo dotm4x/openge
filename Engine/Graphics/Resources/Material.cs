@@ -1,6 +1,6 @@
-using Mirage.Common;
+using OpenGE.Common;
 
-namespace Mirage.Graphics.Resources;
+namespace OpenGE.Graphics.Resources;
 
 /// <summary>
 /// Represents the graphical resources and state used to render geometry.

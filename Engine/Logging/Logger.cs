@@ -1,10 +1,10 @@
-using Mirage.Common;
-using Mirage.Common.Collections;
-using Mirage.Common.Lifecycle;
-using Mirage.Common.Primitives;
-using Mirage.Logging.Outputs;
+using OpenGE.Common;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Common.Primitives;
+using OpenGE.Logging.Outputs;
 
-namespace Mirage.Logging;
+namespace OpenGE.Logging;
 
 /// <summary>
 /// Manages logging and dispatches log messages across registered outputs.

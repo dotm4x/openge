@@ -1,8 +1,8 @@
-using Mirage.Graphics.Commands;
-using Mirage.Graphics.Interfaces;
-using Mirage.Noding;
+using OpenGE.Graphics.Commands;
+using OpenGE.Graphics.Interfaces;
+using OpenGE.Noding;
 
-namespace Mirage.Rendering.Spaces;
+namespace OpenGE.Rendering.Spaces;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="NodeRenderSpace"/> class.

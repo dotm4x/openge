@@ -1,7 +1,7 @@
-using Mirage.Noding;
-using Mirage.Scheduling.Interfaces;
+using OpenGE.Noding;
+using OpenGE.Scheduling.Interfaces;
 
-namespace Mirage.Scheduling.Channels;
+namespace OpenGE.Scheduling.Channels;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="NodeUpdateChannel"/> class.

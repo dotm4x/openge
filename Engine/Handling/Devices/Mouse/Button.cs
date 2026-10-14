@@ -1,4 +1,4 @@
-namespace Mirage.Handling.Devices.Mouse;
+namespace OpenGE.Handling.Devices.Mouse;
 
 /// <summary>
 /// Identifies a physical mouse button.

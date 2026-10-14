@@ -1,16 +1,16 @@
 using System.Numerics;
-using Mirage.Handling;
-using Mirage.Handling.Devices.Mouse;
-using Mirage.Handling.Devices.Mouse.Events;
-using Mirage.SDL3.Windowing;
+using OpenGE.Handling;
+using OpenGE.Handling.Devices.Mouse;
+using OpenGE.Handling.Devices.Mouse.Events;
+using OpenGE.SDL3.Windowing;
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.SDL3.Handling.Devices.Mouse;
+namespace OpenGE.SDL3.Handling.Devices.Mouse;
 
 /// <summary>
 /// Processes mouse input using SDL3.
 /// </summary>
-public class SDL3Mouse : Mirage.Handling.Devices.Mouse.Mouse
+public class SDL3Mouse : OpenGE.Handling.Devices.Mouse.Mouse
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="SDL3Mouse"/> class.

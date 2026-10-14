@@ -1,4 +1,4 @@
-namespace Mirage.Common.Primitives;
+namespace OpenGE.Common.Primitives;
 
 /// <summary>
 /// Provides information about the currently executing step in a sequence.

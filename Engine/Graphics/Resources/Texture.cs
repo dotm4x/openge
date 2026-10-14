@@ -1,6 +1,6 @@
-using Mirage.Common;
+using OpenGE.Common;
 
-namespace Mirage.Graphics.Resources;
+namespace OpenGE.Graphics.Resources;
 
 /// <summary>
 /// Describes how a texture is sampled during rendering.

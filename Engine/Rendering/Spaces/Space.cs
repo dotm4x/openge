@@ -1,12 +1,12 @@
-using Mirage.Common.Events;
-using Mirage.Common.Interfaces;
-using Mirage.Common.Lifecycle;
-using Mirage.Common.Primitives;
-using Mirage.Graphics;
-using Mirage.Graphics.Commands;
-using Mirage.Graphics.Interfaces;
+using OpenGE.Common.Events;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Common.Primitives;
+using OpenGE.Graphics;
+using OpenGE.Graphics.Commands;
+using OpenGE.Graphics.Interfaces;
 
-namespace Mirage.Rendering.Spaces;
+namespace OpenGE.Rendering.Spaces;
 
 /// <summary>
 /// Represents the rendering priority of a space.

@@ -1,11 +1,11 @@
 using System.Diagnostics;
-using Mirage.Common;
-using Mirage.Common.Collections;
-using Mirage.Common.Primitives;
-using Mirage.Logging;
-using Mirage.Scheduling.Channels;
+using OpenGE.Common;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Primitives;
+using OpenGE.Logging;
+using OpenGE.Scheduling.Channels;
 
-namespace Mirage.Scheduling;
+namespace OpenGE.Scheduling;
 
 /// <summary>
 /// Manages the main update loop and its update channels.
@@ -189,11 +189,11 @@ public class Scheduler : Module
     /// without an explicit rate limit.
     ///
     /// The loop ends when the scheduler is no longer running. An update failure exits
-    /// the loop and includes Mirage.UpdateChannel in Exception.Data. The application
+    /// the loop and includes OpenGE.UpdateChannel in Exception.Data. The application
     /// must stop its owning engine before destroying it; the scheduler does not own modules.
     /// </remarks>
     /// <exception cref="InvalidOperationException">The scheduler is not running.</exception>
-    /// <exception cref="Mirage.Common.Lifecycle.DestroyedObjectException">The scheduler has been destroyed.</exception>
+    /// <exception cref="OpenGE.Common.Lifecycle.DestroyedObjectException">The scheduler has been destroyed.</exception>
     /// <exception cref="AggregateException">An update and reporting its failure both failed.</exception>
     public void Run()
     {
@@ -228,7 +228,7 @@ public class Scheduler : Module
                 }
                 catch (Exception exception)
                 {
-                    exception.Data["Mirage.UpdateChannel"] = channel.Identifier;
+                    exception.Data["OpenGE.UpdateChannel"] = channel.Identifier;
                     try
                     {
                         if (InjectedDependencies is not null)

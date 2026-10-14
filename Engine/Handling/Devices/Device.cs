@@ -1,7 +1,7 @@
-using Mirage.Common.Interfaces;
-using Mirage.Common.Lifecycle;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
 
-namespace Mirage.Handling.Devices;
+namespace OpenGE.Handling.Devices;
 
 /// <summary>
 /// Represents an input device processed by an input handler.

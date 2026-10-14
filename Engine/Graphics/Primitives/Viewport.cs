@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Mirage.Graphics.Primitives;
+namespace OpenGE.Graphics.Primitives;
 
 /// <summary>
 /// Describes a rectangular region within a rendering target.

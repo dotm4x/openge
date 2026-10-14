@@ -1,10 +1,10 @@
 using System.Numerics;
-using Mirage.Common.Collections;
-using Mirage.Common.Events;
-using Mirage.Common.Primitives;
-using Mirage.Handling.Devices.Mouse.Events;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Events;
+using OpenGE.Common.Primitives;
+using OpenGE.Handling.Devices.Mouse.Events;
 
-namespace Mirage.Handling.Devices.Mouse;
+namespace OpenGE.Handling.Devices.Mouse;
 
 /// <summary>
 /// Represents a mouse input device that manages and publishes mouse events.

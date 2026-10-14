@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\Mirage.Common.csproj" />
-    <ProjectReference Include="..\Noding\Mirage.Noding.csproj" />
-    <ProjectReference Include="..\Numerics\Mirage.Numerics.csproj" />
+    <ProjectReference Include="..\Common\OpenGE.Common.csproj" />
+    <ProjectReference Include="..\Noding\OpenGE.Noding.csproj" />
+    <ProjectReference Include="..\Numerics\OpenGE.Numerics.csproj" />
   </ItemGroup>
 
   <ItemGroup>

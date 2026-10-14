@@ -23,10 +23,10 @@ jobs:
         run: dotnet tool restore --tool-manifest dotnet-tools.json
 
       - name: Restore dependencies
-        run: dotnet restore Mirage.slnx
+        run: dotnet restore OpenGE.slnx
 
       - name: Check formatting
         run: dotnet csharpier check .
 
       - name: Build
-        run: dotnet build Mirage.slnx --configuration Release --no-restore
+        run: dotnet build OpenGE.slnx --configuration Release --no-restore

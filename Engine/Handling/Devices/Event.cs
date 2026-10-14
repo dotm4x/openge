@@ -1,7 +1,7 @@
-using Mirage.Common.Events;
-using Mirage.Common.Interfaces;
+using OpenGE.Common.Events;
+using OpenGE.Common.Interfaces;
 
-namespace Mirage.Handling.Devices;
+namespace OpenGE.Handling.Devices;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="InputEvent{TPayload, TSource}"/> class.

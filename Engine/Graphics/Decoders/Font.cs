@@ -1,7 +1,7 @@
-using Mirage.Graphics.Resources;
-using Mirage.Importing;
+using OpenGE.Graphics.Resources;
+using OpenGE.Importing;
 
-namespace Mirage.Graphics.Decoders;
+namespace OpenGE.Graphics.Decoders;
 
 /// <summary>
 /// Decodes supported font files into reusable font data.

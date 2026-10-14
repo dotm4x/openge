@@ -1,6 +1,6 @@
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.SDL3.Windowing;
+namespace OpenGE.SDL3.Windowing;
 
 internal static class VideoRuntime
 {

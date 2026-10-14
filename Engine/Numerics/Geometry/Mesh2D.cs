@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Mirage.Numerics.Geometry;
+namespace OpenGE.Numerics.Geometry;
 
 /// <summary>
 /// Represents indexed two-dimensional triangle geometry.

@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\Mirage.Common.csproj" />
-    <ProjectReference Include="..\Graphics\Mirage.Graphics.csproj" />
-    <ProjectReference Include="..\Handling\Mirage.Handling.csproj" />
-    <ProjectReference Include="..\Rendering\Mirage.Rendering.csproj" />
-    <ProjectReference Include="..\Windowing\Mirage.Windowing.csproj" />
+    <ProjectReference Include="..\Common\OpenGE.Common.csproj" />
+    <ProjectReference Include="..\Graphics\OpenGE.Graphics.csproj" />
+    <ProjectReference Include="..\Handling\OpenGE.Handling.csproj" />
+    <ProjectReference Include="..\Rendering\OpenGE.Rendering.csproj" />
+    <ProjectReference Include="..\Windowing\OpenGE.Windowing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

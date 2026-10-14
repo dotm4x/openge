@@ -1,9 +1,9 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Mirage.Graphics.Geometry;
+using OpenGE.Graphics.Geometry;
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.SDL3.Rendering.Resources;
+namespace OpenGE.SDL3.Rendering.Resources;
 
 internal sealed class SDL3Pipeline : IDisposable
 {

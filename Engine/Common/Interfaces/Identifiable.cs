@@ -1,4 +1,4 @@
-namespace Mirage.Common.Interfaces;
+namespace OpenGE.Common.Interfaces;
 
 /// <summary>
 /// Represents an object that can be uniquely identified by a value of a specified type.

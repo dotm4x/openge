@@ -1,6 +1,6 @@
 # Documenting the API
 
-Mirage's documentation describes contracts: what an object represents, when an operation is valid, and what callers or subclasses are responsible for. Keep it close to the public API and consistent with the implementation. See [Ownership and destruction](Ownership.md) for lifetime conventions.
+OpenGE's documentation describes contracts: what an object represents, when an operation is valid, and what callers or subclasses are responsible for. Keep it close to the public API and consistent with the implementation. See [Ownership and destruction](Ownership.md) for lifetime conventions.
 
 ## Language and style
 
@@ -27,7 +27,7 @@ Use the tags that explain the contract:
 
 Keep tags correctly nested and closed. Use `<inheritdoc />` consistently, and `<para>` when a longer remarks block needs distinct paragraphs.
 
-For ordinary constructors, state what they initialize and describe the arguments without repeating every property's documentation. For primary constructors, follow the surrounding Mirage style: document initialization in the summary, explain the type's role in remarks, and place parameter tags on the type declaration.
+For ordinary constructors, state what they initialize and describe the arguments without repeating every property's documentation. For primary constructors, follow the surrounding OpenGE style: document initialization in the summary, explain the type's role in remarks, and place parameter tags on the type declaration.
 
 ## Describe lifetime explicitly
 
@@ -50,7 +50,7 @@ Keep these claims grounded in the code. A readonly field, a constructor argument
 
 ## Describe lifecycle and extension points
 
-Mirage commonly separates composition, configuration, startup, updates, shutdown, and destruction. Document the phases that matter to a particular API:
+OpenGE commonly separates composition, configuration, startup, updates, shutdown, and destruction. Document the phases that matter to a particular API:
 
 - When `Compose()` runs, who owns its results, and whether constructor-provided objects are already registered.
 - What is available in `Configure()`, whether it runs once, and what happens if initialization fails.
@@ -87,9 +87,9 @@ Read-only views restrict access; they do not imply ownership or guarantee that t
 
 ## AI-assisted documentation
 
-Much of Mirage's API documentation is written or refined with AI assistance. This is intentional and part of the project's documentation workflow.
+Much of OpenGE's API documentation is written or refined with AI assistance. This is intentional and part of the project's documentation workflow.
 
-Mirage has many related APIs that share concepts such as ownership, lifecycle, composition, and reactive state. AI makes it practical to document these consistently across the codebase and is particularly useful for repository-wide documentation work.
+OpenGE has many related APIs that share concepts such as ownership, lifecycle, composition, and reactive state. AI makes it practical to document these consistently across the codebase and is particularly useful for repository-wide documentation work.
 
 AI-generated documentation must still be grounded in the implementation. It should inspect the relevant code and surrounding APIs, follow the conventions in this document, and never invent behavior, ownership, exceptions, guarantees, or lifecycle rules.
 

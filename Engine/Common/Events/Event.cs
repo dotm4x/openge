@@ -1,6 +1,6 @@
-using Mirage.Common.Lifecycle;
+using OpenGE.Common.Lifecycle;
 
-namespace Mirage.Common.Events;
+namespace OpenGE.Common.Events;
 
 /// <summary>
 /// Represents an active connection between an event and a callback.

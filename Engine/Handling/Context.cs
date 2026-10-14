@@ -1,6 +1,6 @@
-using Mirage.Windowing;
+using OpenGE.Windowing;
 
-namespace Mirage.Handling;
+namespace OpenGE.Handling;
 
 /// <summary>
 /// Provides the context required to process input for one window.

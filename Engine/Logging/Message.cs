@@ -1,4 +1,4 @@
-namespace Mirage.Logging;
+namespace OpenGE.Logging;
 
 /// <summary>
 /// Represents the severity level or classification of a telemetry message.

@@ -1,7 +1,7 @@
-using Mirage.Common.Collections;
-using Mirage.Common.Primitives;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Primitives;
 
-namespace Mirage.Handling.Devices.Keyboard;
+namespace OpenGE.Handling.Devices.Keyboard;
 
 /// <summary>
 /// Represents a keyboard input device that manages and publishes keyboard events.

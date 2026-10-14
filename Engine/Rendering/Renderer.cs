@@ -1,19 +1,19 @@
 using System.Numerics;
-using Mirage.Common;
-using Mirage.Common.Collections;
-using Mirage.Common.Events;
-using Mirage.Common.Lifecycle;
-using Mirage.Common.Primitives;
-using Mirage.Graphics.Commands;
-using Mirage.Graphics.Interfaces;
-using Mirage.Graphics.Primitives;
-using Mirage.Logging;
-using Mirage.Rendering.Spaces;
-using Mirage.Scheduling;
-using Mirage.Scheduling.Interfaces;
-using Mirage.Windowing;
+using OpenGE.Common;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Events;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Common.Primitives;
+using OpenGE.Graphics.Commands;
+using OpenGE.Graphics.Interfaces;
+using OpenGE.Graphics.Primitives;
+using OpenGE.Logging;
+using OpenGE.Rendering.Spaces;
+using OpenGE.Scheduling;
+using OpenGE.Scheduling.Interfaces;
+using OpenGE.Windowing;
 
-namespace Mirage.Rendering;
+namespace OpenGE.Rendering;
 
 /// <summary>
 /// Manages rendering backends and spaces used to produce frames for one window.

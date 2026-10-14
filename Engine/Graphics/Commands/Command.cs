@@ -1,4 +1,4 @@
-namespace Mirage.Graphics.Commands;
+namespace OpenGE.Graphics.Commands;
 
 /// <summary>
 /// Represents a backend-independent rendering operation.

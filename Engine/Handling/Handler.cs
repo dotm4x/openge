@@ -1,13 +1,13 @@
-using Mirage.Common;
-using Mirage.Common.Collections;
-using Mirage.Common.Primitives;
-using Mirage.Handling.Devices;
-using Mirage.Logging;
-using Mirage.Scheduling;
-using Mirage.Scheduling.Interfaces;
-using Mirage.Windowing;
+using OpenGE.Common;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Primitives;
+using OpenGE.Handling.Devices;
+using OpenGE.Logging;
+using OpenGE.Scheduling;
+using OpenGE.Scheduling.Interfaces;
+using OpenGE.Windowing;
 
-namespace Mirage.Handling;
+namespace OpenGE.Handling;
 
 /// <summary>
 /// Registers input devices and updates them for one window.

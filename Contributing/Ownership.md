@@ -1,6 +1,6 @@
 # Ownership and destruction
 
-Mirage uses `Destroyable` for explicit lifetime management. Design ownership alongside an API, and make its destruction behavior match that contract. See [Documenting the API](Documenting.md) for how to express the contract in XML comments.
+OpenGE uses `Destroyable` for explicit lifetime management. Design ownership alongside an API, and make its destruction behavior match that contract. See [Documenting the API](Documenting.md) for how to express the contract in XML comments.
 
 ## Choose one owner
 
@@ -96,7 +96,7 @@ An `OnDestroy()` override must release owned contents and honor the inherited li
 - Disconnect subscriptions to borrowed objects before the subscriber disappears.
 - Release owned elements before their collection, and consumers before their dependencies.
 
-Destruction is not the same as `Clear()`. Mirage's reactive collections disconnect their signals and discard references during destruction without issuing ordinary mutation notifications. Do not rely on removal callbacks to destroy owned elements.
+Destruction is not the same as `Clear()`. OpenGE's reactive collections disconnect their signals and discard references during destruction without issuing ordinary mutation notifications. Do not rely on removal callbacks to destroy owned elements.
 
 Use `Destroyable` for explicit lifetimes. Do not replace it with finalizers, garbage-collection-based cleanup, or an unrelated disposal system.
 

@@ -1,6 +1,6 @@
-using Mirage.Common.Lifecycle;
+using OpenGE.Common.Lifecycle;
 
-namespace Mirage.Logging.Outputs;
+namespace OpenGE.Logging.Outputs;
 
 /// <summary>
 /// Defines the processing priority levels for log outputs.

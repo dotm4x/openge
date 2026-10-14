@@ -1,17 +1,17 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Mirage.Common;
-using Mirage.Graphics.Commands;
-using Mirage.Graphics.Geometry;
-using Mirage.Graphics.Interfaces;
-using Mirage.Graphics.Primitives;
-using Mirage.Graphics.Resources;
-using Mirage.Rendering;
-using Mirage.SDL3.Rendering.Resources;
-using Mirage.SDL3.Windowing;
+using OpenGE.Common;
+using OpenGE.Graphics.Commands;
+using OpenGE.Graphics.Geometry;
+using OpenGE.Graphics.Interfaces;
+using OpenGE.Graphics.Primitives;
+using OpenGE.Graphics.Resources;
+using OpenGE.Rendering;
+using OpenGE.SDL3.Rendering.Resources;
+using OpenGE.SDL3.Windowing;
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.SDL3.Rendering;
+namespace OpenGE.SDL3.Rendering;
 
 /// <summary>Executes clear and two-dimensional geometry commands using SDL GPU.</summary>
 /// <remarks>

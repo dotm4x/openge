@@ -1,4 +1,4 @@
-namespace Mirage.Numerics.Geometry;
+namespace OpenGE.Numerics.Geometry;
 
 /// <summary>
 /// Represents indexed triangle geometry composed of vertices of a specific type.

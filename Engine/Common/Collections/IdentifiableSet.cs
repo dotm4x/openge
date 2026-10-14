@@ -1,10 +1,10 @@
 using System.Collections;
-using Mirage.Common.Events;
-using Mirage.Common.Interfaces;
-using Mirage.Common.Lifecycle;
-using Mirage.Common.Primitives;
+using OpenGE.Common.Events;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Common.Primitives;
 
-namespace Mirage.Common.Collections;
+namespace OpenGE.Common.Collections;
 
 /// <summary>
 /// Provides read-only access to a set of uniquely identifiable items.

@@ -1,8 +1,8 @@
 using System.Numerics;
-using Mirage.Common.Events;
-using Mirage.Noding;
+using OpenGE.Common.Events;
+using OpenGE.Noding;
 
-namespace Mirage.Spatial.Nodes;
+namespace OpenGE.Spatial.Nodes;
 
 /// <summary>
 /// Provides optional values used to initialize a <see cref="Node2D"/>.

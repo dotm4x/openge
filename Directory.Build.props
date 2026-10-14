@@ -7,6 +7,9 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
 
+    <Description>The open-source, modular, code-first game engine for .NET.</Description>
+    <RepositoryUrl>https://github.com/stonebogus/openge</RepositoryUrl>
+
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <AnalysisLevel>latest</AnalysisLevel>

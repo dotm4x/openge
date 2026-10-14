@@ -1,17 +1,17 @@
-using Mirage.Handling;
-using Mirage.Handling.Devices;
-using Mirage.Handling.Devices.Keyboard;
-using Mirage.SDL3.Windowing;
+using OpenGE.Handling;
+using OpenGE.Handling.Devices;
+using OpenGE.Handling.Devices.Keyboard;
+using OpenGE.SDL3.Windowing;
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.SDL3.Handling.Devices.Keyboard;
+namespace OpenGE.SDL3.Handling.Devices.Keyboard;
 
 /// <summary>
 /// Processes keyboard input using SDL3.
 /// </summary>
 /// <param name="events">The keyboard events to register initially.</param>
 public class SDL3Keyboard(params InputEvent<KeyboardEventPayload, KeyboardKey>[] events)
-    : Mirage.Handling.Devices.Keyboard.Keyboard(events)
+    : OpenGE.Handling.Devices.Keyboard.Keyboard(events)
 {
     /// <inheritdoc />
     protected override void OnProcess(InputContext context)

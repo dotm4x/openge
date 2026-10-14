@@ -1,10 +1,10 @@
 using System.Numerics;
-using Mirage.Common.Events;
-using Mirage.Graphics.Interfaces;
-using Mirage.Graphics.Primitives;
-using Mirage.Spatial.Nodes;
+using OpenGE.Common.Events;
+using OpenGE.Graphics.Interfaces;
+using OpenGE.Graphics.Primitives;
+using OpenGE.Spatial.Nodes;
 
-namespace Mirage.Graphics.Nodes;
+namespace OpenGE.Graphics.Nodes;
 
 /// <summary>
 /// Provides optional values used to initialize a <see cref="Camera2D"/>.

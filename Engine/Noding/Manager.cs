@@ -1,10 +1,10 @@
-using Mirage.Common;
-using Mirage.Common.Collections;
-using Mirage.Common.Events;
-using Mirage.Common.Primitives;
-using Mirage.Logging;
+using OpenGE.Common;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Events;
+using OpenGE.Common.Primitives;
+using OpenGE.Logging;
 
-namespace Mirage.Noding;
+namespace OpenGE.Noding;
 
 /// <summary>
 /// Coordinates node lifecycles between roots.
@@ -480,7 +480,7 @@ public class NodeManager : Module
     /// Recovery failures are aggregated with the original error. Shutdown also cleans
     /// up roots left loaded by a failed recovery.
     /// </remarks>
-    /// <exception cref="Mirage.Common.Lifecycle.DestroyedObjectException">
+    /// <exception cref="OpenGE.Common.Lifecycle.DestroyedObjectException">
     /// Thrown when the manager has been destroyed.
     /// </exception>
     /// <exception cref="ArgumentException">

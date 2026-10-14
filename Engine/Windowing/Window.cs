@@ -1,13 +1,13 @@
 using System.Numerics;
-using Mirage.Common.Collections;
-using Mirage.Common.Events;
-using Mirage.Common.Interfaces;
-using Mirage.Common.Lifecycle;
-using Mirage.Common.Primitives;
-using Mirage.Scheduling;
-using Mirage.Scheduling.Interfaces;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Events;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Common.Primitives;
+using OpenGE.Scheduling;
+using OpenGE.Scheduling.Interfaces;
 
-namespace Mirage.Windowing;
+namespace OpenGE.Windowing;
 
 /// <summary>
 /// Defines the initial configuration of a <see cref="Window"/>.
@@ -119,10 +119,10 @@ public class WindowOptions : IIdentifiable<string>
     /// Gets the initial title of the window.
     /// </summary>
     /// <remarks>
-    /// The default is <c>"Mirage"</c> followed by a randomly selected message.
+    /// The default is <c>"OpenGE"</c> followed by a randomly selected message.
     /// </remarks>
     public string Title { get; init; } =
-        $"Mirage - {DefaultTitleMessages[Random.Shared.Next(DefaultTitleMessages.Length)]}";
+        $"OpenGE - {DefaultTitleMessages[Random.Shared.Next(DefaultTitleMessages.Length)]}";
 
     /// <summary>
     /// Gets whether the window is initially visible.

@@ -1,8 +1,8 @@
-using Mirage.Common.Events;
-using Mirage.Common.Lifecycle;
-using Mirage.Common.Primitives;
+using OpenGE.Common.Events;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Common.Primitives;
 
-namespace Mirage.Common;
+namespace OpenGE.Common;
 
 /// <summary>
 /// Represents the current lifecycle state of an engine.

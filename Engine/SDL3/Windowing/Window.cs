@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using System.Numerics;
-using Mirage.Windowing;
+using OpenGE.Windowing;
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.SDL3.Windowing;
+namespace OpenGE.SDL3.Windowing;
 
 /// <summary>
-/// Implements a Mirage window using SDL3.
+/// Implements a OpenGE window using SDL3.
 /// </summary>
 /// <remarks>
 /// All native operations must run on the SDL video thread. SDL's event queue is
@@ -44,7 +44,7 @@ public sealed class SDL3Window : Window
 
     /// <summary>Gets SDL events delivered to this window during its last update.</summary>
     /// <remarks>Window events are routed by SDL's associated window. Events without
-    /// an associated window are delivered to every open Mirage window.</remarks>
+    /// an associated window are delivered to every open OpenGE window.</remarks>
     public IReadOnlyList<SDL.Event> FrameEvents => _events;
 
     /// <summary>Gets the borrowed native handle; zero while closed.</summary>

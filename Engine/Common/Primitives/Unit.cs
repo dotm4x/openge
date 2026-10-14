@@ -1,4 +1,4 @@
-namespace Mirage.Common.Primitives;
+namespace OpenGE.Common.Primitives;
 
 /// <summary>
 /// Represents a type with a single possible value and no associated data.

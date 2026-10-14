@@ -1,9 +1,9 @@
 using System.Collections;
-using Mirage.Common.Events;
-using Mirage.Common.Lifecycle;
-using Mirage.Common.Primitives;
+using OpenGE.Common.Events;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Common.Primitives;
 
-namespace Mirage.Common.Collections;
+namespace OpenGE.Common.Collections;
 
 /// <summary>
 /// Provides read-only access to the entries in a reactive dictionary.

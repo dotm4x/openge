@@ -1,6 +1,6 @@
-using Mirage.Common;
+using OpenGE.Common;
 
-namespace Mirage.Graphics.Resources;
+namespace OpenGE.Graphics.Resources;
 
 /// <summary>
 /// Specifies the in-memory layout of image pixels.

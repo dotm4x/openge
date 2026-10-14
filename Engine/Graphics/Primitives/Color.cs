@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Mirage.Graphics.Primitives;
+namespace OpenGE.Graphics.Primitives;
 
 /// <summary>
 /// Represents a color using normalized red, green, blue, and alpha components.

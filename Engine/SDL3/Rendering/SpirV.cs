@@ -1,8 +1,8 @@
 using System.Buffers.Binary;
 using System.Text;
-using Mirage.Graphics.Resources;
+using OpenGE.Graphics.Resources;
 
-namespace Mirage.SDL3.Rendering;
+namespace OpenGE.SDL3.Rendering;
 
 internal readonly record struct SDL3ShaderLayout(uint Samplers, uint UniformBuffers);
 

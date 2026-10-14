@@ -1,12 +1,12 @@
-using Mirage.Common;
-using Mirage.Common.Collections;
-using Mirage.Common.Events;
-using Mirage.Common.Interfaces;
-using Mirage.Common.Lifecycle;
-using Mirage.Common.Primitives;
-using Mirage.Logging;
+using OpenGE.Common;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Events;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Common.Primitives;
+using OpenGE.Logging;
 
-namespace Mirage.Noding;
+namespace OpenGE.Noding;
 
 internal sealed class NodeContext(ModuleContainer modules)
 {

@@ -1,9 +1,9 @@
 using System.Text;
-using Mirage.Graphics.Resources;
-using Mirage.Importing;
+using OpenGE.Graphics.Resources;
+using OpenGE.Importing;
 using Vortice.Dxc;
 
-namespace Mirage.Graphics.Decoders;
+namespace OpenGE.Graphics.Decoders;
 
 /// <summary>
 /// Decodes HLSL shader files into compiled <see cref="Shader"/> resources.

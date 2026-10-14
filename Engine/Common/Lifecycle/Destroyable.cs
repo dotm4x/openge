@@ -1,4 +1,4 @@
-namespace Mirage.Common.Lifecycle;
+namespace OpenGE.Common.Lifecycle;
 
 /// <summary>
 /// Provides read-only access to the lifecycle state of a destroyable object.

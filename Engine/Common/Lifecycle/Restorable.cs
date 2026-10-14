@@ -1,4 +1,4 @@
-namespace Mirage.Common.Lifecycle;
+namespace OpenGE.Common.Lifecycle;
 
 /// <summary>
 /// Defines an object that can restore its state.

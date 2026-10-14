@@ -1,4 +1,4 @@
-namespace Mirage.Handling.Devices.Keyboard;
+namespace OpenGE.Handling.Devices.Keyboard;
 
 /// <summary>
 /// Identifies a physical keyboard key.

@@ -1,11 +1,11 @@
 using System.Numerics;
-using Mirage.Common.Events;
-using Mirage.Common.Interfaces;
-using Mirage.Common.Lifecycle;
-using Mirage.Graphics.Resources;
-using Image = Mirage.Graphics.Resources.Image;
+using OpenGE.Common.Events;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Graphics.Resources;
+using Image = OpenGE.Graphics.Resources.Image;
 
-namespace Mirage.Windowing;
+namespace OpenGE.Windowing;
 
 /// <summary>
 /// Provides the initial configuration of a <see cref="Cursor"/>.

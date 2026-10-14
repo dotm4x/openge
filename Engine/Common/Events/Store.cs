@@ -1,6 +1,6 @@
-using Mirage.Common.Lifecycle;
+using OpenGE.Common.Lifecycle;
 
-namespace Mirage.Common.Events;
+namespace OpenGE.Common.Events;
 
 /// <summary>
 /// Provides read-only access to a store.

@@ -1,8 +1,8 @@
-using Mirage.Graphics;
-using Mirage.Graphics.Interfaces;
-using Mirage.Graphics.Primitives;
+using OpenGE.Graphics;
+using OpenGE.Graphics.Interfaces;
+using OpenGE.Graphics.Primitives;
 
-namespace Mirage.Rendering;
+namespace OpenGE.Rendering;
 
 /// <summary>
 /// Provides the rendering state available while producing rendering data for a frame.

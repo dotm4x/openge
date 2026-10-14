@@ -22,9 +22,9 @@ for recovery; destruction requires the idle state.
 
 ## Diagnostic context
 
-Failures after decoder selection keep their original exception type and attach `Mirage.ResourcePath`,
-`Mirage.ResourceType`, and `Mirage.Decoder` to `Exception.Data`. Update failures
-attach `Mirage.UpdateChannel`. Catch these at the application boundary to report
+Failures after decoder selection keep their original exception type and attach `OpenGE.ResourcePath`,
+`OpenGE.ResourceType`, and `OpenGE.Decoder` to `Exception.Data`. Update failures
+attach `OpenGE.UpdateChannel`. Catch these at the application boundary to report
 the failure. Avoid repeated wrapping when it adds no information.
 
 CI restore, formatting, and build failures must fail their step and job.

@@ -1,10 +1,10 @@
-using Mirage.Common;
-using Mirage.Common.Collections;
-using Mirage.Common.Interfaces;
-using Mirage.Common.Primitives;
-using Mirage.Logging;
+using OpenGE.Common;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Primitives;
+using OpenGE.Logging;
 
-namespace Mirage.Importing;
+namespace OpenGE.Importing;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="ImportContext"/> class.
@@ -232,11 +232,11 @@ public class Importer : Module
     /// Resources are cached by requested type and normalized relative path.
     /// The importer owns the returned resource. A decoded resource is destroyed if
     /// it cannot be adopted by the cache. Failures after decoder selection retain their original type
-    /// and include Mirage.ResourcePath, Mirage.ResourceType and Mirage.Decoder in Exception.Data.
+    /// and include OpenGE.ResourcePath, OpenGE.ResourceType and OpenGE.Decoder in Exception.Data.
     /// Cleanup failures are aggregated with the original import error. Resources whose
     /// cleanup failed remain owned by the importer and are retried during its destruction.
     /// </remarks>
-    /// <exception cref="Mirage.Common.Lifecycle.DestroyedObjectException">
+    /// <exception cref="OpenGE.Common.Lifecycle.DestroyedObjectException">
     /// Thrown when the importer has been destroyed.
     /// </exception>
     /// <exception cref="ArgumentException">
@@ -344,9 +344,9 @@ public class Importer : Module
         }
         catch (Exception exception)
         {
-            exception.Data["Mirage.ResourcePath"] = absolutePath;
-            exception.Data["Mirage.ResourceType"] = typeof(TResource).FullName;
-            exception.Data["Mirage.Decoder"] = decoder.GetType().FullName;
+            exception.Data["OpenGE.ResourcePath"] = absolutePath;
+            exception.Data["OpenGE.ResourceType"] = typeof(TResource).FullName;
+            exception.Data["OpenGE.Decoder"] = decoder.GetType().FullName;
 
             if (decoded is { Destroyed: false })
             {

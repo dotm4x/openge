@@ -1,13 +1,13 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Mirage.Graphics.Resources;
-using Mirage.Windowing;
-using Image = Mirage.Graphics.Resources.Image;
+using OpenGE.Graphics.Resources;
+using OpenGE.Windowing;
+using Image = OpenGE.Graphics.Resources.Image;
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.SDL3.Windowing;
+namespace OpenGE.SDL3.Windowing;
 
-/// <summary>Implements a Mirage cursor with SDL3 system or RGBA image cursors.</summary>
+/// <summary>Implements a OpenGE cursor with SDL3 system or RGBA image cursors.</summary>
 /// <remarks>
 /// SDL cursor selection and visibility are global. Use SDL video-thread access.
 /// This object owns its native handle and video lease but borrows its image.

@@ -1,11 +1,11 @@
-using Mirage.Common;
-using Mirage.Common.Primitives;
-using Mirage.Logging;
-using Mirage.Scheduling;
-using Mirage.Scheduling.Interfaces;
-using Mirage.Windowing;
+using OpenGE.Common;
+using OpenGE.Common.Primitives;
+using OpenGE.Logging;
+using OpenGE.Scheduling;
+using OpenGE.Scheduling.Interfaces;
+using OpenGE.Windowing;
 
-namespace Mirage.Windowing;
+namespace OpenGE.Windowing;
 
 /// <summary>
 /// Manages the lifecycle and event processing of the application's windows.

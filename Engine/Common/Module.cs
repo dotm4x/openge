@@ -1,8 +1,8 @@
-using Mirage.Common.Events;
-using Mirage.Common.Interfaces;
-using Mirage.Common.Lifecycle;
+using OpenGE.Common.Events;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
 
-namespace Mirage.Common;
+namespace OpenGE.Common;
 
 /// <summary>
 /// Provides access to a collection of modules.

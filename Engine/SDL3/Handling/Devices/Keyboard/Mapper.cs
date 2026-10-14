@@ -1,15 +1,15 @@
-using Mirage.Handling.Devices.Keyboard;
+using OpenGE.Handling.Devices.Keyboard;
 using SDL = global::SDL3.SDL;
 
-namespace Mirage.SDL3.Handling.Devices.Keyboard;
+namespace OpenGE.SDL3.Handling.Devices.Keyboard;
 
 /// <summary>
-/// Converts SDL physical scancodes to Mirage keyboard keys.
+/// Converts SDL physical scancodes to OpenGE keyboard keys.
 /// </summary>
 public static class SDL3KeyboardKeyMapper
 {
     /// <summary>
-    /// Maps an SDL physical scancode to the corresponding Mirage key.
+    /// Maps an SDL physical scancode to the corresponding OpenGE key.
     /// </summary>
     /// <param name="scancode">The SDL scancode to map.</param>
     /// <returns>

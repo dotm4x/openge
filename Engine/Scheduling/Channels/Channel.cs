@@ -1,10 +1,10 @@
-using Mirage.Common.Collections;
-using Mirage.Common.Interfaces;
-using Mirage.Common.Lifecycle;
-using Mirage.Common.Primitives;
-using Mirage.Scheduling.Interfaces;
+using OpenGE.Common.Collections;
+using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
+using OpenGE.Common.Primitives;
+using OpenGE.Scheduling.Interfaces;
 
-namespace Mirage.Scheduling.Channels;
+namespace OpenGE.Scheduling.Channels;
 
 /// <summary>
 /// Represents the priority of an update channel.

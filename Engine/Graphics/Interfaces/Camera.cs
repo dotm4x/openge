@@ -1,7 +1,7 @@
 using System.Numerics;
-using Mirage.Graphics.Primitives;
+using OpenGE.Graphics.Primitives;
 
-namespace Mirage.Graphics.Interfaces;
+namespace OpenGE.Graphics.Interfaces;
 
 /// <summary>
 /// Provides the transformations required to render a scene from a camera view.

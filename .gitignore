@@ -15,7 +15,7 @@ bld/
 [Ll]ogs/
 
 # Settings
-Mirage.sln.DotSettings.user
+*.sln.DotSettings.user
 
 # .NET Core
 project.lock.json

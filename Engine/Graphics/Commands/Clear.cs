@@ -1,6 +1,6 @@
-using Mirage.Graphics.Primitives;
+using OpenGE.Graphics.Primitives;
 
-namespace Mirage.Graphics.Commands;
+namespace OpenGE.Graphics.Commands;
 
 /// <summary>
 /// Represents a command to clear the current rendering target.
