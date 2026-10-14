@@ -53,7 +53,18 @@ public class ShaderDecoder : Decoder<Shader>
             _ => throw new NotSupportedException($"Shader stage '{stage}' is not supported."),
         };
 
-        using var result = DxcCompiler.Compile(dxcStage, source, EntryPoint, options, path);
+        Console.WriteLine($"[DXC] Stage: {dxcStage}");
+        Console.WriteLine($"[DXC] Options: {options}");
+        using var result = DxcCompiler.Compile(
+            dxcStage,
+            source,
+            EntryPoint,
+            options,
+            Path.GetFileName(path)
+        );
+
+        Console.WriteLine($"[DXC] HRESULT: 0x{result.GetStatus():X8}");
+        Console.WriteLine($"[DXC] Errors: {result.GetErrors()}");
 
         if (result.GetStatus() >= 0)
             return result.GetObjectBytecodeArray();
@@ -66,9 +77,16 @@ public class ShaderDecoder : Decoder<Shader>
 
     private static byte[] CompileToSpirV(string source, ShaderStage stage, string path)
     {
-        var options = new DxcCompilerOptions { GenerateSpirv = true };
+        const string testSource = """
+            float4 main(uint vertexId : SV_VertexID) : SV_Position
+            {
+                return float4(0.0, 0.0, 0.0, 1.0);
+            }
+            """;
 
-        return Compile(source, stage, path, options);
+        var options = new DxcCompilerOptions { GenerateSpirv = false };
+
+        return Compile(testSource, ShaderStage.Vertex, path, options);
     }
 
     private static ShaderStage GetStage(string path)
