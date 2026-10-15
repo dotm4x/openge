@@ -1,93 +1,105 @@
 using System.Text;
 using OpenGE.Graphics.Resources;
 using OpenGE.Importing;
-using Vortice.Dxc;
 
 namespace OpenGE.Graphics.Decoders;
 
 /// <summary>
-/// Decodes HLSL shader files into compiled <see cref="Shader"/> resources.
+/// Decodes shader source files, optionally compiling them.
 /// </summary>
 /// <remarks>
-/// Vertex shaders use the <c>.vert</c> extension and fragment shaders use
-/// the <c>.frag</c> extension. Shader source is compiled for the configured
-/// target format.
+/// The source language is configured explicitly. Vertex, fragment, and compute
+/// shaders use the .vert, .frag, and .comp extensions respectively.
+/// The decoder does not own its compiler.
 /// </remarks>
 public class ShaderDecoder : Decoder<Shader>
 {
-    private const string EntryPoint = "main";
-
     private static readonly HashSet<string> Extensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".vert",
         ".frag",
+        ".comp",
     };
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ShaderDecoder"/> class.
+    /// Initializes a decoder that returns shader source resources.
     /// </summary>
-    /// <param name="target">
-    /// The compiled shader format produced by the decoder.
-    /// </param>
-    public ShaderDecoder(ShaderFormat target = ShaderFormat.SpirV)
+    /// <param name="language">The source language.</param>
+    /// <param name="entryPoint">The shader entry point.</param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The language is invalid.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// The entry point is empty or contains a null character.
+    /// </exception>
+    public ShaderDecoder(ShaderLanguage language, string entryPoint = "main")
     {
+        if (!Enum.IsDefined(language))
+            throw new ArgumentOutOfRangeException(nameof(language));
+
+        if (string.IsNullOrWhiteSpace(entryPoint) || entryPoint.Contains('\0'))
+            throw new ArgumentException(
+                "The entry point cannot be empty or contain null characters.",
+                nameof(entryPoint)
+            );
+
+        Language = language;
+        EntryPoint = entryPoint;
+    }
+
+    /// <summary>
+    /// Initializes a decoder that compiles shader source files.
+    /// </summary>
+    /// <param name="language">The source language.</param>
+    /// <param name="compiler">The compiler to use.</param>
+    /// <param name="target">The compiled output format.</param>
+    /// <param name="entryPoint">The shader entry point.</param>
+    /// <exception cref="ArgumentNullException">
+    /// The compiler is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The language or target format is invalid.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// The entry point is empty or contains a null character.
+    /// </exception>
+    public ShaderDecoder(
+        ShaderLanguage language,
+        ShaderCompiler compiler,
+        ShaderFormat target,
+        string entryPoint = "main"
+    )
+        : this(language, entryPoint)
+    {
+        ArgumentNullException.ThrowIfNull(compiler);
+
+        if (!Enum.IsDefined(target))
+            throw new ArgumentOutOfRangeException(nameof(target));
+
+        Compiler = compiler;
         Target = target;
     }
 
     /// <summary>
-    /// Gets the compiled shader format produced by the decoder.
+    /// Gets the source language.
     /// </summary>
-    public ShaderFormat Target { get; }
+    public ShaderLanguage Language { get; }
 
-    private static byte[] Compile(
-        string source,
-        ShaderStage stage,
-        string path,
-        DxcCompilerOptions options
-    )
-    {
-        var dxcStage = stage switch
-        {
-            ShaderStage.Vertex => DxcShaderStage.Vertex,
-            ShaderStage.Fragment => DxcShaderStage.Pixel,
-            _ => throw new NotSupportedException($"Shader stage '{stage}' is not supported."),
-        };
+    /// <summary>
+    /// Gets the shader entry point.
+    /// </summary>
+    public string EntryPoint { get; }
 
-        Console.WriteLine($"[DXC] Stage: {dxcStage}");
-        Console.WriteLine($"[DXC] Options: {options}");
-        using var result = DxcCompiler.Compile(
-            dxcStage,
-            source,
-            EntryPoint,
-            options,
-            Path.GetFileName(path)
-        );
+    /// <summary>
+    /// Gets the optional compiler.
+    /// </summary>
+    public ShaderCompiler? Compiler { get; }
 
-        Console.WriteLine($"[DXC] HRESULT: 0x{result.GetStatus():X8}");
-        Console.WriteLine($"[DXC] Errors: {result.GetErrors()}");
-
-        if (result.GetStatus() >= 0)
-            return result.GetObjectBytecodeArray();
-        var errors = result.GetErrors();
-
-        throw new InvalidDataException(
-            string.IsNullOrWhiteSpace(errors) ? $"Failed to compile shader '{path}'." : errors
-        );
-    }
-
-    private static byte[] CompileToSpirV(string source, ShaderStage stage, string path)
-    {
-        const string testSource = """
-            float4 main(uint vertexId : SV_VertexID) : SV_Position
-            {
-                return float4(0.0, 0.0, 0.0, 1.0);
-            }
-            """;
-
-        var options = new DxcCompilerOptions { GenerateSpirv = false };
-
-        return Compile(testSource, ShaderStage.Vertex, path, options);
-    }
+    /// <summary>
+    /// Gets the compiled output format, or <see langword="null"/>
+    /// when the decoder returns source code.
+    /// </summary>
+    public ShaderFormat? Target { get; }
 
     private static ShaderStage GetStage(string path)
     {
@@ -95,6 +107,7 @@ public class ShaderDecoder : Decoder<Shader>
         {
             ".vert" => ShaderStage.Vertex,
             ".frag" => ShaderStage.Fragment,
+            ".comp" => ShaderStage.Compute,
             var extension => throw new NotSupportedException(
                 $"Shader extension '{extension}' is not supported."
             ),
@@ -104,6 +117,13 @@ public class ShaderDecoder : Decoder<Shader>
     /// <inheritdoc />
     protected override Shader OnDecode(ImportContext context, Stream stream)
     {
+        var stage = GetStage(context.Path);
+
+        if (Compiler is not null && !Compiler.Supports(Language, stage, Target!.Value))
+            throw new NotSupportedException(
+                $"Compilation of '{Language}' " + $"stage '{stage}' to '{Target}' is not supported."
+            );
+
         using var reader = new StreamReader(
             stream,
             Encoding.UTF8,
@@ -111,18 +131,25 @@ public class ShaderDecoder : Decoder<Shader>
             leaveOpen: true
         );
 
-        var source = reader.ReadToEnd();
-        var stage = GetStage(context.Path);
+        var source = new ShaderSource(
+            reader.ReadToEnd(),
+            Language,
+            stage,
+            EntryPoint,
+            context.Path
+        );
 
-        var code = Target switch
+        if (Compiler is null)
+            return source;
+
+        try
         {
-            ShaderFormat.SpirV => CompileToSpirV(source, stage, context.Path),
-            _ => throw new NotSupportedException(
-                $"Shader format '{Target}' is not supported by this decoder."
-            ),
-        };
-
-        return new Shader(code, stage, Target, EntryPoint);
+            return Compiler.Compile(source, Target!.Value);
+        }
+        finally
+        {
+            source.Destroy();
+        }
     }
 
     /// <inheritdoc />

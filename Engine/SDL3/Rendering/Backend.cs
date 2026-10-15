@@ -268,10 +268,21 @@ public sealed class SDL3RenderBackend : RenderBackend
 
     private SDL3Shader GetShader(Shader shader)
     {
+        ArgumentNullException.ThrowIfNull(shader);
         CheckAlive(shader);
+
+        if (shader is not ShaderBinary binary)
+            throw new NotSupportedException(
+                $"Shader representation '{shader.GetType().Name}' is not supported. "
+                    + "This backend requires compiled SPIR-V. "
+                    + "Compile the source before rendering."
+            );
+
         if (_shaders.TryGetValue(shader, out var result))
             return result;
-        result = new SDL3Shader(_device, shader);
+
+        result = new SDL3Shader(_device, binary);
+
         try
         {
             _shaders.Add(shader, result);

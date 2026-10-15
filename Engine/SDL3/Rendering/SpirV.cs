@@ -6,13 +6,11 @@ namespace OpenGE.SDL3.Rendering;
 
 internal readonly record struct SDL3ShaderLayout(uint Samplers, uint UniformBuffers);
 
-// Inspects trusted compiler output for the limited Render2DCommand shader ABI.
-// Requires one entry point and four float4 MVP rows in the vertex uniform.
 internal static class SDL3SpirV
 {
     private static NotSupportedException Unsupported(string message) => new(message);
 
-    public static SDL3ShaderLayout Inspect(Shader shader)
+    public static SDL3ShaderLayout Inspect(ShaderBinary shader)
     {
         if (shader.Format != ShaderFormat.SpirV)
             throw Unsupported("Only SPIR-V shaders are supported.");
