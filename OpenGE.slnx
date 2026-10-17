@@ -15,4 +15,7 @@
     <Project Path="Engine\Rendering\OpenGE.Rendering.csproj" />
     <Project Path="Engine\Handling\OpenGE.Handling.csproj" />
   </Folder>
+  <Folder Name="/Engine/Raylib/">
+    <Project Path="Engine/Raylib/OpenGE.Raylib.csproj" />
+  </Folder>
 </Solution>
