@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\Common\OpenGE.Common.csproj" />
+    <ProjectReference Include="..\Logging\OpenGE.Logging.csproj" />
     <ProjectReference Include="..\Noding\OpenGE.Noding.csproj" />
   </ItemGroup>
 

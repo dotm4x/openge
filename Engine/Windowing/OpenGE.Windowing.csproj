@@ -6,6 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Common\OpenGE.Common.csproj" />
+    <ProjectReference Include="..\Logging\OpenGE.Logging.csproj" />
+    <ProjectReference Include="..\Numerics\OpenGE.Numerics.csproj" />
     <ProjectReference Include="..\Graphics\OpenGE.Graphics.csproj" />
     <ProjectReference Include="..\Scheduling\OpenGE.Scheduling.csproj" />
   </ItemGroup>
