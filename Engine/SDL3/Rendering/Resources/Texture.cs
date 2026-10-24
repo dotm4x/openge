@@ -17,7 +17,7 @@ internal sealed class SDL3Texture : IDisposable
     private readonly IntPtr _device;
 
     /// <summary>
-    /// Initializes a GPU texture from the specified source.
+    /// Initializes a new instance of the <see cref="SDL3Texture"/> class.
     /// </summary>
     /// <param name="device">The SDL GPU device.</param>
     /// <param name="commandBuffer">

@@ -71,7 +71,9 @@ public sealed class SDL3RenderBackend : RenderBackend
     private uint _swapchainWidth;
     private uint _swapchainHeight;
 
-    /// <summary>Creates a backend for one borrowed SDL window.</summary>
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SDL3RenderBackend"/> class.
+    /// </summary>
     /// <param name="window">The window to render into.</param>
     /// <param name="debugMode">Whether SDL GPU validation is enabled.</param>
     /// <param name="vsync">Whether presentation waits for vertical synchronization.</param>

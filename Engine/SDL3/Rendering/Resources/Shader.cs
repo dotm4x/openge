@@ -8,6 +8,9 @@ internal sealed class SDL3Shader : IDisposable
 {
     private readonly IntPtr _device;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SDL3Shader"/> class.
+    /// </summary>
     public unsafe SDL3Shader(IntPtr device, ShaderBinary source)
     {
         ArgumentNullException.ThrowIfNull(source);

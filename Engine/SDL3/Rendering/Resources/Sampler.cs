@@ -7,6 +7,9 @@ internal sealed class SDL3Sampler : IDisposable
 {
     private readonly IntPtr _device;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SDL3Sampler"/> class.
+    /// </summary>
     public SDL3Sampler(IntPtr device, TextureSampler source)
     {
         _device = device;

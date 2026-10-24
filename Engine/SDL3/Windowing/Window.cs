@@ -28,7 +28,9 @@ public sealed class SDL3Window : Window
             SDL.SetHint("SDL_VIDEO_DRIVER", "x11");
     }
 
-    /// <summary>Creates a window wrapper without opening its native handle.</summary>
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SDL3Window"/> class.
+    /// </summary>
     public SDL3Window(WindowOptions? options = null)
         : base(options)
     {

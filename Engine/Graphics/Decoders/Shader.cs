@@ -22,7 +22,8 @@ public class ShaderDecoder : Decoder<Shader>
     };
 
     /// <summary>
-    /// Initializes a decoder that returns shader source resources.
+    /// Initializes a new instance of the <see cref="ShaderDecoder"/> class.
+    /// The decoder returns shader source resources.
     /// </summary>
     /// <param name="language">The source language.</param>
     /// <param name="entryPoint">The shader entry point.</param>
@@ -48,7 +49,8 @@ public class ShaderDecoder : Decoder<Shader>
     }
 
     /// <summary>
-    /// Initializes a decoder that compiles shader source files.
+    /// Initializes a new instance of the <see cref="ShaderDecoder"/> class.
+    /// The decoder compiles shader source files.
     /// </summary>
     /// <param name="language">The source language.</param>
     /// <param name="compiler">The compiler to use.</param>

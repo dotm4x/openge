@@ -18,7 +18,7 @@ public sealed class RenderTarget : Texture
     public override Vector2 Size { get; }
 
     /// <summary>
-    /// Initializes a new render target with the specified dimensions.
+    /// Initializes a new instance of the <see cref="RenderTarget"/> class.
     /// </summary>
     /// <param name="size">The dimensions of the target, in pixels.</param>
     public RenderTarget(Vector2 size)

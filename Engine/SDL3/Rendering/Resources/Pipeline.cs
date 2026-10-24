@@ -9,6 +9,9 @@ internal sealed class SDL3Pipeline : IDisposable
 {
     private readonly IntPtr _device;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SDL3Pipeline"/> class.
+    /// </summary>
     public unsafe SDL3Pipeline(
         IntPtr device,
         SDL3Shader vertex,

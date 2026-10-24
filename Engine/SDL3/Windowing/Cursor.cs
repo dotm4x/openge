@@ -16,7 +16,9 @@ public sealed class SDLCursor : Cursor
 {
     private IntPtr _native;
 
-    /// <summary>Creates the native cursor and registers change hooks.</summary>
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SDLCursor"/> class.
+    /// </summary>
     public SDLCursor(string identifier, CursorOptions? options = null)
         : base(identifier, options)
     {

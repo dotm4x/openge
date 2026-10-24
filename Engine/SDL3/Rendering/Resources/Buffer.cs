@@ -7,6 +7,9 @@ internal sealed class SDL3Buffer : IDisposable
 {
     private readonly IntPtr _device;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SDL3Buffer"/> class.
+    /// </summary>
     public SDL3Buffer(
         IntPtr device,
         IntPtr commandBuffer,
@@ -70,6 +73,9 @@ internal sealed class SDL3TransferBuffer : IDisposable
 {
     private readonly IntPtr _device;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SDL3TransferBuffer"/> class.
+    /// </summary>
     public unsafe SDL3TransferBuffer(IntPtr device, ReadOnlySpan<byte> data)
     {
         _device = device;
