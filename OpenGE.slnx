@@ -16,4 +16,5 @@
     <Project Path="Engine\Handling\OpenGE.Handling.csproj" />
     <Project Path="Engine/Raylib/OpenGE.Raylib.csproj" />
   </Folder>
+  <Project Path="Tests/Tests.csproj" />
 </Solution>

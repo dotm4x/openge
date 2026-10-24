@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Engine\Common\OpenGE.Common.csproj" />
+    <ProjectReference Include="..\Engine\DXC\OpenGE.DXC.csproj" />
+    <ProjectReference Include="..\Engine\Graphics\OpenGE.Graphics.csproj" />
+    <ProjectReference Include="..\Engine\Handling\OpenGE.Handling.csproj" />
+    <ProjectReference Include="..\Engine\Importing\OpenGE.Importing.csproj" />
+    <ProjectReference Include="..\Engine\Logging\OpenGE.Logging.csproj" />
+    <ProjectReference Include="..\Engine\Noding\OpenGE.Noding.csproj" />
+    <ProjectReference Include="..\Engine\Numerics\OpenGE.Numerics.csproj" />
+    <ProjectReference Include="..\Engine\Presentating\OpenGE.Presentating.csproj" />
+    <ProjectReference Include="..\Engine\Raylib\OpenGE.Raylib.csproj" />
+    <ProjectReference Include="..\Engine\Rendering\OpenGE.Rendering.csproj" />
+    <ProjectReference Include="..\Engine\Scheduling\OpenGE.Scheduling.csproj" />
+    <ProjectReference Include="..\Engine\SDL3\OpenGE.SDL3.csproj" />
+    <ProjectReference Include="..\Engine\Spatial\OpenGE.Spatial.csproj" />
+    <ProjectReference Include="..\Engine\Windowing\OpenGE.Windowing.csproj" />
+  </ItemGroup>
+</Project>
