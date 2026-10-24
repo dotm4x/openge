@@ -94,6 +94,7 @@ public abstract class Keyboard : InputDevice
     /// </summary>
     protected void EnsureInitialized()
     {
+        ThrowIfDestroyed();
         _preparator.Ensure(ComposeContents, ConfigureContents);
     }
 
@@ -114,6 +115,8 @@ public abstract class Keyboard : InputDevice
     /// <param name="payload">The keyboard event payload to publish.</param>
     protected void Publish(KeyboardEventPayload payload)
     {
+        ThrowIfDestroyed();
+
         foreach (var @event in Events)
         {
             if (@event.Source.Get() == payload.Key)

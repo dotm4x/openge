@@ -114,6 +114,7 @@ public abstract class Mouse : InputDevice
     /// </summary>
     protected void EnsureInitialized()
     {
+        ThrowIfDestroyed();
         _preparator.Ensure(ComposeContents, ConfigureContents);
     }
 
@@ -137,6 +138,7 @@ public abstract class Mouse : InputDevice
     /// <param name="payload">The mouse button event payload to publish.</param>
     protected void PublishButton(MouseButtonEventPayload payload)
     {
+        ThrowIfDestroyed();
         _position.Set(payload.Position);
 
         foreach (var @event in Events)
@@ -152,6 +154,7 @@ public abstract class Mouse : InputDevice
     /// <param name="payload">The mouse movement payload to publish.</param>
     protected void PublishMove(MouseMoveEventPayload payload)
     {
+        ThrowIfDestroyed();
         _position.Set(payload.Position);
         OnMove.Set(payload);
     }
@@ -162,6 +165,7 @@ public abstract class Mouse : InputDevice
     /// <param name="payload">The mouse wheel payload to publish.</param>
     protected void PublishWheel(MouseWheelEventPayload payload)
     {
+        ThrowIfDestroyed();
         _position.Set(payload.Position);
         OnWheel.Fire(payload);
     }
