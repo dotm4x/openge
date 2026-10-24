@@ -28,7 +28,7 @@
 - Avoid unnecessary wrappers, forwarding methods, inheritance layers, and abstractions.
 - Preserve public API behavior unless a change is explicitly required.
 
-## Blueprint Architecture
+## OpenGE Architecture
 
 - Keep shared concepts, elements, geometry, layouts, drawing, and platform-specific behavior separated according to their existing responsibilities.
 - Place each new type in the project that owns its responsibility.
@@ -48,7 +48,7 @@
 ### Structure
 
 - Use xUnit for all automated tests.
-- Mirror the `Source/` directory structure inside `Tests/`. Each production project corresponds to a directory named after the project without the `Blueprint.` prefix.
+- Mirror the `Source/` directory structure inside `Tests/`. Each production project corresponds to a directory named after the project without the `OpenGE.` prefix.
 - Preserve all nested directories relative to their production project.
 - Name each test class after its production type, appending `Tests`.
 - Place each test class in the directory corresponding to its production type.
@@ -58,13 +58,13 @@
 For example:
 
 ```text
-Source/Blueprint.Geometry/Primitives/Position.cs
-Tests/Geometry/Primitives/PositionTests.cs
+Source/OpenGE.Numerics/Geometry/Mesh2D.cs
+Tests/Numerics/Geometry/Mesh2DTests.cs
 ```
 
 ```text
-Source/Blueprint.Shared/Events/Store.cs
-Tests/Shared/Events/StoreTests.cs
+Source/OpenGE.Commons/Events/Store.cs
+Tests/Common/Events/StoreTests.cs
 ```
 
 ### Naming and Organization
