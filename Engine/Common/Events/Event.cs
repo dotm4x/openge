@@ -10,6 +10,9 @@ public class EventConnection<TPayload>
 {
     private Action<EventConnection<TPayload>>? _disconnect;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EventConnection{TPayload}"/> class.
+    /// </summary>
     internal EventConnection(
         Action<TPayload> callback,
         bool persistent,
@@ -143,6 +146,7 @@ public abstract class Event<TPayload> : Destroyable, IEvent<TPayload>
     public EventConnection<TPayload> Connect(Action<TPayload> callback, bool persistent = false)
     {
         ThrowIfDestroyed();
+        ArgumentNullException.ThrowIfNull(callback);
 
         var connection = new EventConnection<TPayload>(
             callback,
