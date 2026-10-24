@@ -10,8 +10,4 @@
     <ProjectReference Include="..\Noding\OpenGE.Noding.csproj" />
     <ProjectReference Include="..\Numerics\OpenGE.Numerics.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
 </Project>
