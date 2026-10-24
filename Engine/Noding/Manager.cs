@@ -306,11 +306,16 @@ public class NodeManager : Module
 
     private static IEnumerable<Node> Traverse(Node node)
     {
-        yield return node;
-        foreach (var subnode in node.Subnodes)
+        Stack<Node> pending = [];
+        pending.Push(node);
+
+        while (pending.TryPop(out var current))
         {
-            foreach (var descendant in Traverse(subnode))
-                yield return descendant;
+            yield return current;
+
+            var subnodes = current.Subnodes.ToArray();
+            for (var index = subnodes.Length - 1; index >= 0; index--)
+                pending.Push(subnodes[index]);
         }
     }
 

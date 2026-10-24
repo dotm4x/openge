@@ -53,6 +53,32 @@ public class NodeOptions
 /// </remarks>
 public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
 {
+    private IEnumerable<Node> Enumerate(bool recursive)
+    {
+        var nodes = ToArray();
+
+        if (!recursive)
+        {
+            foreach (var node in nodes)
+                yield return node;
+
+            yield break;
+        }
+
+        Stack<Node> pending = [];
+        for (var index = nodes.Length - 1; index >= 0; index--)
+            pending.Push(nodes[index]);
+
+        while (pending.TryPop(out var node))
+        {
+            yield return node;
+
+            var children = node.Subnodes.ToArray();
+            for (var index = children.Length - 1; index >= 0; index--)
+                pending.Push(children[index]);
+        }
+    }
+
     /// <summary>
     /// Gets a node by its unique identifier.
     /// </summary>
@@ -66,21 +92,7 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// </returns>
     public Node? GetByIdentifier(Guid identifier, bool recursive = false)
     {
-        foreach (var node in this)
-        {
-            if (node.Identifier == identifier)
-                return node;
-
-            if (!recursive)
-                continue;
-
-            var result = node.Subnodes.GetByIdentifier(identifier, true);
-
-            if (result is not null)
-                return result;
-        }
-
-        return null;
+        return Enumerate(recursive).FirstOrDefault(node => node.Identifier == identifier);
     }
 
     /// <summary>
@@ -100,21 +112,9 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     public TNode? GetByIdentifier<TNode>(Guid identifier, bool recursive = false)
         where TNode : Node
     {
-        foreach (var node in this)
-        {
-            if (node.Identifier == identifier && node is TNode typedNode)
-                return typedNode;
-
-            if (!recursive)
-                continue;
-
-            var result = node.Subnodes.GetByIdentifier<TNode>(identifier, true);
-
-            if (result is not null)
-                return result;
-        }
-
-        return null;
+        return Enumerate(recursive)
+            .OfType<TNode>()
+            .FirstOrDefault(node => node.Identifier == identifier);
     }
 
     /// <summary>
@@ -130,21 +130,7 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// </returns>
     public Node? GetByName(string name, bool recursive = false)
     {
-        foreach (var node in this)
-        {
-            if (node.Name.Get() == name)
-                return node;
-
-            if (!recursive)
-                continue;
-
-            var result = node.Subnodes.GetByName(name, true);
-
-            if (result is not null)
-                return result;
-        }
-
-        return null;
+        return Enumerate(recursive).FirstOrDefault(node => node.Name.Get() == name);
     }
 
     /// <summary>
@@ -164,21 +150,7 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     public TNode? GetByName<TNode>(string name, bool recursive = false)
         where TNode : Node
     {
-        foreach (var node in this)
-        {
-            if (node.Name.Get() == name && node is TNode typedNode)
-                return typedNode;
-
-            if (!recursive)
-                continue;
-
-            var result = node.Subnodes.GetByName<TNode>(name, true);
-
-            if (result is not null)
-                return result;
-        }
-
-        return null;
+        return Enumerate(recursive).OfType<TNode>().FirstOrDefault(node => node.Name.Get() == name);
     }
 
     /// <summary>
@@ -262,16 +234,10 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// </remarks>
     public IEnumerable<Node> GetByTag(string tag, bool recursive = false)
     {
-        foreach (var node in this)
+        foreach (var node in Enumerate(recursive))
         {
             if (node.Tags.Contains(tag))
                 yield return node;
-
-            if (!recursive)
-                continue;
-
-            foreach (var result in node.Subnodes.GetByTag(tag, true))
-                yield return result;
         }
     }
 
@@ -295,16 +261,10 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     public IEnumerable<TNode> GetByTag<TNode>(string tag, bool recursive = false)
         where TNode : Node
     {
-        foreach (var node in this)
+        foreach (var node in Enumerate(recursive))
         {
             if (node is TNode typedNode && node.Tags.Contains(tag))
                 yield return typedNode;
-
-            if (!recursive)
-                continue;
-
-            foreach (var result in node.Subnodes.GetByTag<TNode>(tag, true))
-                yield return result;
         }
     }
 }
@@ -437,9 +397,21 @@ public class Node : Destroyable, IIdentifiable<Guid>
     {
         get
         {
-            var parent = Parent.Get();
+            List<string> names = [];
+            HashSet<Node> visited = [];
+            Node? current = this;
 
-            return parent is null ? Name.Get() : $"{parent.Path}/{Name.Get()}";
+            while (current is not null)
+            {
+                if (!visited.Add(current))
+                    throw new InvalidOperationException("The node hierarchy contains a cycle.");
+
+                names.Add(current.Name.Get());
+                current = current.Parent.Get();
+            }
+
+            names.Reverse();
+            return string.Join('/', names);
         }
     }
 
@@ -558,7 +530,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
             );
 
         if (ReferenceEquals(parent, this))
-            throw new InvalidOperationException($"{this} cannot be its own parent.");
+            throw new InvalidOperationException($"Node '{Name.Get()}' cannot be its own parent.");
 
         HashSet<Node> visited = [];
 
@@ -567,14 +539,14 @@ public class Node : Destroyable, IIdentifiable<Guid>
             if (ReferenceEquals(ancestor, this))
             {
                 throw new InvalidOperationException(
-                    $"Cannot set {parent} as the parent of {this} because it would create a cycle."
+                    $"Cannot set node '{parent.Name.Get()}' as the parent of node '{Name.Get()}' because it would create a cycle."
                 );
             }
 
             if (!visited.Add(ancestor))
             {
                 throw new InvalidOperationException(
-                    $"Cannot assign {parent} because its hierarchy already contains a cycle."
+                    $"Cannot assign node '{parent.Name.Get()}' because its hierarchy already contains a cycle."
                 );
             }
         }
