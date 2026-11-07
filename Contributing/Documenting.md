@@ -27,7 +27,15 @@ Use the tags that explain the contract:
 
 Keep tags correctly nested and closed. Use `<inheritdoc />` consistently, and `<para>` when a longer remarks block needs distinct paragraphs.
 
-For ordinary constructors, state what they initialize and describe the arguments without repeating every property's documentation. For primary constructors, follow the surrounding OpenGE style: document initialization in the summary, explain the type's role in remarks, and place parameter tags on the type declaration.
+## Tag order and phrasing
+
+Keep one tag order across the codebase so related APIs read alike: `<summary>`, `<typeparam>`, `<remarks>`, `<example>`, `<param>`, `<returns>`, `<exception>`. `<inheritdoc />` always comes first, followed by `<remarks>` when an override adds information.
+
+Boolean members read `Gets a value indicating whether ...`. Summary sentences end with a period, parameter and return descriptions start with a capital letter and end with a period, and documentation lines stay within roughly 100 columns to match the surrounding code.
+
+For ordinary constructors, use `Initializes a new instance of the <see cref="X"/> class.` as the summary, followed by optional remarks, parameter tags, and declared exceptions. Use `struct.` instead of `class.` for structs and record structs.
+
+For primary constructors, the type summary describes the type's responsibility and the `<param>` tags document the constructor parameters on the type declaration. Do not repeat the constructor sentence there: the type has no separate constructor member to document.
 
 ## Describe lifetime explicitly
 
