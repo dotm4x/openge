@@ -33,7 +33,7 @@ public class KeyboardTests
         var keyboard = new TestKeyboard(inputEvent);
         var received = new List<KeyboardEventPayload>();
         inputEvent.Connect(received.Add);
-        inputEvent.Source.Set(KeyboardKey.B);
+        inputEvent.Source.Value = KeyboardKey.B;
         var payload = new KeyboardEventPayload(KeyboardKey.B, Down: false, Repeat: false);
 
         keyboard.PublishPayload(payload);

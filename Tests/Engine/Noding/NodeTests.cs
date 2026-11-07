@@ -11,24 +11,44 @@ public class NodeTests
     public void Constructor_InitializesIdentityNameTagsAndSubnodes()
     {
         var child = new Node("child");
-        var node = new Node(
-            "root",
-            new NodeOptions
-            {
-                Subnodes = [child],
-                Tags = ["scene", "visible"],
-                Persistent = true,
-            }
-        );
+        var node = new Node("root")
+        {
+            Subnodes = { child },
+            Tags = { "scene", "visible" },
+            Persistent = true,
+        };
 
         Assert.NotEqual(Guid.Empty, node.Identifier);
         Assert.NotEqual(node.Identifier, child.Identifier);
-        Assert.Equal("root", node.Name.Get());
+        Assert.Equal("root", node.Name.Value);
         Assert.True(node.Persistent);
         Assert.Same(child, node["child"]);
-        Assert.Same(node, child.Parent.Get());
+        Assert.Same(node, child.Parent.Value);
         Assert.Equal(new[] { "scene", "visible" }, node.Tags.ToArray());
         Assert.Equal("root/child", child.Path);
+    }
+
+    [Fact]
+    public void Constructor_ObjectInitializerAssignsEverySetting()
+    {
+        var parent = new Node("parent");
+        var child = new Node("child");
+        var node = new Node
+        {
+            Name = "Nodo",
+            Parent = parent,
+            Subnodes = { child },
+            Tags = { "scene", "visible" },
+            Visible = false,
+            Persistent = true,
+        };
+
+        Assert.Equal("Nodo", node.Name.Value);
+        Assert.Same(parent, node.Parent.Value);
+        Assert.Same(node, child.Parent.Value);
+        Assert.Equal(["scene", "visible"], node.Tags.ToArray());
+        Assert.False(node.Visible.Value);
+        Assert.True(node.Persistent);
     }
 
     [Fact]
@@ -38,20 +58,20 @@ public class NodeTests
         var secondParent = new Node("second");
         var child = new Node("child");
 
-        child.Parent.Set(firstParent);
+        child.Parent.Value = firstParent;
 
         Assert.Contains(child, firstParent.Subnodes);
-        Assert.Same(firstParent, child.Parent.Get());
+        Assert.Same(firstParent, child.Parent.Value);
 
-        child.Parent.Set(secondParent);
+        child.Parent.Value = secondParent;
 
         Assert.DoesNotContain(child, firstParent.Subnodes);
         Assert.Contains(child, secondParent.Subnodes);
-        Assert.Same(secondParent, child.Parent.Get());
+        Assert.Same(secondParent, child.Parent.Value);
 
         secondParent.Subnodes.Remove(child);
 
-        Assert.Null(child.Parent.Get());
+        Assert.Null(child.Parent.Value);
         Assert.DoesNotContain(child, secondParent.Subnodes);
     }
 
@@ -60,13 +80,13 @@ public class NodeTests
     {
         var firstParent = new TrackingNode("first");
         var secondParent = new TrackingNode("second");
-        var child = new TrackingNode("child", new NodeOptions { Parent = firstParent });
+        var child = new TrackingNode("child") { Parent = firstParent };
         firstParent.Load();
 
         Assert.True(child.Loaded);
         Assert.Equal(1, child.LoadCount);
 
-        child.Parent.Set(secondParent);
+        child.Parent.Value = secondParent;
 
         Assert.False(child.Loaded);
         Assert.Equal(1, child.UnloadCount);
@@ -83,15 +103,15 @@ public class NodeTests
     public void Parent_WhenAssignedToSelfOrDescendant_ThrowsWithoutChangingHierarchy()
     {
         var root = new Node("root");
-        var child = new Node("child", new NodeOptions { Parent = root });
-        var grandchild = new Node("grandchild", new NodeOptions { Parent = child });
+        var child = new Node("child") { Parent = root };
+        var grandchild = new Node("grandchild") { Parent = child };
 
-        Assert.Throws<InvalidOperationException>(() => root.Parent.Set(root));
-        Assert.Throws<InvalidOperationException>(() => root.Parent.Set(grandchild));
+        Assert.Throws<InvalidOperationException>(() => root.Parent.Value = root);
+        Assert.Throws<InvalidOperationException>(() => root.Parent.Value = grandchild);
 
-        Assert.Null(root.Parent.Get());
-        Assert.Same(root, child.Parent.Get());
-        Assert.Same(child, grandchild.Parent.Get());
+        Assert.Null(root.Parent.Value);
+        Assert.Same(root, child.Parent.Value);
+        Assert.Same(child, grandchild.Parent.Value);
         Assert.Same(child, root["child"]);
     }
 
@@ -100,12 +120,12 @@ public class NodeTests
     {
         var previous = new Node("previous");
         var destroyedParent = new Node("destroyed");
-        var child = new Node("child", new NodeOptions { Parent = previous });
+        var child = new Node("child") { Parent = previous };
         destroyedParent.Destroy();
 
-        Assert.Throws<DestroyedObjectException>(() => child.Parent.Set(destroyedParent));
+        Assert.Throws<DestroyedObjectException>(() => child.Parent.Value = destroyedParent);
 
-        Assert.Same(previous, child.Parent.Get());
+        Assert.Same(previous, child.Parent.Value);
         Assert.Contains(child, previous.Subnodes);
         Assert.Empty(destroyedParent.Subnodes);
     }
@@ -114,7 +134,7 @@ public class NodeTests
     public void Load_ChildWithUnloadedParent_Throws()
     {
         var parent = new Node("parent");
-        var child = new Node("child", new NodeOptions { Parent = parent });
+        var child = new Node("child") { Parent = parent };
 
         Assert.Throws<InvalidOperationException>(child.Load);
         Assert.False(child.Loaded);
@@ -129,13 +149,13 @@ public class NodeTests
 
         parent.Subnodes.Add(child);
 
-        Assert.Same(parent, child.Parent.Get());
+        Assert.Same(parent, child.Parent.Value);
         Assert.True(child.Loaded);
         Assert.Equal(1, child.LoadCount);
 
         parent.Subnodes.Remove(child);
 
-        Assert.Null(child.Parent.Get());
+        Assert.Null(child.Parent.Value);
         Assert.False(child.Loaded);
         Assert.Equal(1, child.UnloadCount);
     }
@@ -144,13 +164,13 @@ public class NodeTests
     public void DetachingPersistentChildFromLoadedParent_KeepsChildLoaded()
     {
         var parent = new TrackingNode("parent");
-        var child = new TrackingNode("child", new NodeOptions { Persistent = true });
+        var child = new TrackingNode("child") { Persistent = true };
         parent.Load();
         parent.Subnodes.Add(child);
 
         parent.Subnodes.Remove(child);
 
-        Assert.Null(child.Parent.Get());
+        Assert.Null(child.Parent.Value);
         Assert.True(child.Loaded);
         child.Unload();
     }
@@ -159,11 +179,11 @@ public class NodeTests
     public void Path_ReflectsCurrentNamesAndAncestors()
     {
         var root = new Node("root");
-        var middle = new Node("middle", new NodeOptions { Parent = root });
-        var child = new Node("child", new NodeOptions { Parent = middle });
+        var middle = new Node("middle") { Parent = root };
+        var child = new Node("child") { Parent = middle };
 
         Assert.Equal("root/middle/child", child.Path);
-        middle.Name.Set("renamed");
+        middle.Name.Value = "renamed";
         Assert.Equal("root/renamed/child", child.Path);
         Assert.Contains("root/renamed/child", child.ToString());
     }
@@ -172,15 +192,9 @@ public class NodeTests
     public void NodeReactiveSet_SearchesByIdentifierNamePathAndTag()
     {
         var root = new Node("root");
-        var first = new SpecializedNode(
-            "first",
-            new NodeOptions { Parent = root, Tags = ["shared"] }
-        );
-        var middle = new Node("middle", new NodeOptions { Parent = root });
-        var nested = new SpecializedNode(
-            "nested",
-            new NodeOptions { Parent = middle, Tags = ["shared"] }
-        );
+        var first = new SpecializedNode("first") { Parent = root, Tags = { "shared" } };
+        var middle = new Node("middle") { Parent = root };
+        var nested = new SpecializedNode("nested") { Parent = middle, Tags = { "shared" } };
 
         Assert.Same(first, root.Subnodes.GetByName("first"));
         Assert.Null(root.Subnodes.GetByName("nested"));
@@ -206,8 +220,8 @@ public class NodeTests
     public void NodeReactiveSet_ResolvesRelativePathsAndParentSegments()
     {
         var root = new Node("root");
-        var child = new Node("child", new NodeOptions { Parent = root });
-        var nested = new Node("nested", new NodeOptions { Parent = child });
+        var child = new Node("child") { Parent = root };
+        var nested = new Node("nested") { Parent = child };
 
         Assert.Same(root, root.Subnodes.GetByPath("."));
         Assert.Same(child, root.Subnodes.GetByPath("child"));
@@ -244,8 +258,8 @@ public class NodeTests
     {
         var calls = new List<string>();
         var root = new TrackingNode("root", calls: calls);
-        var child = new TrackingNode("child", new NodeOptions { Parent = root }, calls);
-        var grandchild = new TrackingNode("grandchild", new NodeOptions { Parent = child }, calls);
+        var child = new TrackingNode("child", calls) { Parent = root };
+        var grandchild = new TrackingNode("grandchild", calls) { Parent = child };
 
         root.Load();
 
@@ -279,11 +293,8 @@ public class NodeTests
     public void Unload_PreservesLoadedPersistentChildren()
     {
         var root = new TrackingNode("root");
-        var regular = new TrackingNode("regular", new NodeOptions { Parent = root });
-        var persistent = new TrackingNode(
-            "persistent",
-            new NodeOptions { Parent = root, Persistent = true }
-        );
+        var regular = new TrackingNode("regular") { Parent = root };
+        var persistent = new TrackingNode("persistent") { Parent = root, Persistent = true };
 
         root.Load();
         root.Unload();
@@ -302,15 +313,8 @@ public class NodeTests
     {
         var calls = new List<string>();
         var root = new TrackingNode("root", calls: calls);
-        var successfulChild = new TrackingNode(
-            "successful",
-            new NodeOptions { Parent = root },
-            calls
-        );
-        var failingChild = new TrackingNode("failing", new NodeOptions { Parent = root }, calls)
-        {
-            FailLoad = true,
-        };
+        var successfulChild = new TrackingNode("successful", calls) { Parent = root };
+        var failingChild = new TrackingNode("failing", calls) { Parent = root, FailLoad = true };
 
         Assert.Throws<InvalidOperationException>(root.Load);
 
@@ -334,16 +338,10 @@ public class NodeTests
     public void Load_WhenChildLoadFails_PreservesPreviouslyLoadedPersistentChildren()
     {
         var root = new TrackingNode("root");
-        var persistent = new TrackingNode(
-            "persistent",
-            new NodeOptions { Parent = root, Persistent = true }
-        );
+        var persistent = new TrackingNode("persistent") { Parent = root, Persistent = true };
         root.Load();
         root.Unload();
-        var failing = new TrackingNode("failing", new NodeOptions { Parent = root })
-        {
-            FailLoad = true,
-        };
+        var failing = new TrackingNode("failing") { Parent = root, FailLoad = true };
 
         Assert.Throws<InvalidOperationException>(root.Load);
 
@@ -369,14 +367,8 @@ public class NodeTests
     public void Load_WhenRollbackCleanupFails_AggregatesAndCanBeRetried()
     {
         var root = new TrackingNode("root");
-        var child = new TrackingNode("child", new NodeOptions { Parent = root })
-        {
-            FailUnload = true,
-        };
-        var failing = new TrackingNode("failing", new NodeOptions { Parent = root })
-        {
-            FailLoad = true,
-        };
+        var child = new TrackingNode("child") { Parent = root, FailUnload = true };
+        var failing = new TrackingNode("failing") { Parent = root, FailLoad = true };
 
         var exception = Assert.Throws<AggregateException>(root.Load);
 
@@ -397,10 +389,7 @@ public class NodeTests
     public void Unload_WhenChildCleanupFails_LeavesParentLoadedForRetry()
     {
         var root = new TrackingNode("root");
-        var child = new TrackingNode("child", new NodeOptions { Parent = root })
-        {
-            FailUnload = true,
-        };
+        var child = new TrackingNode("child") { Parent = root, FailUnload = true };
         root.Load();
 
         Assert.Throws<InvalidOperationException>(root.Unload);
@@ -449,7 +438,7 @@ public class NodeTests
     public void Destroy_UnloadsAndDestroysDescendantsAndOwnedStores()
     {
         var root = new TrackingNode("root");
-        var child = new TrackingNode("child", new NodeOptions { Parent = root });
+        var child = new TrackingNode("child") { Parent = root };
         root.Load();
 
         root.Destroy();
@@ -468,10 +457,7 @@ public class NodeTests
     public void Destroy_WhenChildUnloadFails_DoesNotMarkParentDestroyedAndCanRetry()
     {
         var root = new TrackingNode("root");
-        var child = new TrackingNode("child", new NodeOptions { Parent = root })
-        {
-            FailUnload = true,
-        };
+        var child = new TrackingNode("child") { Parent = root, FailUnload = true };
         root.Load();
 
         Assert.Throws<InvalidOperationException>(root.Destroy);
@@ -493,7 +479,7 @@ public class NodeTests
         node.Destroy();
 
         Assert.Throws<DestroyedObjectException>(node.Load);
-        Assert.Throws<DestroyedObjectException>(() => node.Parent.Set(parent));
+        Assert.Throws<DestroyedObjectException>(() => node.Parent.Value = parent);
     }
 
     [Fact]
@@ -504,11 +490,9 @@ public class NodeTests
         Assert.Equal($"Node \"node\" ({node.Identifier.ToString()[..8]})", node.ToString());
     }
 
-    private sealed class SpecializedNode(string name, NodeOptions? options = null)
-        : Node(name, options);
+    private sealed class SpecializedNode(string name) : Node(name);
 
-    private class TrackingNode(string name, NodeOptions? options = null, List<string>? calls = null)
-        : Node(name, options)
+    private class TrackingNode(string name, List<string>? calls = null) : Node(name)
     {
         public bool FailLoad { get; set; }
         public bool FailUnload { get; set; }
@@ -518,7 +502,7 @@ public class NodeTests
         protected override void OnLoad()
         {
             LoadCount++;
-            calls?.Add($"load:{Name.Get()}");
+            calls?.Add($"load:{Name.Value}");
             if (FailLoad)
                 throw new InvalidOperationException("load failure");
         }
@@ -526,7 +510,7 @@ public class NodeTests
         protected override void OnUnload()
         {
             UnloadCount++;
-            calls?.Add($"unload:{Name.Get()}");
+            calls?.Add($"unload:{Name.Value}");
             if (FailUnload)
                 throw new InvalidOperationException("unload failure");
         }

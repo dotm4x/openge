@@ -169,7 +169,7 @@ public sealed class SDL3RenderBackend : RenderBackend
     private void EnsureDevice()
     {
         CheckThread();
-        if (!_window.Opened.Get() || _window.Native == IntPtr.Zero)
+        if (!_window.Opened.Value || _window.Native == IntPtr.Zero)
             throw new InvalidOperationException("The SDL window must be open before rendering.");
         if (_device != IntPtr.Zero)
         {
@@ -524,7 +524,7 @@ public sealed class SDL3RenderBackend : RenderBackend
     {
         EnsureDevice();
         RemoveDestroyedResources();
-        _logicalSize = _window.Size.Get();
+        _logicalSize = _window.Size.Value;
         _commandBuffer = SDL.AcquireGPUCommandBuffer(_device);
         if (_commandBuffer == IntPtr.Zero)
             throw SDL3Gpu.Error("Acquiring a GPU command buffer");
@@ -658,7 +658,7 @@ public sealed class SDL3RenderBackend : RenderBackend
         {
             _currentTarget = null;
             _currentTexture = _swapchainTexture;
-            _logicalSize = _window.Size.Get();
+            _logicalSize = _window.Size.Value;
             _width = _swapchainWidth;
             _height = _swapchainHeight;
             _targetFormat = SDL.GetGPUSwapchainTextureFormat(_device, _claimedWindow);

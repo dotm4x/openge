@@ -5,40 +5,6 @@ using OpenGE.Noding;
 namespace OpenGE.Spatial.Nodes;
 
 /// <summary>
-/// Provides optional values used to initialize a <see cref="Node2D"/>.
-/// </summary>
-public class Node2DOptions : NodeOptions
-{
-    /// <summary>
-    /// Gets the initial local origin used as the center of scale and rotation.
-    /// The default is <see cref="Vector2.Zero"/>.
-    /// </summary>
-    /// <remarks>
-    /// Coordinates use the same application-defined units as <see cref="Position"/>.
-    /// </remarks>
-    public Vector2 Origin { get; init; } = Vector2.Zero;
-
-    /// <summary>
-    /// Gets the initial local position of the origin relative to the nearest
-    /// <see cref="Node2D"/> ancestor.
-    /// The default is <see cref="Vector2.Zero"/>.
-    /// </summary>
-    public Vector2 Position { get; init; } = Vector2.Zero;
-
-    /// <summary>
-    /// Gets the initial local rotation in radians.
-    /// The default is <c>0</c>.
-    /// </summary>
-    public float Rotation { get; init; } = 0f;
-
-    /// <summary>
-    /// Gets the initial local scale factor.
-    /// The default is <see cref="Vector2.One"/>.
-    /// </summary>
-    public Vector2 Scale { get; init; } = Vector2.One;
-}
-
-/// <summary>
 /// Represents a node positioned in two-dimensional space.
 /// </summary>
 /// <remarks>
@@ -56,45 +22,39 @@ public class Node2D : Node
     private bool _hasCachedLocalTransform;
 
     /// <summary>
-    /// Gets the local origin around which this node and its descendants
-    /// are scaled and rotated.
+    /// Gets the local origin around which this node and its descendants are
+    /// scaled and rotated.
     /// </summary>
-    public readonly Store<Vector2> Origin;
+    public Store<Vector2> Origin { get; init; } = new(Vector2.Zero);
 
     /// <summary>
-    /// Gets the position of the origin relative to the nearest
-    /// <see cref="Node2D"/> ancestor.
+    /// Gets the position of the origin relative to the nearest <see cref="Node2D"/>
+    /// ancestor.
     /// </summary>
-    public readonly Store<Vector2> Position;
+    public Store<Vector2> Position { get; init; } = new(Vector2.Zero);
 
     /// <summary>
     /// Gets the local rotation, expressed in radians.
     /// </summary>
-    public readonly Store<float> Rotation;
+    public Store<float> Rotation { get; init; } = new(0f);
 
     /// <summary>
     /// Gets the local scale.
     /// </summary>
-    public readonly Store<Vector2> Scale;
+    public Store<Vector2> Scale { get; init; } = new(Vector2.One);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Node2D"/> class.
     /// </summary>
-    /// <param name="name">The initial name of the node.</param>
-    /// <param name="options">
-    /// The initial two-dimensional transformation and node values,
-    /// or <see langword="null"/> for defaults.
+    /// <remarks>
+    /// Initial values are assigned through an object initializer, for example
+    /// <c>new Node2D { Position = new Vector2(10, 20) }</c>.
+    /// </remarks>
+    /// <param name="name">
+    /// The initial name of the node. The default is <c>"Node2D"</c>.
     /// </param>
-    public Node2D(string name = "Node2D", Node2DOptions? options = null)
-        : base(name, options)
-    {
-        options ??= new Node2DOptions();
-
-        Origin = new Store<Vector2>(options.Origin);
-        Position = new Store<Vector2>(options.Position);
-        Rotation = new Store<float>(options.Rotation);
-        Scale = new Store<Vector2>(options.Scale);
-    }
+    public Node2D(string name = "Node2D")
+        : base(name) { }
 
     /// <summary>
     /// Gets or sets the world position of this node's origin.
@@ -112,7 +72,7 @@ public class Node2D : Node
     /// </exception>
     public Vector2 GlobalPosition
     {
-        get => Vector2.Transform(Origin.Get(), GlobalTransform);
+        get => Vector2.Transform(Origin.Value, GlobalTransform);
         set
         {
             var parentTransform = GetParentTransform();
@@ -124,7 +84,7 @@ public class Node2D : Node
                 );
             }
 
-            Position.Set(Vector2.Transform(value, inverse));
+            Position.Value = Vector2.Transform(value, inverse);
         }
     }
 
@@ -152,7 +112,7 @@ public class Node2D : Node
 
             var parentRotation = MathF.Atan2(parentTransform.M12, parentTransform.M11);
 
-            Rotation.Set(value - parentRotation);
+            Rotation.Value = value - parentRotation;
         }
     }
 
@@ -170,14 +130,14 @@ public class Node2D : Node
         get
         {
             var transform = LocalTransform;
-            var ancestor = Parent.Get();
+            var ancestor = Parent.Value;
 
             while (ancestor is not null)
             {
                 if (ancestor is Node2D node)
                     transform *= node.LocalTransform;
 
-                ancestor = ancestor.Parent.Get();
+                ancestor = ancestor.Parent.Value;
             }
 
             return transform;
@@ -195,10 +155,10 @@ public class Node2D : Node
     {
         get
         {
-            var origin = Origin.Get();
-            var position = Position.Get();
-            var rotation = Rotation.Get();
-            var scale = Scale.Get();
+            var origin = Origin.Value;
+            var position = Position.Value;
+            var rotation = Rotation.Value;
+            var scale = Scale.Value;
 
             if (
                 !_hasCachedLocalTransform
@@ -228,14 +188,14 @@ public class Node2D : Node
     private Matrix3x2 GetParentTransform()
     {
         var transform = Matrix3x2.Identity;
-        var ancestor = Parent.Get();
+        var ancestor = Parent.Value;
 
         while (ancestor is not null)
         {
             if (ancestor is Node2D node)
                 transform *= node.LocalTransform;
 
-            ancestor = ancestor.Parent.Get();
+            ancestor = ancestor.Parent.Value;
         }
 
         return transform;

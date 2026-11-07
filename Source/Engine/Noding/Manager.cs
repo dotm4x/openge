@@ -49,10 +49,10 @@ public class NodeManager : Module
 
         try
         {
-            Roots.Add(initial.Name.Get(), initial);
+            Roots.Add(initial.Name.Value, initial);
 
             foreach (var root in roots ?? [])
-                Roots.Add(root.Name.Get(), root);
+                Roots.Add(root.Name.Value, root);
         }
         catch
         {
@@ -95,11 +95,11 @@ public class NodeManager : Module
         {
             try
             {
-                Roots.Add(root.Name.Get(), root);
+                Roots.Add(root.Name.Value, root);
             }
             catch
             {
-                if (root.RootOwner is null && root.Parent.Get() is null && !root.Destroyed)
+                if (root.RootOwner is null && root.Parent.Value is null && !root.Destroyed)
                     root.Destroy();
 
                 throw;
@@ -154,7 +154,7 @@ public class NodeManager : Module
         if (_restoringRoots)
             return;
 
-        if (!ReferenceEquals(entry.Value, _activeRoot.Get()))
+        if (!ReferenceEquals(entry.Value, _activeRoot.Value))
         {
             entry.Value.RootOwner = null;
             return;
@@ -188,7 +188,7 @@ public class NodeManager : Module
 
         try
         {
-            if (ReferenceEquals(change.Previous.Value, _activeRoot.Get()))
+            if (ReferenceEquals(change.Previous.Value, _activeRoot.Value))
             {
                 throw new InvalidOperationException(
                     $"Cannot replace active root '{change.Previous.Key}'. Switch roots first."
@@ -243,10 +243,10 @@ public class NodeManager : Module
         try
         {
             next.Load();
-            _activeRoot.Set(next);
+            _activeRoot.Value = next;
 
             Logger.Log(
-                $"NodeManager switched active root from '{current.Name.Get()}' to '{next.Name.Get()}'."
+                $"NodeManager switched active root from '{current.Name.Value}' to '{next.Name.Value}'."
             );
         }
         catch (Exception exception)
@@ -276,7 +276,7 @@ public class NodeManager : Module
             var selected = next.Loaded ? next : current;
             try
             {
-                _activeRoot.Set(selected);
+                _activeRoot.Value = selected;
             }
             catch (Exception notificationFailure)
             {
@@ -297,7 +297,7 @@ public class NodeManager : Module
 
             if (failures.Count != 0)
                 throw new AggregateException(
-                    $"Switching root from '{current.Name.Get()}' to '{next.Name.Get()}' and recovery failed.",
+                    $"Switching root from '{current.Name.Value}' to '{next.Name.Value}' and recovery failed.",
                     [exception, .. failures]
                 );
 
@@ -322,7 +322,7 @@ public class NodeManager : Module
 
     private static void ValidateLoadableRoot(Node root)
     {
-        if (root.Parent.Get() is not null)
+        if (root.Parent.Value is not null)
         {
             throw new InvalidOperationException(
                 $"{root} cannot be loaded as a root because it has a parent."
@@ -342,7 +342,7 @@ public class NodeManager : Module
                 "The root is already owned by another node manager."
             );
 
-        if (root.Parent.Get() is not null)
+        if (root.Parent.Value is not null)
         {
             throw new InvalidOperationException(
                 $"{root} cannot be registered as a root because it has a parent."
@@ -402,7 +402,7 @@ public class NodeManager : Module
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        var active = _activeRoot.Get();
+        var active = _activeRoot.Value;
 
         if (active.Loaded)
             active.Unload();
@@ -444,12 +444,12 @@ public class NodeManager : Module
         foreach (var root in Roots.Values)
             root.Inject(_nodeContext);
 
-        var active = _activeRoot.Get();
+        var active = _activeRoot.Value;
 
         ValidateLoadableRoot(active);
         active.Load();
 
-        Logger.Log($"NodeManager loaded active root '{active.Name.Get()}'.");
+        Logger.Log($"NodeManager loaded active root '{active.Name.Value}'.");
         Logger.Log("Module started.");
     }
 
@@ -515,18 +515,18 @@ public class NodeManager : Module
             throw new InvalidOperationException($"Root '{identifier}' does not exist.");
         }
 
-        var current = _activeRoot.Get();
+        var current = _activeRoot.Value;
 
         if (ReferenceEquals(current, next))
             return;
 
-        var state = State.Get();
+        var state = State.Value;
 
         switch (state)
         {
             case ModuleState.Idle:
                 ValidateLoadableRoot(next);
-                _activeRoot.Set(next);
+                _activeRoot.Value = next;
                 if (InjectedDependencies is not null)
                     Logger.Log($"Selected inactive root '{identifier}'.", LogMessageKind.Debug);
                 break;

@@ -15,7 +15,7 @@ public class EngineTests
         var engine = new TestEngine(calls, dependency, consumer);
 
         engine.Start();
-        Assert.Equal(EngineState.Running, engine.State.Get());
+        Assert.Equal(EngineState.Running, engine.State.Value);
         engine.Stop();
 
         Assert.Equal(
@@ -29,7 +29,7 @@ public class EngineTests
             },
             calls
         );
-        Assert.Equal(EngineState.Idle, engine.State.Get());
+        Assert.Equal(EngineState.Idle, engine.State.Value);
     }
 
     [Fact]
@@ -53,8 +53,8 @@ public class EngineTests
 
         Assert.Throws<InvalidOperationException>(engine.Start);
 
-        Assert.Equal(EngineState.Idle, engine.State.Get());
-        Assert.Equal(ModuleState.Idle, consumer.State.Get());
+        Assert.Equal(EngineState.Idle, engine.State.Value);
+        Assert.Equal(ModuleState.Idle, consumer.State.Value);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class EngineTests
         var exception = Assert.Throws<InvalidOperationException>(engine.Start);
 
         Assert.Contains("Circular dependency", exception.Message);
-        Assert.Equal(EngineState.Idle, engine.State.Get());
+        Assert.Equal(EngineState.Idle, engine.State.Value);
     }
 
     [Fact]
@@ -84,9 +84,9 @@ public class EngineTests
             new[] { "compose", "start:first", "start:second", "stop:second", "stop:first" },
             calls
         );
-        Assert.Equal(EngineState.Idle, engine.State.Get());
-        Assert.Equal(ModuleState.Idle, first.State.Get());
-        Assert.Equal(ModuleState.Idle, second.State.Get());
+        Assert.Equal(EngineState.Idle, engine.State.Value);
+        Assert.Equal(ModuleState.Idle, first.State.Value);
+        Assert.Equal(ModuleState.Idle, second.State.Value);
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class EngineTests
         Assert.Throws<InvalidOperationException>(engine.Destroy);
 
         Assert.False(engine.Destroyed);
-        Assert.Equal(EngineState.Running, engine.State.Get());
+        Assert.Equal(EngineState.Running, engine.State.Value);
         engine.Stop();
     }
 

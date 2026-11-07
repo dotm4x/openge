@@ -35,8 +35,8 @@ public class WindowManagerTests
         var context = new UpdateContext(0.5, 20);
 
         engine.Start();
-        Assert.True(first.Opened.Get());
-        Assert.True(second.Opened.Get());
+        Assert.True(first.Opened.Value);
+        Assert.True(second.Opened.Value);
         manager.Update(context);
 
         Assert.Equal(1, first.ProcessCount);
@@ -46,8 +46,8 @@ public class WindowManagerTests
 
         engine.Stop();
 
-        Assert.False(first.Opened.Get());
-        Assert.False(second.Opened.Get());
+        Assert.False(first.Opened.Value);
+        Assert.False(second.Opened.Value);
         Assert.Throws<InvalidOperationException>(() => manager.Update(context));
     }
 
@@ -61,10 +61,10 @@ public class WindowManagerTests
 
         Assert.Throws<InvalidOperationException>(engine.Start);
 
-        Assert.False(first.Opened.Get());
-        Assert.False(second.Opened.Get());
+        Assert.False(first.Opened.Value);
+        Assert.False(second.Opened.Value);
         Assert.Equal(1, first.CloseCount);
-        Assert.Equal(ModuleState.Idle, manager.State.Get());
+        Assert.Equal(ModuleState.Idle, manager.State.Value);
     }
 
     [Fact]

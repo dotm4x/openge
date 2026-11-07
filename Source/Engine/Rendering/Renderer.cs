@@ -171,29 +171,29 @@ public class Renderer : Module, IUpdatable
     {
         ThrowIfDestroyed();
 
-        if (State.Get() != ModuleState.Running)
+        if (State.Value != ModuleState.Running)
         {
             throw new InvalidOperationException("The module must be running before rendering.");
         }
 
-        if (!Window.Opened.Get())
+        if (!Window.Opened.Value)
             return;
 
-        var backend = _activeBackend.Get();
+        var backend = _activeBackend.Value;
 
         backend.BeginFrame();
         Exception? renderingFailure = null;
 
         try
         {
-            ClearCommand clear = new(ClearColor.Get());
+            ClearCommand clear = new(ClearColor.Value);
             HashSet<RenderTarget> preparedTargets = [];
 
             backend.Render([clear]);
 
             foreach (var space in _spaceOrder.OrderBy(space => space.Priority))
             {
-                var camera = space.Camera.Get();
+                var camera = space.Camera.Value;
 
                 if (camera is null)
                 {
@@ -202,12 +202,12 @@ public class Renderer : Module, IUpdatable
                     );
                 }
 
-                var target = space.Target.Get();
+                var target = space.Target.Value;
 
                 if (target is not null && preparedTargets.Add(target))
                     backend.Render([clear], target);
 
-                var viewport = new Viewport(Vector2.Zero, target?.Size ?? Window.Size.Get());
+                var viewport = new Viewport(Vector2.Zero, target?.Size ?? Window.Size.Value);
 
                 var renderContext = new RenderContext(context.DeltaTime, camera, viewport);
 
@@ -344,7 +344,7 @@ public class Renderer : Module, IUpdatable
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        var state = State.Get();
+        var state = State.Value;
         if (state != ModuleState.Idle)
             throw new InvalidOperationException(
                 $"Renderer cannot be destroyed while in state '{state}'."
@@ -436,10 +436,10 @@ public class Renderer : Module, IUpdatable
             );
         }
 
-        if (ReferenceEquals(_activeBackend.Get(), backend))
+        if (ReferenceEquals(_activeBackend.Value, backend))
             return;
 
-        _activeBackend.Set(backend);
+        _activeBackend.Value = backend;
 
         if (InjectedDependencies is not null)
         {

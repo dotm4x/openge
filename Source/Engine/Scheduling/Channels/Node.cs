@@ -40,6 +40,6 @@ public class NodeUpdateChannel(
     /// <inheritdoc />
     protected override void OnUpdate(UpdateContext context)
     {
-        Visit(_graph.ActiveRoot.Get(), context);
+        Visit(_graph.ActiveRoot.Value, context);
     }
 }

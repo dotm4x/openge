@@ -218,7 +218,7 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     public readonly IReadOnlyStore<bool> Focused;
 
     /// <summary>
-    /// Gets the store that controls and reports the window's display mode.
+    /// Gets the display mode of the window.
     /// </summary>
     public readonly Store<WindowMode> Mode;
 
@@ -228,7 +228,7 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     public readonly IReadOnlyStore<bool> Opened;
 
     /// <summary>
-    /// Gets the store that controls and reports the position of the window's client area.
+    /// Gets the position of the window's client area.
     /// </summary>
     /// <remarks>
     /// The position is expressed in screen coordinates.
@@ -236,12 +236,12 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     public readonly Store<Vector2> Position;
 
     /// <summary>
-    /// Gets the store that controls and reports whether the window is resizable.
+    /// Gets whether the window is resizable.
     /// </summary>
     public readonly Store<bool> Resizable;
 
     /// <summary>
-    /// Gets the store that controls and reports the size of the window's client area.
+    /// Gets the size of the window's client area.
     /// </summary>
     /// <remarks>
     /// The size is expressed in pixels.
@@ -249,12 +249,12 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     public readonly Store<Vector2> Size;
 
     /// <summary>
-    /// Gets the store that controls and reports the title of the window.
+    /// Gets the title of the window.
     /// </summary>
     public readonly Store<string> Title;
 
     /// <summary>
-    /// Gets the store that controls and reports whether the window is visible.
+    /// Gets whether the window is visible.
     /// </summary>
     public readonly Store<bool> Visible;
 
@@ -320,7 +320,7 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     {
         ThrowIfDestroyed();
 
-        if (_opened.Get())
+        if (_opened.Value)
             OnProcess();
     }
 
@@ -332,7 +332,7 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        if (_opened.Get())
+        if (_opened.Value)
         {
             _closing.Fire(Unit.Value);
             OnClose();
@@ -411,7 +411,7 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     {
         ThrowIfDestroyed();
 
-        if (EqualityComparer<TValue>.Default.Equals(store.Get(), value))
+        if (EqualityComparer<TValue>.Default.Equals(store.Value, value))
             return;
 
         var previousStore = _publishingStore;
@@ -422,7 +422,7 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
 
         try
         {
-            store.Set(value);
+            store.Value = value;
         }
         finally
         {
@@ -507,7 +507,7 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     /// </returns>
     protected bool ShouldApply<TValue>(Store<TValue> store, TValue value)
     {
-        if (!EqualityComparer<TValue>.Default.Equals(store.Get(), value))
+        if (!EqualityComparer<TValue>.Default.Equals(store.Value, value))
             return false;
 
         return !(
@@ -526,7 +526,7 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     {
         ThrowIfDestroyed();
 
-        if (!_opened.Get())
+        if (!_opened.Value)
             return;
 
         _closing.Fire(Unit.Value);
@@ -535,8 +535,8 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
         if (Destroyed)
             return;
 
-        _focused.Set(false);
-        _opened.Set(false);
+        _focused.Value = false;
+        _opened.Value = false;
     }
 
     /// <summary>
@@ -549,12 +549,12 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     {
         ThrowIfDestroyed();
 
-        if (_opened.Get())
+        if (_opened.Value)
             return;
 
         OnOpen();
 
         if (!Destroyed)
-            _opened.Set(true);
+            _opened.Value = true;
     }
 }

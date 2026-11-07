@@ -88,7 +88,7 @@ public class SDL3Mouse : OpenGE.Handling.Devices.Mouse.Mouse
             );
         }
 
-        if (!window.Opened.Get())
+        if (!window.Opened.Value)
             return;
 
         var windowId = SDL.GetWindowID(window.Native);

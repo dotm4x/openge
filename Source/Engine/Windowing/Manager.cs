@@ -64,7 +64,7 @@ public class WindowManager : Module, IUpdatable
     {
         ThrowIfDestroyed();
 
-        if (State.Get() != ModuleState.Running)
+        if (State.Value != ModuleState.Running)
             throw new InvalidOperationException(
                 "The module must be running before processing updates."
             );
@@ -175,7 +175,7 @@ public class WindowManager : Module, IUpdatable
             {
                 try
                 {
-                    if (openedWindows[index].Opened.Get())
+                    if (openedWindows[index].Opened.Value)
                         openedWindows[index].Close();
                 }
                 catch (Exception cleanupFailure)
@@ -203,7 +203,7 @@ public class WindowManager : Module, IUpdatable
     {
         foreach (var window in Enumerable.Reverse(_orderedWindows))
         {
-            if (window.Opened.Get())
+            if (window.Opened.Value)
             {
                 window.Close();
                 Logger.Log($"Closed window '{window.Identifier}'.");

@@ -28,7 +28,7 @@ public class MouseTests
 
         mouse.PublishButtonPayload(payload);
 
-        Assert.Equal(payload.Position, mouse.Position.Get());
+        Assert.Equal(payload.Position, mouse.Position.Value);
         Assert.Equal(new[] { payload }, leftPayloads);
         Assert.Empty(rightPayloads);
     }
@@ -43,8 +43,8 @@ public class MouseTests
 
         mouse.PublishMovePayload(payload);
 
-        Assert.Equal(payload.Position, mouse.Position.Get());
-        Assert.Equal(payload, mouse.OnMove.Get());
+        Assert.Equal(payload.Position, mouse.Position.Value);
+        Assert.Equal(payload, mouse.OnMove.Value);
         Assert.Equal(new[] { payload }, movements);
     }
 
@@ -58,7 +58,7 @@ public class MouseTests
 
         mouse.PublishWheelPayload(payload);
 
-        Assert.Equal(payload.Position, mouse.Position.Get());
+        Assert.Equal(payload.Position, mouse.Position.Value);
         Assert.Equal(new[] { payload }, wheelEvents);
     }
 

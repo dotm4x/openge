@@ -24,16 +24,16 @@ public class CursorTests
             }
         );
 
-        Assert.Equal(Vector2.Zero, defaultCursor.Hotspot.Get());
-        Assert.Null(defaultCursor.Icon.Get());
-        Assert.Equal(SystemCursor.Default, defaultCursor.SystemIcon.Get());
-        Assert.True(defaultCursor.Visible.Get());
+        Assert.Equal(Vector2.Zero, defaultCursor.Hotspot.Value);
+        Assert.Null(defaultCursor.Icon.Value);
+        Assert.Equal(SystemCursor.Default, defaultCursor.SystemIcon.Value);
+        Assert.True(defaultCursor.Visible.Value);
         Assert.Equal("default", defaultCursor.Identifier);
 
-        Assert.Equal(new Vector2(2, 3), configuredCursor.Hotspot.Get());
-        Assert.Same(image, configuredCursor.Icon.Get());
-        Assert.Equal(SystemCursor.Pointer, configuredCursor.SystemIcon.Get());
-        Assert.False(configuredCursor.Visible.Get());
+        Assert.Equal(new Vector2(2, 3), configuredCursor.Hotspot.Value);
+        Assert.Same(image, configuredCursor.Icon.Value);
+        Assert.Equal(SystemCursor.Pointer, configuredCursor.SystemIcon.Value);
+        Assert.False(configuredCursor.Visible.Value);
     }
 
     [Theory]
@@ -51,10 +51,10 @@ public class CursorTests
         var image = new Image(1, 1, new byte[] { 1, 2, 3, 4 });
         var hotspot = new Vector2(4, 5);
 
-        cursor.Hotspot.Set(hotspot);
-        cursor.Icon.Set(image);
-        cursor.SystemIcon.Set(SystemCursor.Crosshair);
-        cursor.Visible.Set(false);
+        cursor.Hotspot.Value = hotspot;
+        cursor.Icon.Value = image;
+        cursor.SystemIcon.Value = SystemCursor.Crosshair;
+        cursor.Visible.Value = false;
 
         Assert.Equal(new[] { hotspot }, cursor.HotspotChanges);
         Assert.Equal(new[] { image }, cursor.IconChanges);

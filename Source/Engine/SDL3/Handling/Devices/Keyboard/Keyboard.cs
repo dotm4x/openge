@@ -32,7 +32,7 @@ public class SDL3Keyboard(params InputEvent<KeyboardEventPayload, KeyboardKey>[]
             );
         }
 
-        if (!window.Opened.Get())
+        if (!window.Opened.Value)
             return;
 
         var windowId = SDL.GetWindowID(window.Native);

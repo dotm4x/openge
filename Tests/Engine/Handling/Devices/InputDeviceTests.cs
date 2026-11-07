@@ -44,7 +44,7 @@ public class InputDeviceTests
         Assert.True(inputEvent.Destroyed);
         Assert.True(source.Destroyed);
         Assert.Throws<DestroyedObjectException>(() => inputEvent.Fire("payload"));
-        Assert.Throws<DestroyedObjectException>(() => inputEvent.Source.Set(2));
+        Assert.Throws<DestroyedObjectException>(() => inputEvent.Source.Value = 2);
     }
 
     private sealed class TestInputDevice(string identifier) : InputDevice(identifier)

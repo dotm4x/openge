@@ -188,13 +188,13 @@ public sealed class SDL3Window : Window
     {
         if (Native != IntPtr.Zero)
             return;
-        var (width, height) = SizeToNative(Size.Get());
+        var (width, height) = SizeToNative(Size.Value);
         var flags = (SDL.WindowFlags)0;
-        if (Resizable.Get())
+        if (Resizable.Value)
             flags |= SDL.WindowFlags.Resizable;
-        if (!Visible.Get())
+        if (!Visible.Value)
             flags |= SDL.WindowFlags.Hidden;
-        flags |= Mode.Get() switch
+        flags |= Mode.Value switch
         {
             WindowMode.Normal => 0,
             WindowMode.Minimized => SDL.WindowFlags.Minimized,
@@ -205,20 +205,20 @@ public sealed class SDL3Window : Window
         VideoRuntime.Acquire();
         try
         {
-            Native = SDL.CreateWindow(Title.Get(), width, height, flags);
+            Native = SDL.CreateWindow(Title.Value, width, height, flags);
             if (Native == IntPtr.Zero)
                 throw new InvalidOperationException($"Creating window failed: {SDL.GetError()}");
             _id = SDL.GetWindowID(Native);
             Windows.Add(_id, this);
-            if (HasInitialPosition && Mode.Get() == WindowMode.Normal)
+            if (HasInitialPosition && Mode.Value == WindowMode.Normal)
             {
-                var (x, y) = PositionToNative(Position.Get());
+                var (x, y) = PositionToNative(Position.Value);
                 Ensure(SDL.SetWindowPosition(Native, x, y), "Setting initial position");
             }
             _lastTitleChange = Stopwatch.GetTimestamp();
             _titlePending = false;
             Synchronize();
-            if (Cursor.Get() is { } cursor)
+            if (Cursor.Value is { } cursor)
             {
                 if (cursor is not SDLCursor)
                     throw new ArgumentException("An SDL window requires an SDLCursor.");
@@ -293,7 +293,7 @@ public sealed class SDL3Window : Window
         var now = Stopwatch.GetTimestamp();
         if (_titlePending && Stopwatch.GetElapsedTime(_lastTitleChange, now) >= TitleInterval)
         {
-            var requested = Title.Get();
+            var requested = Title.Value;
             if (SDL.GetWindowTitle(Native) != requested)
                 Ensure(SDL.SetWindowTitle(Native, requested), "Changing title");
             _titlePending = false;

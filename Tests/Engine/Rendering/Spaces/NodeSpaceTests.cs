@@ -20,7 +20,7 @@ public class NodeRenderSpaceTests
         var grandchild = new RenderableNode("grandchild", "grandchild");
         firstChild.Subnodes.Add(grandchild);
         var secondChild = new RenderableNode("second", "second");
-        var root = new RenderableNode("root", "root", [firstChild, secondChild]);
+        var root = new RenderableNode("root", "root") { Subnodes = { firstChild, secondChild } };
         var manager = new NodeManager(root);
         var engine = new TestEngine(new Logger(), manager);
 
@@ -51,7 +51,7 @@ public class NodeRenderSpaceTests
     {
         var visible = new RenderableNode("visible", "visible");
         var unloaded = new RenderableNode("unloaded", "unloaded");
-        var root = new Node("root", new NodeOptions { Subnodes = [visible, unloaded] });
+        var root = new Node("root") { Subnodes = { visible, unloaded } };
         var manager = new NodeManager(root);
         var engine = new TestEngine(new Logger(), manager);
 
@@ -72,10 +72,10 @@ public class NodeRenderSpaceTests
     public void Collect_SkipsInvisibleSubtrees()
     {
         var hiddenChild = new RenderableNode("hidden-child", "hidden-child");
-        var hidden = new RenderableNode("hidden", "hidden", [hiddenChild]);
-        hidden.Visible.Set(false);
+        var hidden = new RenderableNode("hidden", "hidden") { Subnodes = { hiddenChild } };
+        hidden.Visible.Value = false;
         var visible = new RenderableNode("visible", "visible");
-        var root = new Node("root", new NodeOptions { Subnodes = [hidden, visible] });
+        var root = new Node("root") { Subnodes = { hidden, visible } };
         var manager = new NodeManager(root);
         var engine = new TestEngine(new Logger(), manager);
 
@@ -102,15 +102,11 @@ public class NodeRenderSpaceTests
         space.Destroy();
 
         Assert.False(manager.Destroyed);
-        Assert.False(manager.ActiveRoot.Get().Destroyed);
+        Assert.False(manager.ActiveRoot.Value.Destroyed);
         manager.Destroy();
     }
 
-    private sealed class RenderableNode(
-        string name,
-        string command,
-        IEnumerable<Node>? children = null
-    ) : Node(name, new NodeOptions { Subnodes = children }), IRenderable
+    private sealed class RenderableNode(string name, string command) : Node(name), IRenderable
     {
         public RenderData Render(IRenderContext context)
         {

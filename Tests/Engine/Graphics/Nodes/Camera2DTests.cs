@@ -10,7 +10,7 @@ public class Camera2DTests
     [Fact]
     public void GetProjection_UsesViewportSizeAndZoom()
     {
-        var camera = new Camera2D("camera", new Camera2DOptions { Zoom = 2f });
+        var camera = new Camera2D("camera") { Zoom = 2f };
         var viewport = new Viewport(Vector2.Zero, new Vector2(800, 600));
 
         var projection = camera.GetProjection(viewport);
@@ -22,24 +22,24 @@ public class Camera2DTests
         Assert.Equal(0f, projection.M42, precision: 5);
     }
 
-    [Fact]
-    public void GetProjection_WhenZoomIsInvalid_ThrowsInvalidOperationException()
+    [Theory]
+    [InlineData(0f)]
+    [InlineData(-1f)]
+    [InlineData(float.NaN)]
+    [InlineData(float.PositiveInfinity)]
+    public void Zoom_SetInvalidValue_ThrowsAndKeepsPreviousValue(float zoom)
     {
-        var camera = new Camera2D();
+        var camera = new Camera2D("camera") { Zoom = 2f };
 
-        camera.Zoom.Set(0f);
+        Assert.Throws<ArgumentOutOfRangeException>(() => camera.Zoom.Value = zoom);
 
-        Assert.Throws<InvalidOperationException>(() => camera.GetProjection(default));
-
-        camera.Zoom.Set(float.NaN);
-
-        Assert.Throws<InvalidOperationException>(() => camera.GetProjection(default));
+        Assert.Equal(2f, camera.Zoom.Value);
     }
 
     [Fact]
     public void View_MapsGlobalPositionToCameraOrigin()
     {
-        var camera = new Camera2D("camera", new Camera2DOptions { Position = new Vector2(10, -5) });
+        var camera = new Camera2D("camera") { Position = new Vector2(10, -5) };
 
         var view = camera.View;
         var origin = Vector4.Transform(new Vector4(10, -5, 0, 1), view);
@@ -49,10 +49,8 @@ public class Camera2DTests
     }
 
     [Fact]
-    public void Constructor_InvalidZoom_ThrowsArgumentOutOfRangeException()
+    public void Constructor_InitializerWithInvalidZoom_ThrowsArgumentOutOfRangeException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new Camera2D("camera", new Camera2DOptions { Zoom = 0f })
-        );
+        Assert.Throws<ArgumentOutOfRangeException>(() => new Camera2D("camera") { Zoom = 0f });
     }
 }

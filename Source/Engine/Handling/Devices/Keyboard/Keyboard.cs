@@ -119,7 +119,7 @@ public abstract class Keyboard : InputDevice
 
         foreach (var @event in Events)
         {
-            if (@event.Source.Get() == payload.Key)
+            if (@event.Source.Value == payload.Key)
                 @event.Fire(payload);
         }
     }

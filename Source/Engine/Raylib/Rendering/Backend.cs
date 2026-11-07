@@ -25,7 +25,7 @@ public sealed class RaylibRenderBackend : RenderBackend
     /// <inheritdoc />
     protected override void OnBeginFrame()
     {
-        if (!_window.Opened.Get())
+        if (!_window.Opened.Value)
             throw new InvalidOperationException("The Raylib window must be open before rendering.");
 
         Raylib_cs.Raylib.BeginDrawing();

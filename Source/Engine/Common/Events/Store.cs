@@ -16,7 +16,7 @@ public interface IReadOnlyStore<TValue> : IReadOnlyEvent<TValue>
     /// <summary>
     /// Gets the current value of the store.
     /// </summary>
-    TValue Get();
+    TValue Value { get; }
 }
 
 /// <summary>
@@ -26,10 +26,12 @@ public interface IReadOnlyStore<TValue> : IReadOnlyEvent<TValue>
 public interface IStore<TValue> : IReadOnlyStore<TValue>, IEvent<TValue>
 {
     /// <summary>
-    /// Updates the value and notifies listeners only when it differs from the current value.
+    /// Gets or sets the current value.
     /// </summary>
-    /// <param name="value">The new value to set.</param>
-    void Set(TValue value);
+    /// <remarks>
+    /// Assigning notifies listeners only when the new value differs from the current value.
+    /// </remarks>
+    new TValue Value { get; set; }
 }
 
 /// <summary>
@@ -50,7 +52,7 @@ public interface IStore<TValue> : IReadOnlyStore<TValue>, IEvent<TValue>
 ///     Console.WriteLine($"Changed from {store.Previous} to {value}.");
 /// });
 ///
-/// store.Set(5); // Logs: Changed from 0 to 5.
+/// store.Value = 5; // Logs: Changed from 0 to 5.
 /// </code>
 /// </example>
 /// <param name="value">The initial value of the store.</param>
@@ -65,45 +67,49 @@ public class Store<TValue>(TValue value, Func<TValue, TValue, bool>? equals = nu
     private TValue _value = value;
 
     /// <summary>
-    /// Gets the current value of the store.
+    /// Converts a value into a new store holding that value.
     /// </summary>
-    /// <returns>The current value.</returns>
-    public TValue Get()
+    /// <param name="value">The initial value of the new store.</param>
+    /// <returns>A new store initialized with <paramref name="value"/>.</returns>
+    public static implicit operator Store<TValue>(TValue value) => new(value);
+
+    /// <summary>
+    /// Gets or sets the current value.
+    /// </summary>
+    /// <remarks>
+    /// Assigning notifies listeners only when the new value differs from the current value.
+    /// </remarks>
+    /// <exception cref="DestroyedObjectException">
+    /// Thrown when the store has already been destroyed and a value is assigned.
+    /// </exception>
+    public TValue Value
     {
-        return _value;
+        get => _value;
+        set
+        {
+            ThrowIfDestroyed();
+
+            if (_equals is not null)
+            {
+                if (_equals(_value, value))
+                    return;
+            }
+            else if (EqualityComparer<TValue>.Default.Equals(_value, value))
+            {
+                return;
+            }
+
+            Previous = _value;
+            _value = value;
+
+            Dispatch(_value);
+        }
     }
 
     /// <summary>
     /// Gets the value held before the most recent change. Initially, it equals the current value.
     /// </summary>
     public TValue Previous { get; private set; } = value;
-
-    /// <summary>
-    /// Updates the value and notifies listeners only when it differs from the current value.
-    /// </summary>
-    /// <param name="value">The new value to set.</param>
-    /// <exception cref="DestroyedObjectException">
-    /// Thrown when the store has already been destroyed.
-    /// </exception>
-    public void Set(TValue value)
-    {
-        ThrowIfDestroyed();
-
-        if (_equals is not null)
-        {
-            if (_equals(_value, value))
-                return;
-        }
-        else if (EqualityComparer<TValue>.Default.Equals(_value, value))
-        {
-            return;
-        }
-
-        Previous = _value;
-        _value = value;
-
-        Dispatch(_value);
-    }
 
     /// <summary>
     /// Returns the string representation of the current value.

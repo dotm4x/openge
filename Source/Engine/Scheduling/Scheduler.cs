@@ -104,7 +104,7 @@ public class Scheduler : Module
         {
             _channelsDirty = true;
 
-            if (State.Get() == ModuleState.Running)
+            if (State.Value == ModuleState.Running)
             {
                 channel.Prepare();
                 Logger.Log($"Prepared added channel '{channel.Identifier}'.", LogMessageKind.Debug);
@@ -253,7 +253,7 @@ public class Scheduler : Module
     public void Run()
     {
         ThrowIfDestroyed();
-        if (State.Get() != ModuleState.Running)
+        if (State.Value != ModuleState.Running)
             throw new InvalidOperationException(
                 "The scheduler must be running before entering its update loop."
             );
@@ -265,7 +265,7 @@ public class Scheduler : Module
         var stopwatch = Stopwatch.StartNew();
         var previousIterationTime = stopwatch.Elapsed.TotalSeconds;
 
-        while (State.Get() == ModuleState.Running)
+        while (State.Value == ModuleState.Running)
         {
             var iterationStartTime = stopwatch.Elapsed.TotalSeconds;
 
@@ -277,7 +277,7 @@ public class Scheduler : Module
 
             foreach (var channel in GetOrderedChannels())
             {
-                if (State.Get() != ModuleState.Running)
+                if (State.Value != ModuleState.Running)
                     break;
 
                 try

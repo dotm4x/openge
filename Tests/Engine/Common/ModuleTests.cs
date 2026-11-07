@@ -16,7 +16,7 @@ public class ModuleTests
 
         Assert.Equal("consumer", module.Identifier);
         Assert.Equal(new[] { "dependency" }, module.Dependencies);
-        Assert.Equal(ModuleState.Idle, module.State.Get());
+        Assert.Equal(ModuleState.Idle, module.State.Value);
     }
 
     [Fact]
@@ -40,19 +40,19 @@ public class ModuleTests
         {
             OnStarting = module =>
             {
-                states.Add(module.State.Get());
+                states.Add(module.State.Value);
                 Assert.Same(dependency, module.GetDependency<DependencyModule>("dependency"));
             },
-            OnStopping = module => states.Add(module.State.Get()),
+            OnStopping = module => states.Add(module.State.Value),
         };
         var engine = new TestEngine(dependency, consumer);
 
         engine.Start();
-        Assert.Equal(ModuleState.Running, consumer.State.Get());
+        Assert.Equal(ModuleState.Running, consumer.State.Value);
         engine.Stop();
 
         Assert.Equal(new[] { ModuleState.Starting, ModuleState.Stopping }, states);
-        Assert.Equal(ModuleState.Idle, consumer.State.Get());
+        Assert.Equal(ModuleState.Idle, consumer.State.Value);
     }
 
     [Fact]
@@ -117,8 +117,8 @@ public class ModuleTests
         Assert.Throws<InvalidOperationException>(engine.Start);
 
         Assert.Equal(new[] { "start", "stop" }, calls);
-        Assert.Equal(ModuleState.Idle, module.State.Get());
-        Assert.Equal(EngineState.Idle, engine.State.Get());
+        Assert.Equal(ModuleState.Idle, module.State.Value);
+        Assert.Equal(EngineState.Idle, engine.State.Value);
     }
 
     [Fact]
@@ -138,14 +138,14 @@ public class ModuleTests
         engine.Start();
 
         Assert.Throws<InvalidOperationException>(engine.Stop);
-        Assert.Equal(ModuleState.Running, module.State.Get());
-        Assert.Equal(EngineState.Failed, engine.State.Get());
+        Assert.Equal(ModuleState.Running, module.State.Value);
+        Assert.Equal(EngineState.Failed, engine.State.Value);
 
         engine.Stop();
 
         Assert.Equal(2, stopAttempts);
-        Assert.Equal(ModuleState.Idle, module.State.Get());
-        Assert.Equal(EngineState.Idle, engine.State.Get());
+        Assert.Equal(ModuleState.Idle, module.State.Value);
+        Assert.Equal(EngineState.Idle, engine.State.Value);
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public class ModuleTests
         Assert.Throws<InvalidOperationException>(module.Destroy);
 
         Assert.False(module.Destroyed);
-        Assert.Equal(ModuleState.Running, module.State.Get());
+        Assert.Equal(ModuleState.Running, module.State.Value);
         engine.Stop();
     }
 

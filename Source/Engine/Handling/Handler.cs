@@ -59,7 +59,7 @@ public abstract class InputHandler : Module, IUpdatable
     {
         ThrowIfDestroyed();
 
-        if (State.Get() != ModuleState.Running)
+        if (State.Value != ModuleState.Running)
         {
             throw new InvalidOperationException(
                 "The module must be running before processing updates."

@@ -28,23 +28,23 @@ public class WindowTests
         );
 
         Assert.Equal("window", defaultWindow.Identifier);
-        Assert.Equal("OpenGE", defaultWindow.Title.Get().Split(" - ")[0]);
-        Assert.Equal(new Vector2(800, 600), defaultWindow.Size.Get());
-        Assert.Equal(Vector2.Zero, defaultWindow.Position.Get());
+        Assert.Equal("OpenGE", defaultWindow.Title.Value.Split(" - ")[0]);
+        Assert.Equal(new Vector2(800, 600), defaultWindow.Size.Value);
+        Assert.Equal(Vector2.Zero, defaultWindow.Position.Value);
         Assert.False(defaultWindow.HasConfiguredPosition);
-        Assert.True(defaultWindow.Resizable.Get());
-        Assert.True(defaultWindow.Visible.Get());
-        Assert.Equal(WindowMode.Normal, defaultWindow.Mode.Get());
+        Assert.True(defaultWindow.Resizable.Value);
+        Assert.True(defaultWindow.Visible.Value);
+        Assert.Equal(WindowMode.Normal, defaultWindow.Mode.Value);
 
         Assert.Equal("game", configuredWindow.Identifier);
-        Assert.Equal("Game", configuredWindow.Title.Get());
-        Assert.Equal(new Vector2(1280, 720), configuredWindow.Size.Get());
-        Assert.Equal(new Vector2(50, 70), configuredWindow.Position.Get());
+        Assert.Equal("Game", configuredWindow.Title.Value);
+        Assert.Equal(new Vector2(1280, 720), configuredWindow.Size.Value);
+        Assert.Equal(new Vector2(50, 70), configuredWindow.Position.Value);
         Assert.True(configuredWindow.HasConfiguredPosition);
-        Assert.False(configuredWindow.Resizable.Get());
-        Assert.False(configuredWindow.Visible.Get());
-        Assert.Equal(WindowMode.Maximized, configuredWindow.Mode.Get());
-        Assert.Same(cursor, configuredWindow.Cursor.Get());
+        Assert.False(configuredWindow.Resizable.Value);
+        Assert.False(configuredWindow.Visible.Value);
+        Assert.Equal(WindowMode.Maximized, configuredWindow.Mode.Value);
+        Assert.Same(cursor, configuredWindow.Cursor.Value);
         Assert.Same(cursor, configuredWindow.Cursors["main"]);
     }
 
@@ -75,19 +75,19 @@ public class WindowTests
     {
         var window = new TestWindow();
         var events = new List<string>();
-        window.OnClosing.Connect(_ => events.Add($"closing:{window.Opened.Get()}"));
-        window.OnCloseAction = () => events.Add($"close:{window.Opened.Get()}");
+        window.OnClosing.Connect(_ => events.Add($"closing:{window.Opened.Value}"));
+        window.OnCloseAction = () => events.Add($"close:{window.Opened.Value}");
 
         window.Open();
         window.Open();
-        Assert.True(window.Opened.Get());
+        Assert.True(window.Opened.Value);
 
         window.Close();
         window.Close();
 
         Assert.Equal(new[] { "closing:True", "close:True" }, events);
-        Assert.False(window.Opened.Get());
-        Assert.False(window.Focused.Get());
+        Assert.False(window.Opened.Value);
+        Assert.False(window.Focused.Value);
         Assert.Equal(1, window.OpenCount);
         Assert.Equal(1, window.CloseCount);
     }
@@ -114,12 +114,12 @@ public class WindowTests
         var size = new Vector2(1024, 768);
         var position = new Vector2(15, 25);
 
-        window.Mode.Set(WindowMode.Fullscreen);
-        window.Position.Set(position);
-        window.Resizable.Set(false);
-        window.Size.Set(size);
-        window.Title.Set("Updated");
-        window.Visible.Set(false);
+        window.Mode.Value = WindowMode.Fullscreen;
+        window.Position.Value = position;
+        window.Resizable.Value = false;
+        window.Size.Value = size;
+        window.Title.Value = "Updated";
+        window.Visible.Value = false;
 
         Assert.Equal(new[] { WindowMode.Fullscreen }, window.ModeChanges);
         Assert.Equal(new[] { position }, window.PositionChanges);
@@ -146,13 +146,13 @@ public class WindowTests
             visible: false
         );
 
-        Assert.True(window.Focused.Get());
-        Assert.Equal(WindowMode.Maximized, window.Mode.Get());
-        Assert.Equal(position, window.Position.Get());
-        Assert.False(window.Resizable.Get());
-        Assert.Equal(size, window.Size.Get());
-        Assert.Equal("Platform title", window.Title.Get());
-        Assert.False(window.Visible.Get());
+        Assert.True(window.Focused.Value);
+        Assert.Equal(WindowMode.Maximized, window.Mode.Value);
+        Assert.Equal(position, window.Position.Value);
+        Assert.False(window.Resizable.Value);
+        Assert.Equal(size, window.Size.Value);
+        Assert.Equal("Platform title", window.Title.Value);
+        Assert.False(window.Visible.Value);
         Assert.Empty(window.ModeChanges);
         Assert.Empty(window.PositionChanges);
         Assert.Empty(window.ResizableChanges);
@@ -191,7 +191,7 @@ public class WindowTests
 
         Assert.Throws<InvalidOperationException>(window.Open);
 
-        Assert.False(window.Opened.Get());
+        Assert.False(window.Opened.Value);
     }
 
     private sealed class TestWindow(WindowOptions? options = null) : Window(options)

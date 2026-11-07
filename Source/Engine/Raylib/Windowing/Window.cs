@@ -85,20 +85,20 @@ public sealed class RaylibWindow : Window
         if (_active is not null || Raylib_cs.Raylib.IsWindowReady())
             throw new InvalidOperationException("Only one Raylib window can be active.");
 
-        if (Cursor.Get() is not null)
+        if (Cursor.Value is not null)
             throw new NotSupportedException("RaylibCursor has not been implemented.");
 
-        var (width, height) = ToSize(Size.Get());
+        var (width, height) = ToSize(Size.Value);
 
         var flags = (ConfigFlags)0;
 
-        if (Resizable.Get())
+        if (Resizable.Value)
             flags |= ConfigFlags.ResizableWindow;
 
-        if (!Visible.Get())
+        if (!Visible.Value)
             flags |= ConfigFlags.HiddenWindow;
 
-        flags |= Mode.Get() switch
+        flags |= Mode.Value switch
         {
             WindowMode.Normal => (ConfigFlags)0,
             WindowMode.Minimized => ConfigFlags.MinimizedWindow,
@@ -112,7 +112,7 @@ public sealed class RaylibWindow : Window
         try
         {
             Raylib_cs.Raylib.SetConfigFlags(flags);
-            Raylib_cs.Raylib.InitWindow(width, height, Title.Get());
+            Raylib_cs.Raylib.InitWindow(width, height, Title.Value);
 
             if (!Raylib_cs.Raylib.IsWindowReady())
                 throw new InvalidOperationException("Failed to initialize the Raylib window.");
@@ -121,9 +121,9 @@ public sealed class RaylibWindow : Window
 
             Raylib_cs.Raylib.SetExitKey((KeyboardKey)0);
 
-            if (HasInitialPosition && Mode.Get() == WindowMode.Normal)
+            if (HasInitialPosition && Mode.Value == WindowMode.Normal)
             {
-                var (x, y) = ToPosition(Position.Get());
+                var (x, y) = ToPosition(Position.Value);
                 Raylib_cs.Raylib.SetWindowPosition(x, y);
             }
 

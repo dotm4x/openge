@@ -144,9 +144,9 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        if (_state.Get() != ModuleState.Idle)
+        if (_state.Value != ModuleState.Idle)
             throw new InvalidOperationException(
-                $"Module '{Identifier}' cannot be destroyed while in state '{_state.Get()}'."
+                $"Module '{Identifier}' cannot be destroyed while in state '{_state.Value}'."
             );
 
         if (!_state.Destroyed)
@@ -241,7 +241,7 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
                 $"Module '{Identifier}' has not been injected, cannot start."
             );
 
-        var currentState = _state.Get();
+        var currentState = _state.Value;
 
         if (currentState != ModuleState.Idle)
             throw new InvalidOperationException(
@@ -253,11 +253,11 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
 
         try
         {
-            _state.Set(ModuleState.Starting);
+            _state.Value = ModuleState.Starting;
             startEntered = true;
             OnStart();
             started = true;
-            _state.Set(ModuleState.Running);
+            _state.Value = ModuleState.Running;
         }
         catch (Exception exception)
         {
@@ -271,7 +271,7 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
             {
                 try
                 {
-                    _state.Set(ModuleState.Stopping);
+                    _state.Value = ModuleState.Stopping;
                 }
                 catch (Exception notificationFailure)
                 {
@@ -291,7 +291,7 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
 
             try
             {
-                _state.Set(cleanupFailed ? ModuleState.Running : ModuleState.Idle);
+                _state.Value = cleanupFailed ? ModuleState.Running : ModuleState.Idle;
             }
             catch (Exception notificationFailure)
             {
@@ -317,7 +317,7 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
                 $"Module '{Identifier}' has not been injected, cannot stop."
             );
 
-        var currentState = _state.Get();
+        var currentState = _state.Value;
 
         if (currentState != ModuleState.Running)
             throw new InvalidOperationException(
@@ -328,16 +328,16 @@ public abstract class Module(string identifier, IEnumerable<string>? dependencie
 
         try
         {
-            _state.Set(ModuleState.Stopping);
+            _state.Value = ModuleState.Stopping;
             OnStop();
             stopped = true;
-            _state.Set(ModuleState.Idle);
+            _state.Value = ModuleState.Idle;
         }
         catch (Exception exception)
         {
             try
             {
-                _state.Set(stopped ? ModuleState.Idle : ModuleState.Running);
+                _state.Value = stopped ? ModuleState.Idle : ModuleState.Running;
             }
             catch (Exception notificationFailure)
             {

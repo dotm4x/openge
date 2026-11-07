@@ -25,7 +25,7 @@ public sealed class SDLCursor : Cursor
         VideoRuntime.Acquire();
         try
         {
-            _native = CreateNative(Icon.Get(), SystemIcon.Get(), Hotspot.Get());
+            _native = CreateNative(Icon.Value, SystemIcon.Value, Hotspot.Value);
         }
         catch
         {
@@ -46,7 +46,7 @@ public sealed class SDLCursor : Cursor
 
     private void ApplyVisibility()
     {
-        var success = Visible.Get() ? SDL.ShowCursor() : SDL.HideCursor();
+        var success = Visible.Value ? SDL.ShowCursor() : SDL.HideCursor();
         if (!success)
             throw new InvalidOperationException(
                 $"Changing cursor visibility failed: {SDL.GetError()}"
@@ -138,7 +138,7 @@ public sealed class SDLCursor : Cursor
 
     private void Recreate()
     {
-        var replacement = CreateNative(Icon.Get(), SystemIcon.Get(), Hotspot.Get());
+        var replacement = CreateNative(Icon.Value, SystemIcon.Value, Hotspot.Value);
         var previous = _native;
         var active = SDL.GetCursor() == previous;
         if (active && !SDL.SetCursor(replacement))
@@ -177,7 +177,7 @@ public sealed class SDLCursor : Cursor
     /// <inheritdoc />
     protected override void OnHotspotChanged(Vector2 hotspot)
     {
-        if (Icon.Get() is not null)
+        if (Icon.Value is not null)
             Recreate();
     }
 
@@ -187,7 +187,7 @@ public sealed class SDLCursor : Cursor
     /// <inheritdoc />
     protected override void OnSystemIconChanged(SystemCursor systemIcon)
     {
-        if (Icon.Get() is null)
+        if (Icon.Value is null)
             Recreate();
     }
 

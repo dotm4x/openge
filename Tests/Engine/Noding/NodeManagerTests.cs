@@ -14,9 +14,9 @@ public class NodeManagerTests
         var initial = new Node("initial");
         var additional = new Node("additional");
         var manager = new NodeManager(initial, [additional]);
-        initial.Name.Set("renamed");
+        initial.Name.Value = "renamed";
 
-        Assert.Same(initial, manager.ActiveRoot.Get());
+        Assert.Same(initial, manager.ActiveRoot.Value);
         Assert.Same(initial, manager.Roots["initial"]);
         Assert.False(manager.Roots.ContainsKey("renamed"));
         Assert.Same(additional, manager.Roots["additional"]);
@@ -34,7 +34,7 @@ public class NodeManagerTests
         Assert.False(second.Destroyed);
         var parent = new Node("parent");
         parent.Subnodes.Add(first);
-        Assert.Same(parent, first.Parent.Get());
+        Assert.Same(parent, first.Parent.Value);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class NodeManagerTests
 
         manager.Switch("next");
 
-        Assert.Same(next, manager.ActiveRoot.Get());
+        Assert.Same(next, manager.ActiveRoot.Value);
         Assert.False(initial.Loaded);
         Assert.False(next.Loaded);
         Assert.Equal(0, next.LoadCount);
@@ -79,7 +79,7 @@ public class NodeManagerTests
         Assert.Throws<InvalidOperationException>(() => manager.Roots.Remove("initial"));
 
         Assert.Same(initial, manager.Roots["initial"]);
-        Assert.Same(initial, manager.ActiveRoot.Get());
+        Assert.Same(initial, manager.ActiveRoot.Value);
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public class NodeManagerTests
 
         var parent = new Node("parent");
         parent.Subnodes.Add(inactive);
-        Assert.Same(parent, inactive.Parent.Get());
+        Assert.Same(parent, inactive.Parent.Value);
     }
 
     [Fact]
@@ -113,13 +113,13 @@ public class NodeManagerTests
     {
         var initial = new Node("initial");
         var parent = new Node("parent");
-        var child = new Node("child", new NodeOptions { Parent = parent });
+        var child = new Node("child") { Parent = parent };
         var manager = new NodeManager(initial);
 
         Assert.Throws<InvalidOperationException>(() => manager.Roots.Add("child", child));
 
         Assert.False(manager.Roots.ContainsKey("child"));
-        Assert.Same(parent, child.Parent.Get());
+        Assert.Same(parent, child.Parent.Value);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class NodeManagerTests
         Assert.False(oldRoot.Destroyed);
         var parent = new Node("parent");
         parent.Subnodes.Add(oldRoot);
-        Assert.Same(parent, oldRoot.Parent.Get());
+        Assert.Same(parent, oldRoot.Parent.Value);
     }
 
     [Fact]
@@ -204,12 +204,12 @@ public class NodeManagerTests
         engine.Start();
 
         Assert.True(root.Loaded);
-        Assert.Equal(ModuleState.Running, manager.State.Get());
+        Assert.Equal(ModuleState.Running, manager.State.Value);
 
         engine.Stop();
 
         Assert.False(root.Loaded);
-        Assert.Equal(ModuleState.Idle, manager.State.Get());
+        Assert.Equal(ModuleState.Idle, manager.State.Value);
     }
 
     [Fact]
@@ -223,7 +223,7 @@ public class NodeManagerTests
 
         manager.Switch("next");
 
-        Assert.Same(next, manager.ActiveRoot.Get());
+        Assert.Same(next, manager.ActiveRoot.Value);
         Assert.False(initial.Loaded);
         Assert.True(next.Loaded);
         Assert.Equal(1, initial.UnloadCount);
@@ -242,7 +242,7 @@ public class NodeManagerTests
 
         Assert.Throws<InvalidOperationException>(() => manager.Switch("failing"));
 
-        Assert.Same(initial, manager.ActiveRoot.Get());
+        Assert.Same(initial, manager.ActiveRoot.Value);
         Assert.True(initial.Loaded);
         Assert.False(failing.Loaded);
         Assert.Equal(2, initial.LoadCount);
@@ -259,7 +259,7 @@ public class NodeManagerTests
 
         manager.Switch("initial");
 
-        Assert.Same(initial, manager.ActiveRoot.Get());
+        Assert.Same(initial, manager.ActiveRoot.Value);
         Assert.Equal(1, initial.LoadCount);
         Assert.Equal(0, initial.UnloadCount);
         engine.Stop();
@@ -295,12 +295,12 @@ public class NodeManagerTests
         manager.Roots["old"] = replacement;
         manager.Switch("old");
 
-        Assert.Same(replacement, manager.ActiveRoot.Get());
+        Assert.Same(replacement, manager.ActiveRoot.Value);
         Assert.True(replacement.Loaded);
         Assert.False(old.Destroyed);
         var parent = new Node("parent");
         parent.Subnodes.Add(old);
-        Assert.Same(parent, old.Parent.Get());
+        Assert.Same(parent, old.Parent.Value);
         engine.Stop();
     }
 
@@ -317,8 +317,8 @@ public class NodeManagerTests
 
         Assert.False(root.Loaded);
         Assert.False(alternate.Loaded);
-        Assert.Equal(ModuleState.Idle, manager.State.Get());
-        Assert.Same(root, manager.ActiveRoot.Get());
+        Assert.Equal(ModuleState.Idle, manager.State.Value);
+        Assert.Same(root, manager.ActiveRoot.Value);
     }
 
     [Fact]

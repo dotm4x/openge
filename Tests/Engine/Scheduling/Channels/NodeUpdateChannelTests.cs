@@ -12,8 +12,8 @@ public class NodeUpdateChannelTests
     public void Update_VisitsLoadedUpdatableNodesInActiveRootTree()
     {
         var root = new RecordingNode("root");
-        var child = new RecordingNode("child", new NodeOptions { Parent = root });
-        var unloadedChild = new RecordingNode("unloaded", new NodeOptions { Parent = root });
+        var child = new RecordingNode("child") { Parent = root };
+        var unloadedChild = new RecordingNode("unloaded") { Parent = root };
         var manager = new NodeManager(root);
         var channel = new NodeUpdateChannel(manager);
         var context = new UpdateContext(0.1, 10);
@@ -50,9 +50,7 @@ public class NodeUpdateChannelTests
         manager.Destroy();
     }
 
-    private sealed class RecordingNode(string name, NodeOptions? options = null)
-        : Node(name, options),
-            IUpdatable
+    private sealed class RecordingNode(string name) : Node(name), IUpdatable
     {
         public List<UpdateContext> Contexts { get; } = [];
 

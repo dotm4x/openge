@@ -169,7 +169,7 @@ public abstract class Engine : Destroyable
         for (var index = startedModules.Count - 1; index >= 0; index--)
         {
             var module = startedModules[index];
-            if (module.State.Get() != ModuleState.Running)
+            if (module.State.Value != ModuleState.Running)
                 continue;
 
             try
@@ -219,7 +219,7 @@ public abstract class Engine : Destroyable
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        var currentState = _state.Get();
+        var currentState = _state.Value;
 
         if (currentState != EngineState.Idle)
             throw new InvalidOperationException(
@@ -306,7 +306,7 @@ public abstract class Engine : Destroyable
     {
         ThrowIfDestroyed();
 
-        var currentState = _state.Get();
+        var currentState = _state.Value;
 
         if (currentState != EngineState.Idle)
         {
@@ -322,7 +322,7 @@ public abstract class Engine : Destroyable
 
         try
         {
-            _state.Set(EngineState.Starting);
+            _state.Value = EngineState.Starting;
             _preparator.Ensure(ComposeContents, ConfigureContents);
 
             var sortedModules = ResolveModuleOrder();
@@ -346,12 +346,12 @@ public abstract class Engine : Destroyable
                 }
                 finally
                 {
-                    if (module.State.Get() == ModuleState.Running)
+                    if (module.State.Value == ModuleState.Running)
                         startedModules.Add(module);
                 }
             }
 
-            _state.Set(EngineState.Running);
+            _state.Value = EngineState.Running;
 
             OnStart();
         }
@@ -360,7 +360,7 @@ public abstract class Engine : Destroyable
             var failures = RollbackStartedModules(startedModules);
             try
             {
-                _state.Set(failures.Count == 0 ? EngineState.Idle : EngineState.Failed);
+                _state.Value = failures.Count == 0 ? EngineState.Idle : EngineState.Failed;
             }
             catch (Exception notificationFailure)
             {
@@ -406,7 +406,7 @@ public abstract class Engine : Destroyable
     {
         ThrowIfDestroyed();
 
-        var currentState = _state.Get();
+        var currentState = _state.Value;
 
         if (currentState is not (EngineState.Running or EngineState.Failed))
             throw new InvalidOperationException(
@@ -415,26 +415,26 @@ public abstract class Engine : Destroyable
 
         try
         {
-            _state.Set(EngineState.Stopping);
+            _state.Value = EngineState.Stopping;
             var sortedModules = _moduleOrder ?? ResolveModuleOrder();
 
             for (var index = sortedModules.Count - 1; index >= 0; index--)
             {
                 var module = sortedModules[index];
 
-                if (module.State.Get() == ModuleState.Running)
+                if (module.State.Value == ModuleState.Running)
                     module.Stop();
             }
 
             OnStop();
 
-            _state.Set(EngineState.Idle);
+            _state.Value = EngineState.Idle;
         }
         catch (Exception exception)
         {
             try
             {
-                _state.Set(EngineState.Failed);
+                _state.Value = EngineState.Failed;
             }
             catch (Exception notificationFailure)
             {

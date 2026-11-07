@@ -46,7 +46,7 @@ public class RendererTests
 
         renderer.SwitchBackend("second");
 
-        Assert.Same(second, renderer.ActiveBackend.Get());
+        Assert.Same(second, renderer.ActiveBackend.Value);
         renderer.SwitchBackend("second");
         Assert.Throws<InvalidOperationException>(() => renderer.SwitchBackend("missing"));
         Assert.Throws<ArgumentException>(() => renderer.SwitchBackend(" "));
@@ -59,7 +59,7 @@ public class RendererTests
     {
         var backend = new RecordingBackend();
         var window = new TestWindow();
-        window.Size.Set(new Vector2(900, 700));
+        window.Size.Value = new Vector2(900, 700);
         var target = new RenderTarget(new Vector2(120, 80));
         var lowCamera = new TestCamera();
         var highCamera = new TestCamera();
@@ -100,7 +100,7 @@ public class RendererTests
         var highContext = Assert.Single(highRenderable.Contexts);
         Assert.Equal(updateContext.DeltaTime, lowContext.DeltaTime);
         Assert.Equal(new Viewport(Vector2.Zero, target.Size), lowContext.Viewport);
-        Assert.Equal(new Viewport(Vector2.Zero, window.Size.Get()), highContext.Viewport);
+        Assert.Equal(new Viewport(Vector2.Zero, window.Size.Value), highContext.Viewport);
         Assert.Same(lowCamera, lowContext.Camera);
         Assert.Same(highCamera, highContext.Camera);
         Assert.Equal(
@@ -247,7 +247,7 @@ public class RendererTests
         var backend = new RecordingBackend();
         var window = new TestWindow();
         var space = new RenderSpace("space", new TestCamera());
-        space.Camera.Set(null!);
+        space.Camera.Value = null!;
         var renderer = new Renderer(0, backend, window, spaces: [space]);
         var engine = new TestEngine(new Logger(), renderer);
 

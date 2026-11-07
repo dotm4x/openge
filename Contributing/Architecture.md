@@ -4,7 +4,9 @@ The same composition, lifecycle, and state patterns repeat across every area. Fo
 
 ## Reactive state
 
-- State that observers react to is held in a reactive store and exposed as read-only data. Notifications occur only when the value changes.
+- State that observers react to is held in a reactive store and read or written through `Value`. Notifications occur only when the value changes.
+- Expose a store directly as an `init` property rather than wrapping it in getter and setter properties. Document the member as the value it represents, not as a store.
+- A type that observes a store keeps its own store and adopts the assigned value, so subscriptions survive object-initializer assignment. A store nobody observes can be replaced outright.
 - Read-only views restrict access; they do not imply ownership or guarantee that the underlying value never changes.
 - Use fire-only notifications for events nobody reads back, and readable reactive values for state new listeners must observe.
 - Persistent subscriptions survive ordinary clearing and are used for internal wiring; transient subscriptions are cleared between uses.

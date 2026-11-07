@@ -139,11 +139,11 @@ public abstract class Mouse : InputDevice
     protected void PublishButton(MouseButtonEventPayload payload)
     {
         ThrowIfDestroyed();
-        _position.Set(payload.Position);
+        _position.Value = payload.Position;
 
         foreach (var @event in Events)
         {
-            if (@event.Source.Get() == payload.Button)
+            if (@event.Source.Value == payload.Button)
                 @event.Fire(payload);
         }
     }
@@ -155,8 +155,8 @@ public abstract class Mouse : InputDevice
     protected void PublishMove(MouseMoveEventPayload payload)
     {
         ThrowIfDestroyed();
-        _position.Set(payload.Position);
-        OnMove.Set(payload);
+        _position.Value = payload.Position;
+        OnMove.Value = payload;
     }
 
     /// <summary>
@@ -166,7 +166,7 @@ public abstract class Mouse : InputDevice
     protected void PublishWheel(MouseWheelEventPayload payload)
     {
         ThrowIfDestroyed();
-        _position.Set(payload.Position);
+        _position.Value = payload.Position;
         OnWheel.Fire(payload);
     }
 }

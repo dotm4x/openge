@@ -14,39 +14,6 @@ internal sealed class NodeContext(ModuleContainer modules)
 }
 
 /// <summary>
-/// Provides optional values used to initialize a <see cref="Node"/>.
-/// </summary>
-public class NodeOptions
-{
-    /// <summary>
-    /// Gets the initial parent node. The default is <see langword="null"/>, which creates a root.
-    /// </summary>
-    public Node? Parent { get; init; }
-
-    /// <summary>
-    /// Gets a value indicating whether the node remains loaded when its parent is
-    /// unloaded. The default is <see langword="false"/>.
-    /// </summary>
-    public bool Persistent { get; init; }
-
-    /// <summary>
-    /// Gets the initial subnodes to add. The default is <see langword="null"/>, which adds none.
-    /// </summary>
-    public IEnumerable<Node>? Subnodes { get; init; }
-
-    /// <summary>
-    /// Gets the initial tags to assign. The default is <see langword="null"/>, which adds none.
-    /// </summary>
-    public IEnumerable<string>? Tags { get; init; }
-
-    /// <summary>
-    /// Gets a value indicating whether the node participates in rendering. The default is
-    /// <see langword="true"/>.
-    /// </summary>
-    public bool Visible { get; init; } = true;
-}
-
-/// <summary>
 /// Represents a collection of <see cref="Node"/> instances belonging to a parent node.
 /// </summary>
 /// <remarks>
@@ -134,7 +101,7 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// </returns>
     public Node? GetByName(string name, bool recursive = false)
     {
-        return Enumerate(recursive).FirstOrDefault(node => node.Name.Get() == name);
+        return Enumerate(recursive).FirstOrDefault(node => node.Name.Value == name);
     }
 
     /// <summary>
@@ -154,7 +121,7 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     public TNode? GetByName<TNode>(string name, bool recursive = false)
         where TNode : Node
     {
-        return Enumerate(recursive).OfType<TNode>().FirstOrDefault(node => node.Name.Get() == name);
+        return Enumerate(recursive).OfType<TNode>().FirstOrDefault(node => node.Name.Value == name);
     }
 
     /// <summary>
@@ -186,7 +153,7 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
                     break;
 
                 case "..":
-                    current = current.Parent.Get();
+                    current = current.Parent.Value;
                     break;
 
                 default:
@@ -298,19 +265,26 @@ public class Node : Destroyable, IIdentifiable<Guid>
     private bool _loadRollbackInitialized;
 
     /// <summary>
-    /// Gets the mutable name of the node.
+    /// Gets the name of the node.
     /// </summary>
-    public readonly Store<string> Name;
+    public Store<string> Name { get; init; }
 
     /// <summary>
-    /// Gets the parent node of this node.
+    /// Gets the parent node.
     /// </summary>
     /// <remarks>
     /// The value is <see langword="null"/> when the node is a root node.
-    /// Changes to this store are automatically synchronized with the parent's
-    /// <see cref="Subnodes"/> collection.
+    /// Changing it keeps the parent's <see cref="Subnodes"/> collection in sync.
     /// </remarks>
-    public readonly Store<Node?> Parent;
+    public Store<Node?> Parent
+    {
+        get;
+        init
+        {
+            if (!ReferenceEquals(field, value))
+                field.Value = value.Value;
+        }
+    } = new(null);
 
     /// <summary>
     /// Gets a value indicating whether the node remains loaded when its parent is unloaded.
@@ -319,62 +293,48 @@ public class Node : Destroyable, IIdentifiable<Guid>
     /// Persistent nodes are loaded with their parent, but are not automatically
     /// unloaded with it. They can still be unloaded or destroyed explicitly.
     /// </remarks>
-    public readonly bool Persistent;
+    public bool Persistent { get; init; }
 
     /// <summary>
     /// Gets the collection of nodes directly contained by this node.
     /// </summary>
     /// <remarks>Adding transfers ownership to this node. Removing or clearing detaches
     /// nodes without destroying them and returns ownership to the caller.</remarks>
-    public readonly NodeReactiveSet Subnodes;
+    public NodeReactiveSet Subnodes { get; }
 
     /// <summary>
     /// Gets the tags assigned to this node.
     /// </summary>
-    public readonly ReactiveSet<string> Tags = [];
+    public ReactiveSet<string> Tags { get; } = [];
 
     /// <summary>
-    /// Gets or sets whether this node and its subnodes participate in rendering.
+    /// Gets whether this node and its subnodes participate in rendering.
     /// </summary>
     /// <remarks>
     /// Invisible nodes remain loaded and keep their lifecycle state. Rendering
     /// spaces skip invisible nodes together with their subtrees.
     /// </remarks>
-    public readonly Store<bool> Visible;
+    public Store<bool> Visible { get; init; } = new(true);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Node"/> class.
     /// </summary>
+    /// <remarks>
+    /// Initial values are assigned through an object initializer, for example
+    /// <c>new Node { Name = "root", Visible = false }</c>.
+    /// </remarks>
     /// <param name="name">
-    /// The initial name of the node.
+    /// The initial name of the node. The default is <c>"Node"</c>.
     /// </param>
-    /// <param name="options">
-    /// The optional values used to initialize the node.
-    /// </param>
-    public Node(string name, NodeOptions? options = null)
+    public Node(string name = "Node")
     {
-        Persistent = options?.Persistent ?? false;
-
         Name = new Store<string>(name);
-        Parent = new Store<Node?>(null);
+
         Subnodes = new NodeReactiveSet(this);
-        Visible = new Store<bool>(options?.Visible ?? true);
 
         Parent.Connect(OnParentChanged, true);
         Subnodes.OnAdd.Connect(OnSubnodeAdded, true);
         Subnodes.OnRemove.Connect(OnSubnodeRemoved, true);
-
-        if (options is null)
-            return;
-
-        foreach (var node in options.Subnodes ?? [])
-            Subnodes.Add(node);
-
-        if (options.Parent is not null)
-            Parent.Set(options.Parent);
-
-        foreach (var tag in options.Tags ?? [])
-            Tags.Add(tag);
     }
 
     /// <summary>
@@ -420,8 +380,8 @@ public class Node : Destroyable, IIdentifiable<Guid>
                 if (!visited.Add(current))
                     throw new InvalidOperationException("The node hierarchy contains a cycle.");
 
-                names.Add(current.Name.Get());
-                current = current.Parent.Get();
+                names.Add(current.Name.Value);
+                current = current.Parent.Value;
             }
 
             names.Reverse();
@@ -442,7 +402,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
             }
             catch
             {
-                if (node.Parent.Get() is null && node.RootOwner is null && !node.Destroyed)
+                if (node.Parent.Value is null && node.RootOwner is null && !node.Destroyed)
                     node.Destroy();
 
                 throw;
@@ -475,7 +435,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
 
             try
             {
-                Parent.Set(previous);
+                Parent.Value = previous;
             }
             finally
             {
@@ -513,8 +473,8 @@ public class Node : Destroyable, IIdentifiable<Guid>
             if (_context is not null)
                 node.Inject(_context);
 
-            if (node.Parent.Get() != this)
-                node.Parent.Set(this);
+            if (node.Parent.Value != this)
+                node.Parent.Value = this;
         }
         catch
         {
@@ -527,8 +487,8 @@ public class Node : Destroyable, IIdentifiable<Guid>
 
     private void OnSubnodeRemoved(Node node)
     {
-        if (node.Parent.Get() == this)
-            node.Parent.Set(null);
+        if (node.Parent.Value == this)
+            node.Parent.Value = null;
     }
 
     private void ValidateParent(Node? parent)
@@ -544,23 +504,23 @@ public class Node : Destroyable, IIdentifiable<Guid>
             );
 
         if (ReferenceEquals(parent, this))
-            throw new InvalidOperationException($"Node '{Name.Get()}' cannot be its own parent.");
+            throw new InvalidOperationException($"Node '{Name.Value}' cannot be its own parent.");
 
         HashSet<Node> visited = [];
 
-        for (var ancestor = parent; ancestor is not null; ancestor = ancestor.Parent.Get())
+        for (var ancestor = parent; ancestor is not null; ancestor = ancestor.Parent.Value)
         {
             if (ReferenceEquals(ancestor, this))
             {
                 throw new InvalidOperationException(
-                    $"Cannot set node '{parent.Name.Get()}' as the parent of node '{Name.Get()}' because it would create a cycle."
+                    $"Cannot set node '{parent.Name.Value}' as the parent of node '{Name.Value}' because it would create a cycle."
                 );
             }
 
             if (!visited.Add(ancestor))
             {
                 throw new InvalidOperationException(
-                    $"Cannot assign node '{parent.Name.Get()}' because its hierarchy already contains a cycle."
+                    $"Cannot assign node '{parent.Name.Value}' because its hierarchy already contains a cycle."
                 );
             }
         }
@@ -602,7 +562,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
         if (Loaded)
             Unload();
 
-        Parent.Set(null);
+        Parent.Value = null;
         foreach (var node in Subnodes.ToArray())
             node.Destroy();
 
@@ -729,7 +689,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
         if (Loaded)
             throw new InvalidOperationException($"{this} is already loaded");
 
-        var parent = Parent.Get();
+        var parent = Parent.Value;
 
         if (parent is not null && !parent.Loaded)
         {

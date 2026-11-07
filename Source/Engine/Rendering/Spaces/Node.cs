@@ -47,7 +47,7 @@ public class NodeRenderSpace(
 {
     private static IEnumerable<IRenderCommand> CollectNode(Node node, IRenderContext context)
     {
-        if (node.Destroyed || !node.Visible.Get())
+        if (node.Destroyed || !node.Visible.Value)
             yield break;
 
         if (node.Loaded && node is IRenderable renderable)
@@ -72,6 +72,6 @@ public class NodeRenderSpace(
     /// </remarks>
     protected override IEnumerable<IRenderCommand> OnCollect(IRenderContext context)
     {
-        return CollectNode(manager.ActiveRoot.Get(), context);
+        return CollectNode(manager.ActiveRoot.Value, context);
     }
 }
