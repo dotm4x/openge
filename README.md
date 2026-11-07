@@ -48,6 +48,8 @@ Development takes place primarily on the `develop` branch.
 
 The project targets .NET and is developed using C#.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the repository layout, build and test commands, code conventions, documentation style, and commit format. Automated agents should start from [AGENTS.md](AGENTS.md).
+
 ## License
 
 OpenGE is licensed under the [MIT License](LICENSE).
