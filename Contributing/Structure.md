@@ -7,8 +7,9 @@ OpenGE is a solution of small, single-purpose projects. This document covers how
 - Production code lives in a source tree organized by area, with one project per area.
 - Tests form a single project whose folder structure mirrors the production layout.
 - Platform-specific implementations live in their own projects, separate from shared code.
+- A console playground project lives apart from the source tree and references every engine project. It is the place to try the engine by hand; it is not production code and must not be referenced by anything else.
 - Build settings, output locations, and documentation generation are configured once at the repository root. Do not repeat them per project.
-- New projects join the existing solution under the same source tree.
+- New projects join the existing solution under the appropriate folder.
 
 ## Platform separation
 

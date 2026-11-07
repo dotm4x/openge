@@ -15,5 +15,8 @@
     <Project Path="Source/Engine\Handling\OpenGE.Handling.csproj" />
     <Project Path="Source/Engine/Raylib/OpenGE.Raylib.csproj" />
   </Folder>
+  <Folder Name="/Sandbox/">
+    <Project Path="Sandbox/OpenGE.Sandbox.csproj" />
+  </Folder>
   <Project Path="Tests/Tests.csproj" />
 </Solution>
