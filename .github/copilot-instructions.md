@@ -58,13 +58,13 @@
 For example:
 
 ```text
-Source/OpenGE.Numerics/Geometry/Mesh2D.cs
-Tests/Numerics/Geometry/Mesh2DTests.cs
+Source/Engine/Numerics/Geometry/Mesh2D.cs
+Tests/Engine/Numerics/Geometry/Mesh2DTests.cs
 ```
 
 ```text
-Source/OpenGE.Commons/Events/Store.cs
-Tests/Common/Events/StoreTests.cs
+Source/Engine/Common/Events/Store.cs
+Tests/Engine/Common/Events/StoreTests.cs
 ```
 
 ### Naming and Organization

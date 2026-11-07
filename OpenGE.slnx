@@ -1,20 +1,20 @@
 <Solution>
-  <Folder Name="/Engine/">
-    <Project Path="Engine/SDL3/OpenGE.SDL3.csproj" />
-    <Project Path="Engine/Spatial/OpenGE.Spatial.csproj" />
-    <Project Path="Engine/Windowing/OpenGE.Windowing.csproj" />
-    <Project Path="Engine/Common/OpenGE.Common.csproj" />
-    <Project Path="Engine/Graphics/OpenGE.Graphics.csproj" />
-    <Project Path="Engine/DXC/OpenGE.DXC.csproj" />
-    <Project Path="Engine/Presentating/OpenGE.Presentating.csproj" />
-    <Project Path="Engine/Noding/OpenGE.Noding.csproj" />
-    <Project Path="Engine/Importing/OpenGE.Importing.csproj" />
-    <Project Path="Engine/Scheduling/OpenGE.Scheduling.csproj" />
-    <Project Path="Engine/Logging/OpenGE.Logging.csproj" />
-    <Project Path="Engine\Numerics\OpenGE.Numerics.csproj" />
-    <Project Path="Engine\Rendering\OpenGE.Rendering.csproj" />
-    <Project Path="Engine\Handling\OpenGE.Handling.csproj" />
-    <Project Path="Engine/Raylib/OpenGE.Raylib.csproj" />
+  <Folder Name="/Source/Engine/">
+    <Project Path="Source/Engine/SDL3/OpenGE.SDL3.csproj" />
+    <Project Path="Source/Engine/Spatial/OpenGE.Spatial.csproj" />
+    <Project Path="Source/Engine/Windowing/OpenGE.Windowing.csproj" />
+    <Project Path="Source/Engine/Common/OpenGE.Common.csproj" />
+    <Project Path="Source/Engine/Graphics/OpenGE.Graphics.csproj" />
+    <Project Path="Source/Engine/DXC/OpenGE.DXC.csproj" />
+    <Project Path="Source/Engine/Presentating/OpenGE.Presentating.csproj" />
+    <Project Path="Source/Engine/Noding/OpenGE.Noding.csproj" />
+    <Project Path="Source/Engine/Importing/OpenGE.Importing.csproj" />
+    <Project Path="Source/Engine/Scheduling/OpenGE.Scheduling.csproj" />
+    <Project Path="Source/Engine/Logging/OpenGE.Logging.csproj" />
+    <Project Path="Source/Engine\Numerics\OpenGE.Numerics.csproj" />
+    <Project Path="Source/Engine\Rendering\OpenGE.Rendering.csproj" />
+    <Project Path="Source/Engine\Handling\OpenGE.Handling.csproj" />
+    <Project Path="Source/Engine/Raylib/OpenGE.Raylib.csproj" />
   </Folder>
   <Project Path="Tests/Tests.csproj" />
 </Solution>

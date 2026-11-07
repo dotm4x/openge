@@ -5,7 +5,7 @@
         {
           "src": ".",
           "files": [
-            "Engine/**/*.csproj"
+            "Source/Engine/**/*.csproj"
           ]
         }
       ],
