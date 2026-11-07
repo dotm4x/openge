@@ -11,6 +11,11 @@ namespace OpenGE.Graphics.Primitives;
 ///
 /// Hexadecimal colors may use the <c>#RGB</c>, <c>#RGBA</c>,
 /// <c>#RRGGBB</c>, or <c>#RRGGBBAA</c> formats.
+///
+/// The default value of the struct is fully transparent, and so is the implicit
+/// parameterless constructor. Explicitly constructed colors default their alpha
+/// component to <c>1</c>, which makes <c>new Color(0.0f)</c> opaque black while
+/// <c>new Color()</c> stays transparent.
 /// </remarks>
 public readonly record struct Color
 {
@@ -382,7 +387,7 @@ public readonly record struct Color
     /// <param name="value">The hexadecimal value to parse.</param>
     /// <param name="color">
     /// When this method returns, contains the parsed color if parsing succeeded;
-    /// otherwise, contains the default color.
+    /// otherwise, contains a fully transparent color.
     /// </param>
     /// <returns>
     /// <see langword="true"/> when parsing succeeds; otherwise,

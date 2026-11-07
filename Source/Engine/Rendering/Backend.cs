@@ -47,6 +47,16 @@ public abstract class RenderBackend(string identifier) : Destroyable, IIdentifia
     protected abstract void OnBeginRender(RenderTarget? target);
 
     /// <summary>
+    /// Releases the destination selected by <see cref="OnBeginRender"/>.
+    /// </summary>
+    /// <remarks>
+    /// Invoked after the commands of one <see cref="Render"/> call have executed,
+    /// including when command execution fails.
+    /// The default implementation does nothing.
+    /// </remarks>
+    protected virtual void OnEndRender() { }
+
+    /// <summary>
     /// Executes one command with the context of its rendering space.
     /// </summary>
     /// <param name="command">The command to execute.</param>
@@ -131,7 +141,14 @@ public abstract class RenderBackend(string identifier) : Destroyable, IIdentifia
 
         OnBeginRender(target);
 
-        foreach (var command in commands)
-            OnRender(command, context);
+        try
+        {
+            foreach (var command in commands)
+                OnRender(command, context);
+        }
+        finally
+        {
+            OnEndRender();
+        }
     }
 }

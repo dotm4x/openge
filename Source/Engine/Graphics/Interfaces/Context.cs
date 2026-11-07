@@ -17,11 +17,20 @@ public interface IRenderContext
     /// <summary>
     /// Gets the camera used to render the current view.
     /// </summary>
+    /// <remarks>
+    /// The camera is required; rendering spaces without a camera are rejected
+    /// before their commands are produced.
+    /// </remarks>
     ICamera Camera { get; }
 
     /// <summary>
-    /// Gets the elapsed time since the previous rendering frame, in seconds.
+    /// Gets the delta time of the update that produced the current rendering frame,
+    /// in seconds.
     /// </summary>
+    /// <remarks>
+    /// The value comes from the scheduled update that drives rendering. It is not
+    /// necessarily the elapsed time between two rendering frames.
+    /// </remarks>
     double DeltaTime { get; }
 
     /// <summary>

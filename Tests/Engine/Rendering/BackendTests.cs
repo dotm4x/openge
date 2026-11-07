@@ -120,6 +120,52 @@ public class RenderBackendTests
     }
 
     [Fact]
+    public void Render_EndsRenderAfterExecutingCommands()
+    {
+        var backend = new RecordingBackend();
+        backend.BeginFrame();
+
+        backend.Render([new MarkerCommand("first"), new MarkerCommand("second")], null, null);
+
+        Assert.Equal(1, backend.EndRenderCount);
+
+        backend.EndFrame();
+    }
+
+    [Fact]
+    public void Render_WhenCommandFails_EndsRender()
+    {
+        var backend = new RecordingBackend
+        {
+            OnCommand = (_, _) => throw new InvalidOperationException("command failed"),
+        };
+        backend.BeginFrame();
+
+        Assert.Throws<InvalidOperationException>(() =>
+            backend.Render([new MarkerCommand("first")])
+        );
+
+        Assert.Equal(1, backend.EndRenderCount);
+
+        backend.EndFrame();
+    }
+
+    [Fact]
+    public void Render_WhenDestinationCannotBeSelected_DoesNotEndRender()
+    {
+        var backend = new RecordingBackend();
+        var target = new RenderTarget(new System.Numerics.Vector2(16, 16));
+        target.Destroy();
+        backend.BeginFrame();
+
+        Assert.Throws<ObjectDisposedException>(() => backend.Render([], target));
+
+        Assert.Equal(0, backend.EndRenderCount);
+
+        backend.EndFrame();
+    }
+
+    [Fact]
     public void Destroy_PublicOperationsThrowDestroyedObjectException()
     {
         var backend = new RecordingBackend();

@@ -37,6 +37,12 @@ public class NodeOptions
     /// Gets the initial tags to assign. The default is <see langword="null"/>, which adds none.
     /// </summary>
     public IEnumerable<string>? Tags { get; init; }
+
+    /// <summary>
+    /// Gets whether the node participates in rendering. The default is
+    /// <see langword="true"/>.
+    /// </summary>
+    public bool Visible { get; init; } = true;
 }
 
 /// <summary>
@@ -330,6 +336,15 @@ public class Node : Destroyable, IIdentifiable<Guid>
     public readonly ReactiveSet<string> Tags = [];
 
     /// <summary>
+    /// Gets or sets whether this node and its subnodes participate in rendering.
+    /// </summary>
+    /// <remarks>
+    /// Invisible nodes remain loaded and keep their lifecycle state. Rendering
+    /// spaces skip invisible nodes together with their subtrees.
+    /// </remarks>
+    public readonly Store<bool> Visible;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Node"/> class.
     /// </summary>
     /// <param name="name">
@@ -345,6 +360,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
         Name = new Store<string>(name);
         Parent = new Store<Node?>(null);
         Subnodes = new NodeReactiveSet(this);
+        Visible = new Store<bool>(options?.Visible ?? true);
 
         Parent.Connect(OnParentChanged, true);
         Subnodes.OnAdd.Connect(OnSubnodeAdded, true);
@@ -596,6 +612,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
         Subnodes.Destroy();
         Tags.Destroy();
         Parent.Destroy();
+        Visible.Destroy();
 
         base.OnDestroy();
     }

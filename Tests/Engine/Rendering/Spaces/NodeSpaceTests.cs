@@ -69,6 +69,31 @@ public class NodeRenderSpaceTests
     }
 
     [Fact]
+    public void Collect_SkipsInvisibleSubtrees()
+    {
+        var hiddenChild = new RenderableNode("hidden-child", "hidden-child");
+        var hidden = new RenderableNode("hidden", "hidden", [hiddenChild]);
+        hidden.Visible.Set(false);
+        var visible = new RenderableNode("visible", "visible");
+        var root = new Node("root", new NodeOptions { Subnodes = [hidden, visible] });
+        var manager = new NodeManager(root);
+        var engine = new TestEngine(new Logger(), manager);
+
+        engine.Start();
+
+        var space = new NodeRenderSpace(manager, new TestCamera());
+        var commands = space.Collect(new RenderContext(0, new TestCamera(), default));
+
+        Assert.Collection(commands, command => Assert.Equal(new MarkerCommand("visible"), command));
+        Assert.True(hidden.Loaded);
+        Assert.True(hiddenChild.Loaded);
+
+        space.Destroy();
+        engine.Stop();
+        engine.Destroy();
+    }
+
+    [Fact]
     public void Destroy_DoesNotDestroyBorrowedNodeManager()
     {
         var manager = new NodeManager(new Node("root"));

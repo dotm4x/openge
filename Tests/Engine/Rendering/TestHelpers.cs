@@ -81,6 +81,8 @@ internal sealed class RecordingBackend(string identifier = "recording") : Render
 
     public List<BackendRenderCall> RenderCalls { get; } = [];
 
+    public int EndRenderCount { get; private set; }
+
     public Exception? EndFrameException { get; set; }
 
     public Action<IRenderCommand, IRenderContext?>? OnCommand { get; set; }
@@ -110,6 +112,11 @@ internal sealed class RecordingBackend(string identifier = "recording") : Render
         );
         RenderCalls.Add(new BackendRenderCall(_currentTarget, command, context));
         OnCommand?.Invoke(command, context);
+    }
+
+    protected override void OnEndRender()
+    {
+        EndRenderCount++;
     }
 
     private OpenGE.Graphics.Resources.Targets.RenderTarget? _currentTarget;

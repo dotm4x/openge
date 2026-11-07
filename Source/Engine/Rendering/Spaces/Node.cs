@@ -6,14 +6,16 @@ using OpenGE.Noding;
 namespace OpenGE.Rendering.Spaces;
 
 /// <summary>
-/// Initializes a new instance of the <see cref="NodeRenderSpace"/> class.
+/// Collects rendering commands from the loaded, visible nodes under the active root.
 /// </summary>
 /// <remarks>
-/// Collects rendering commands from loaded renderable nodes under the active root.
-///
 /// The node manager and its nodes are borrowed and are never destroyed by this object.
 /// Nodes are traversed in hierarchy order, and commands produced by each renderable
 /// node preserve their original order.
+///
+/// Destroyed and invisible nodes are skipped together with their subtrees.
+/// A snapshot of the subnodes is taken before each subtree is traversed, so a
+/// renderable may modify the hierarchy while producing its commands.
 ///
 /// The rendering target is borrowed. When no target is specified, commands
 /// are rendered to the window associated with the renderer.
@@ -27,12 +29,13 @@ namespace OpenGE.Rendering.Spaces;
 /// <param name="identifier">
 /// The space identifier. The default is <c>"nodes"</c>.
 /// </param>
+/// <param name="target">
+/// The initial offscreen rendering target, or <see langword="null"/> to render
+/// to the window.
+/// </param>
 /// <param name="priority">
 /// The rendering priority. The default is
 /// <see cref="RenderSpacePriority.Normal"/>.
-/// </param>
-/// <param name="target">
-/// The initial offscreen rendering target, or null to render to the window.
 /// </param>
 public class NodeRenderSpace(
     NodeManager manager,
@@ -44,7 +47,7 @@ public class NodeRenderSpace(
 {
     private static IEnumerable<IRenderCommand> CollectNode(Node node, IRenderContext context)
     {
-        if (node.Destroyed)
+        if (node.Destroyed || !node.Visible.Get())
             yield break;
 
         if (node.Loaded && node is IRenderable renderable)
@@ -55,7 +58,7 @@ public class NodeRenderSpace(
                 yield return command;
         }
 
-        foreach (var child in node.Subnodes)
+        foreach (var child in node.Subnodes.ToArray())
         {
             foreach (var command in CollectNode(child, context))
                 yield return command;

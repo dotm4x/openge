@@ -83,14 +83,17 @@ public class RendererTests
         var updateContext = new UpdateContext(0.125, 60);
 
         engine.Start();
+        window.Open();
         renderer.Update(updateContext);
 
         Assert.IsType<ClearCommand>(backend.RenderCalls[0].Command);
         Assert.Null(backend.RenderCalls[0].Target);
-        Assert.Equal(new MarkerCommand("low"), backend.RenderCalls[1].Command);
+        Assert.IsType<ClearCommand>(backend.RenderCalls[1].Command);
         Assert.Same(target, backend.RenderCalls[1].Target);
-        Assert.Equal(new MarkerCommand("high"), backend.RenderCalls[2].Command);
-        Assert.Null(backend.RenderCalls[2].Target);
+        Assert.Equal(new MarkerCommand("low"), backend.RenderCalls[2].Command);
+        Assert.Same(target, backend.RenderCalls[2].Target);
+        Assert.Equal(new MarkerCommand("high"), backend.RenderCalls[3].Command);
+        Assert.Null(backend.RenderCalls[3].Target);
         Assert.Null(backend.RenderCalls[0].Context);
 
         var lowContext = Assert.Single(lowRenderable.Contexts);
@@ -104,6 +107,8 @@ public class RendererTests
             [
                 "begin-frame",
                 "begin-window",
+                "command:other",
+                "begin-target",
                 "command:other",
                 "begin-target",
                 "command:low",
@@ -129,14 +134,16 @@ public class RendererTests
             [],
             _ => throw new InvalidOperationException("collection failed")
         );
+        var window = new TestWindow();
         var renderer = new Renderer(
             0,
             backend,
-            new TestWindow(),
+            window,
             spaces: [new RenderSpace("failing", new TestCamera(), entries: [failingEntry])]
         );
         var engine = new TestEngine(new Logger(), renderer);
         engine.Start();
+        window.Open();
 
         var exception = Assert.Throws<InvalidOperationException>(() =>
             renderer.Update(new UpdateContext(0, 0))
@@ -158,9 +165,11 @@ public class RendererTests
         };
         var renderException = new InvalidOperationException("render failed");
         backend.OnCommand = (_, _) => throw renderException;
-        var renderer = new Renderer(0, backend, new TestWindow());
+        var window = new TestWindow();
+        var renderer = new Renderer(0, backend, window);
         var engine = new TestEngine(new Logger(), renderer);
         engine.Start();
+        window.Open();
 
         var exception = Assert.Throws<AggregateException>(() =>
             renderer.Update(new UpdateContext(0, 0))
@@ -187,8 +196,8 @@ public class RendererTests
         Assert.True(backend.Destroyed);
         Assert.True(space.Destroyed);
         Assert.False(target.Destroyed);
-        Assert.True(renderer.Backends.Destroyed);
-        Assert.True(renderer.Spaces.Destroyed);
+        Assert.Empty(renderer.Backends);
+        Assert.Empty(renderer.Spaces);
         Assert.True(renderer.ClearColor.Destroyed);
         Assert.True(renderer.ActiveBackend.Destroyed);
         Assert.False(window.Destroyed);
@@ -213,6 +222,101 @@ public class RendererTests
         Assert.Same(composed, renderer.Backends["composed"]);
         Assert.Same(space, renderer.Spaces["composed-space"]);
 
+        engine.Destroy();
+    }
+
+    [Fact]
+    public void Update_WhenWindowIsClosed_SkipsFrame()
+    {
+        var backend = new RecordingBackend();
+        var renderer = new Renderer(0, backend, new TestWindow());
+        var engine = new TestEngine(new Logger(), renderer);
+
+        engine.Start();
+        renderer.Update(new UpdateContext(0.1, 60));
+
+        Assert.Empty(backend.Operations);
+
+        engine.Stop();
+        engine.Destroy();
+    }
+
+    [Fact]
+    public void Update_WhenSpaceHasNoCamera_ThrowsInvalidOperationException()
+    {
+        var backend = new RecordingBackend();
+        var window = new TestWindow();
+        var space = new RenderSpace("space", new TestCamera());
+        space.Camera.Set(null!);
+        var renderer = new Renderer(0, backend, window, spaces: [space]);
+        var engine = new TestEngine(new Logger(), renderer);
+
+        engine.Start();
+        window.Open();
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            renderer.Update(new UpdateContext(0.1, 60))
+        );
+
+        Assert.Contains("requires a camera", exception.Message, StringComparison.Ordinal);
+        Assert.Equal("end-frame", backend.Operations[^1]);
+
+        engine.Stop();
+        engine.Destroy();
+    }
+
+    [Fact]
+    public void Update_ClearsEachTargetOnlyOncePerFrame()
+    {
+        var backend = new RecordingBackend();
+        var window = new TestWindow();
+        var target = new RenderTarget(new Vector2(64, 64));
+        var first = new RenderSpace("first", new TestCamera(), target, RenderSpacePriority.Low);
+        var second = new RenderSpace("second", new TestCamera(), target, RenderSpacePriority.High);
+        var renderer = new Renderer(0, backend, window, spaces: [first, second]);
+        var engine = new TestEngine(new Logger(), renderer);
+
+        engine.Start();
+        window.Open();
+
+        renderer.Update(new UpdateContext(0.1, 60));
+
+        Assert.Equal(2, backend.RenderCalls.Count(call => call.Command is ClearCommand));
+        Assert.Single(backend.RenderCalls, call => ReferenceEquals(call.Target, target));
+
+        engine.Stop();
+        engine.Destroy();
+    }
+
+    [Fact]
+    public void Update_RendersSpacesWithSamePriorityInRegistrationOrder()
+    {
+        var backend = new RecordingBackend();
+        var window = new TestWindow();
+        var later = new RenderSpace(
+            "later",
+            new TestCamera(),
+            entries: [new RecordingRenderable([new MarkerCommand("later")])]
+        );
+        var earlier = new RenderSpace(
+            "earlier",
+            new TestCamera(),
+            entries: [new RecordingRenderable([new MarkerCommand("earlier")])]
+        );
+        var renderer = new Renderer(0, backend, window, spaces: [later, earlier]);
+        var engine = new TestEngine(new Logger(), renderer);
+
+        engine.Start();
+        window.Open();
+
+        renderer.Update(new UpdateContext(0.1, 60));
+
+        Assert.Equal(
+            [new MarkerCommand("later"), new MarkerCommand("earlier")],
+            backend.RenderCalls.Select(call => call.Command).OfType<MarkerCommand>().ToArray()
+        );
+
+        engine.Stop();
         engine.Destroy();
     }
 

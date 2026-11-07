@@ -45,7 +45,8 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     /// Gets the camera used to render this space.
     /// </summary>
     /// <remarks>
-    /// A <see langword="null"/> camera represents screen-space rendering.
+    /// The camera is required to collect the space. A space without a camera
+    /// is rejected by the renderer before its commands are produced.
     /// </remarks>
     public readonly Store<ICamera> Camera;
 
@@ -79,7 +80,10 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     /// <param name="camera">
     /// The initial camera used to render this space.
     /// </param>
-    /// <param name="target"></param>
+    /// <param name="target">
+    /// The initial offscreen rendering target, or <see langword="null"/> to render
+    /// to the window.
+    /// </param>
     /// <param name="priority">
     /// The rendering priority. The default is
     /// <see cref="RenderSpacePriority.Normal"/>.

@@ -27,6 +27,10 @@ public class Camera2D : Node2D, ICamera
     /// Gets the zoom factor applied to the camera view.
     /// A value of <c>1</c> means no zoom.
     /// </summary>
+    /// <remarks>
+    /// The value must remain finite and greater than zero. Projection fails when
+    /// the store holds any other value.
+    /// </remarks>
     public readonly Store<float> Zoom;
 
     /// <summary>
@@ -59,9 +63,24 @@ public class Camera2D : Node2D, ICamera
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// The projection keeps the Y axis pointing down, so world positions map to
+    /// screen-space coordinates with the origin at the viewport center.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <see cref="Zoom"/> holds a value that is not finite or is less
+    /// than or equal to zero.
+    /// </exception>
     public Matrix4x4 GetProjection(Viewport viewport)
     {
         var zoom = Zoom.Get();
+
+        if (!float.IsFinite(zoom) || zoom <= 0f)
+        {
+            throw new InvalidOperationException(
+                "Camera zoom must be finite and greater than zero."
+            );
+        }
 
         var width = viewport.Size.X / zoom;
         var height = viewport.Size.Y / zoom;
@@ -92,8 +111,8 @@ public class Camera2D : Node2D, ICamera
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-
         Zoom.Destroy();
+
+        base.OnDestroy();
     }
 }

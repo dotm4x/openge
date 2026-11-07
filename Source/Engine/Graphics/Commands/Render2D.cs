@@ -21,6 +21,11 @@ namespace OpenGE.Graphics.Commands;
 /// operation. Rendering backends are responsible for translating the mesh,
 /// material, and transformation into their native graphics operations.
 ///
+/// Backends combine <paramref name="Transform"/> with the view and projection of
+/// the rendering context in this order: the two-dimensional transform is promoted
+/// to a four-dimensional matrix that is applied first, followed by the camera view
+/// and then the projection produced for the current viewport.
+///
 /// The referenced resources are borrowed and are not owned by the command.
 /// </remarks>
 public readonly record struct Render2DCommand(

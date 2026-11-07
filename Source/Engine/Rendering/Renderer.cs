@@ -7,6 +7,7 @@ using OpenGE.Common.Primitives;
 using OpenGE.Graphics.Commands;
 using OpenGE.Graphics.Interfaces;
 using OpenGE.Graphics.Primitives;
+using OpenGE.Graphics.Resources.Targets;
 using OpenGE.Logging;
 using OpenGE.Rendering.Spaces;
 using OpenGE.Scheduling;
@@ -28,13 +29,19 @@ namespace OpenGE.Rendering;
 /// The active rendering backend executes commands in space priority order.
 ///
 /// The renderer owns and destroys its registered rendering backends and spaces.
-/// Registration transfers ownership of backends and spaces to the renderer.
+/// Construction and composition transfer ownership of backends and spaces
+/// to the renderer; registered sets are exposed as read-only views.
+///
+/// Frames are only rendered while the associated window is open.
 ///
 /// The associated window is borrowed and is never destroyed by the renderer.
 /// </remarks>
 public class Renderer : Module, IUpdatable
 {
     private readonly Store<RenderBackend> _activeBackend;
+    private readonly IdentifiableSet<string, RenderBackend> _backends = [];
+    private readonly IdentifiableSet<string, RenderSpace> _spaces = [];
+    private readonly List<RenderSpace> _spaceOrder = [];
 
     private readonly Preparator _preparator = new();
 
@@ -43,11 +50,10 @@ public class Renderer : Module, IUpdatable
     /// </summary>
     /// <remarks>
     /// The renderer owns and destroys its registered backends.
-    /// Registration transfers ownership to the renderer. Removing or clearing
-    /// entries returns ownership to the caller without destroying them.
-    /// Do not register a backend owned elsewhere.
+    /// The set is read-only because the active backend may reference registered
+    /// entries; register additional backends through the constructor or composition.
     /// </remarks>
-    public readonly IdentifiableSet<string, RenderBackend> Backends = [];
+    public IReadOnlyIdentifiableSet<string, RenderBackend> Backends => _backends;
 
     /// <summary>
     /// Gets the color used to clear the rendering target at the start of each frame.
@@ -59,11 +65,10 @@ public class Renderer : Module, IUpdatable
     /// </summary>
     /// <remarks>
     /// The renderer owns and destroys its registered spaces.
-    /// Registration transfers ownership to the renderer. Removing or clearing
-    /// entries returns ownership to the caller without destroying them.
+    /// Spaces with the same priority are rendered in registration order.
     /// Do not register a space owned elsewhere.
     /// </remarks>
-    public readonly IdentifiableSet<string, RenderSpace> Spaces = [];
+    public IReadOnlyIdentifiableSet<string, RenderSpace> Spaces => _spaces;
 
     /// <summary>
     /// Gets the window associated with this renderer.
@@ -113,15 +118,29 @@ public class Renderer : Module, IUpdatable
         ActiveBackend = _activeBackend;
 
         Window = window;
-        ClearColor = new Store<Color>(clearColor ?? Color.White);
+        ClearColor = new Store<Color>(clearColor ?? Color.Black);
 
-        Backends.Add(initial);
+        _spaces.OnAdd.Connect(OnSpaceAdded);
+        _spaces.OnRemove.Connect(OnSpaceRemoved);
+
+        _backends.Add(initial);
 
         foreach (var backend in backends ?? [])
-            Backends.Add(backend);
+            _backends.Add(backend);
 
         foreach (var space in spaces ?? [])
-            Spaces.Add(space);
+            _spaces.Add(space);
+    }
+
+    private void OnSpaceAdded(RenderSpace space)
+    {
+        if (!_spaceOrder.Contains(space))
+            _spaceOrder.Add(space);
+    }
+
+    private void OnSpaceRemoved(RenderSpace space)
+    {
+        _spaceOrder.Remove(space);
     }
 
     private SourcedLogger Logger => Require<Logger>("Logger").From(Identifier);
@@ -137,9 +156,17 @@ public class Renderer : Module, IUpdatable
 
     /// <inheritdoc />
     /// <remarks>
+    /// Frames are rendered only while the associated window is open.
+    ///
+    /// The window is cleared at the start of every frame. Each offscreen target is
+    /// cleared once, before the first space that renders to it.
+    ///
     /// Frame completion is attempted even when command collection or rendering fails.
     /// If both fail, the rendering error is the first inner exception of an aggregate.
     /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// The module is not running, or a rendering space does not define a camera.
+    /// </exception>
     public virtual void Update(UpdateContext context)
     {
         ThrowIfDestroyed();
@@ -149,6 +176,9 @@ public class Renderer : Module, IUpdatable
             throw new InvalidOperationException("The module must be running before rendering.");
         }
 
+        if (!Window.Opened.Get())
+            return;
+
         var backend = _activeBackend.Get();
 
         backend.BeginFrame();
@@ -156,19 +186,30 @@ public class Renderer : Module, IUpdatable
 
         try
         {
-            backend.Render([new ClearCommand(ClearColor.Get())]);
+            ClearCommand clear = new(ClearColor.Get());
+            HashSet<RenderTarget> preparedTargets = [];
 
-            foreach (var space in Spaces.OrderBy(space => space.Priority))
+            backend.Render([clear]);
+
+            foreach (var space in _spaceOrder.OrderBy(space => space.Priority))
             {
+                var camera = space.Camera.Get();
+
+                if (camera is null)
+                {
+                    throw new InvalidOperationException(
+                        $"Rendering space '{space.Identifier}' requires a camera."
+                    );
+                }
+
                 var target = space.Target.Get();
+
+                if (target is not null && preparedTargets.Add(target))
+                    backend.Render([clear], target);
 
                 var viewport = new Viewport(Vector2.Zero, target?.Size ?? Window.Size.Get());
 
-                var renderContext = new RenderContext(
-                    context.DeltaTime,
-                    space.Camera.Get(),
-                    viewport
-                );
+                var renderContext = new RenderContext(context.DeltaTime, camera, viewport);
 
                 backend.Render(space.Collect(renderContext), target, renderContext);
             }
@@ -203,11 +244,11 @@ public class Renderer : Module, IUpdatable
         {
             try
             {
-                Backends.Add(backend);
+                _backends.Add(backend);
             }
             catch
             {
-                if (!Backends.Contains(backend) && !backend.Destroyed)
+                if (!_backends.Contains(backend) && !backend.Destroyed)
                     backend.Destroy();
 
                 throw;
@@ -218,11 +259,11 @@ public class Renderer : Module, IUpdatable
         {
             try
             {
-                Spaces.Add(space);
+                _spaces.Add(space);
             }
             catch
             {
-                if (!Spaces.Contains(space) && !space.Destroyed)
+                if (!_spaces.Contains(space) && !space.Destroyed)
                     space.Destroy();
 
                 throw;
@@ -309,7 +350,7 @@ public class Renderer : Module, IUpdatable
                 $"Renderer cannot be destroyed while in state '{state}'."
             );
 
-        foreach (var space in Spaces.ToArray())
+        foreach (var space in _spaces.ToArray())
         {
             space.Destroy();
 
@@ -322,10 +363,11 @@ public class Renderer : Module, IUpdatable
             }
         }
 
-        Spaces.Destroy();
+        _spaces.Destroy();
+        _spaceOrder.Clear();
         ClearColor.Destroy();
 
-        foreach (var backend in Backends.ToArray())
+        foreach (var backend in _backends.ToArray())
         {
             backend.Destroy();
 
@@ -338,7 +380,7 @@ public class Renderer : Module, IUpdatable
             }
         }
 
-        Backends.Destroy();
+        _backends.Destroy();
 
         _activeBackend.Destroy();
 
@@ -356,8 +398,8 @@ public class Renderer : Module, IUpdatable
         _preparator.Ensure(ComposeContents, ConfigureContents);
 
         Logger.Log(
-            $"Module started with {Backends.Count} rendering backends and "
-                + $"{Spaces.Count} rendering spaces for window '{Window.Identifier}'."
+            $"Module started with {_backends.Count} rendering backends and "
+                + $"{_spaces.Count} rendering spaces for window '{Window.Identifier}'."
         );
     }
 
@@ -387,7 +429,7 @@ public class Renderer : Module, IUpdatable
         ThrowIfDestroyed();
         ArgumentException.ThrowIfNullOrWhiteSpace(identifier);
 
-        if (!Backends.TryGetValue(identifier, out var backend))
+        if (!_backends.TryGetValue(identifier, out var backend))
         {
             throw new InvalidOperationException(
                 $"Rendering backend '{identifier}' does not exist."

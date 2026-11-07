@@ -15,7 +15,7 @@ namespace OpenGE.Rendering;
 /// specific rendering backend.
 /// </remarks>
 /// <param name="deltaTime">
-/// The elapsed time since the previous rendering frame, in seconds.
+/// The delta time of the update that produced the current rendering frame, in seconds.
 /// </param>
 /// <param name="camera">
 /// The camera used to render the current view.
