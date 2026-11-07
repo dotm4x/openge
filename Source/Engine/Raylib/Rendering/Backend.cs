@@ -22,6 +22,7 @@ public sealed class RaylibRenderBackend : RenderBackend
         _window = window;
     }
 
+    /// <inheritdoc />
     protected override void OnBeginFrame()
     {
         if (!_window.Opened.Get())
@@ -30,17 +31,20 @@ public sealed class RaylibRenderBackend : RenderBackend
         Raylib_cs.Raylib.BeginDrawing();
     }
 
+    /// <inheritdoc />
     protected override void OnEndFrame()
     {
         Raylib_cs.Raylib.EndDrawing();
     }
 
+    /// <inheritdoc />
     protected override void OnBeginRender(RenderTarget? target)
     {
         if (target is not null)
             throw new NotSupportedException("Offscreen rendering is not implemented yet.");
     }
 
+    /// <inheritdoc />
     protected override void OnRender(IRenderCommand command, IRenderContext? context)
     {
         switch (command)
