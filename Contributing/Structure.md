@@ -28,6 +28,13 @@ dotnet csharpier check .   # verify formatting
 dotnet csharpier format .  # apply formatting
 ```
 
+Install the local git hooks once per clone:
+
+```bash
+dotnet tool restore      # restore pinned tools
+dotnet husky install     # enable the repository hooks
+```
+
 CI restores tools, checks formatting, builds in Release, and runs the tests. A change is not complete until the same commands pass locally. Run the smallest relevant command while iterating, and the full suite before finishing.
 
 Do not suppress warnings, disable documentation generation, or relax nullable annotations to make a build pass.

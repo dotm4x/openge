@@ -1,0 +1,61 @@
+{
+  "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
+  "tasks": [
+    {
+      "name": "format-staged",
+      "group": "pre-commit",
+      "command": "dotnet",
+      "args": [
+        "csharpier",
+        "format",
+        "${staged}"
+      ],
+      "include": [
+        "**/*.cs"
+      ]
+    },
+    {
+      "name": "restage-formatted",
+      "group": "pre-commit",
+      "command": "git",
+      "args": [
+        "add",
+        "${staged}"
+      ],
+      "include": [
+        "**/*.cs"
+      ]
+    },
+    {
+      "name": "verify-format",
+      "group": "pre-push",
+      "command": "dotnet",
+      "args": [
+        "csharpier",
+        "check",
+        "."
+      ]
+    },
+    {
+      "name": "test",
+      "group": "pre-push",
+      "command": "dotnet",
+      "args": [
+        "test",
+        "--nologo"
+      ]
+    },
+    {
+      "name": "commit-message",
+      "group": "commit-msg",
+      "command": "dotnet",
+      "args": [
+        "commit-lint",
+        "--commit-file",
+        "${args}",
+        "--commit-message-config-file",
+        ".husky/commit-message-config.json"
+      ]
+    }
+  ]
+}

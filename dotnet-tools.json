@@ -15,6 +15,20 @@
         "docfx"
       ],
       "rollForward": false
+    },
+    "husky": {
+      "version": "0.9.1",
+      "commands": [
+        "husky"
+      ],
+      "rollForward": false
+    },
+    "commitlint.net": {
+      "version": "0.8.0",
+      "commands": [
+        "commit-lint"
+      ],
+      "rollForward": true
     }
   }
 }
