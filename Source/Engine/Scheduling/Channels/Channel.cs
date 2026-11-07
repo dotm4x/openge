@@ -116,9 +116,13 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
     public double DeltaTime { get; private set; }
 
     /// <summary>
-    /// Gets the measured number of channel updates per second, or zero before
-    /// the first update.
+    /// Gets the instantaneous rate corresponding to the latest channel update,
+    /// or zero before the first update.
     /// </summary>
+    /// <remarks>
+    /// The value is the reciprocal of <see cref="DeltaTime"/> and describes the
+    /// latest update only; it is not an average over several updates.
+    /// </remarks>
     public double UpdateRate { get; private set; }
 
     /// <inheritdoc />
@@ -149,7 +153,8 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
         DeltaTime = context.DeltaTime;
         UpdateRate = DeltaTime > 0 ? 1.0 / DeltaTime : 0;
 
-        foreach (var entry in Entries)
+        // Entries may register or remove entries while updating.
+        foreach (var entry in Entries.ToArray())
             entry.Update(context);
 
         OnUpdate(context);
@@ -216,7 +221,8 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
     ///
     /// A rate-limited channel accumulates elapsed time until its target
     /// interval has been reached. It then performs one update using the real
-    /// accumulated elapsed time.
+    /// accumulated elapsed time and keeps the remaining time for later updates,
+    /// so the average rate matches the target.
     ///
     /// A channel never performs more than one update during a single scheduler
     /// iteration.
@@ -260,7 +266,7 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
 
         var elapsedTime = _accumulator;
 
-        _accumulator = 0;
+        _accumulator -= updateInterval;
 
         PerformUpdate(new UpdateContext(elapsedTime, effectiveUpdateRate));
     }

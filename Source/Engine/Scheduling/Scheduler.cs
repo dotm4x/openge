@@ -19,6 +19,8 @@ namespace OpenGE.Scheduling;
 public class Scheduler : Module
 {
     private readonly Preparator _preparator = new();
+    private readonly List<UpdateChannel> _orderedChannels = [];
+    private bool _channelsDirty = true;
 
     /// <summary>
     /// Gets the identifiable set of channels managed by the scheduler.
@@ -43,6 +45,16 @@ public class Scheduler : Module
     public readonly int TargetUpdateRate;
 
     /// <summary>
+    /// Gets the maximum elapsed time, in seconds, that a single scheduler iteration
+    /// may report.
+    /// </summary>
+    /// <remarks>
+    /// Longer real-time gaps, such as those produced by a debugger breakpoint or a
+    /// suspended process, are clamped so that updates never receive an outsized delta.
+    /// </remarks>
+    public readonly double MaximumDeltaTime;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Scheduler"/> class.
     /// </summary>
     /// <param name="targetUpdateRate">
@@ -52,13 +64,35 @@ public class Scheduler : Module
     /// <param name="channels">
     /// The initial channels, or <see langword="null"/> for none.
     /// </param>
+    /// <param name="maximumDeltaTime">
+    /// The maximum elapsed time reported by a single iteration, in seconds.
+    /// The default is <c>0.25</c>.
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="maximumDeltaTime"/> is not finite or is not
+    /// greater than zero.
+    /// </exception>
     /// <exception cref="InvalidOperationException">
     /// Thrown when two initial channels have the same identifier.
     /// </exception>
-    public Scheduler(int targetUpdateRate = 60, IEnumerable<UpdateChannel>? channels = null)
+    public Scheduler(
+        int targetUpdateRate = 60,
+        IEnumerable<UpdateChannel>? channels = null,
+        double maximumDeltaTime = 0.25
+    )
         : base("Scheduler", ["Logger"])
     {
+        if (!double.IsFinite(maximumDeltaTime) || maximumDeltaTime <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(maximumDeltaTime),
+                maximumDeltaTime,
+                "The maximum delta time must be finite and greater than zero."
+            );
+        }
+
         TargetUpdateRate = targetUpdateRate;
+        MaximumDeltaTime = maximumDeltaTime;
 
         foreach (var channel in channels ?? [])
         {
@@ -67,21 +101,38 @@ public class Scheduler : Module
 
         Channels.OnAdd.Connect(channel =>
         {
+            _channelsDirty = true;
+
             if (State.Get() == ModuleState.Running)
             {
                 channel.Prepare();
                 Logger.Log($"Prepared added channel '{channel.Identifier}'.", LogMessageKind.Debug);
             }
         });
+
+        Channels.OnRemove.Connect(_ => _channelsDirty = true);
+        Channels.OnClear.Connect(_ => _channelsDirty = true);
     }
 
     private SourcedLogger Logger => Require<Logger>("Logger").From(Identifier);
 
     /// <summary>
     /// Gets the amount of real time elapsed since the previous scheduler
-    /// iteration, in seconds.
+    /// iteration, in seconds, limited by <see cref="MaximumDeltaTime"/>.
     /// </summary>
     public double DeltaTime { get; private set; }
+
+    private UpdateChannel[] GetOrderedChannels()
+    {
+        if (_channelsDirty || _orderedChannels.Count != Channels.Count)
+        {
+            _orderedChannels.Clear();
+            _orderedChannels.AddRange(Channels.OrderByDescending(channel => channel.Priority));
+            _channelsDirty = false;
+        }
+
+        return [.. _orderedChannels];
+    }
 
     private void ComposeContents()
     {
@@ -140,13 +191,16 @@ public class Scheduler : Module
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        base.OnDestroy();
         foreach (var channel in Channels.ToArray())
             channel.Destroy();
 
         Channels.Destroy();
+        _orderedChannels.Clear();
+        _channelsDirty = true;
         if (InjectedDependencies is not null)
             Logger.Log("Module resources destroyed.");
+
+        base.OnDestroy();
     }
 
     /// <inheritdoc />
@@ -214,10 +268,13 @@ public class Scheduler : Module
         {
             var iterationStartTime = stopwatch.Elapsed.TotalSeconds;
 
-            DeltaTime = iterationStartTime - previousIterationTime;
+            DeltaTime = System.Math.Min(
+                iterationStartTime - previousIterationTime,
+                MaximumDeltaTime
+            );
             previousIterationTime = iterationStartTime;
 
-            foreach (var channel in Channels.OrderByDescending(channel => channel.Priority))
+            foreach (var channel in GetOrderedChannels())
             {
                 if (State.Get() != ModuleState.Running)
                     break;
@@ -260,11 +317,12 @@ public class Scheduler : Module
 
             while (remainingIterationTime > 0)
             {
-                // Sleep may return before the target interval, especially for sub-millisecond waits.
+                // Sleep may return before the target interval, especially for sub-millisecond
+                // waits. Yielding the remaining time avoids burning a core while spinning.
                 if (remainingIterationTime >= 0.001)
                     Thread.Sleep(TimeSpan.FromSeconds(remainingIterationTime));
                 else
-                    Thread.SpinWait(1);
+                    Thread.Yield();
 
                 elapsedIterationTime = stopwatch.Elapsed.TotalSeconds - iterationStartTime;
                 remainingIterationTime = targetIterationDuration - elapsedIterationTime;

@@ -43,6 +43,36 @@ public class UpdateChannelTests
     }
 
     [Fact]
+    public void Update_WithRateLimit_PreservesAccumulatedRemainder()
+    {
+        var entry = new RecordingUpdatable();
+        var channel = new UpdateChannel("limited", targetUpdateRate: 2, entries: [entry]);
+
+        channel.Update(0.6);
+        Assert.Single(entry.Contexts);
+
+        channel.Update(0.4);
+
+        Assert.Equal(2, entry.Contexts.Count);
+        Assert.Equal(0.5, entry.Contexts[1].DeltaTime, precision: 10);
+
+        channel.Update(0.1);
+        Assert.Equal(2, entry.Contexts.Count);
+    }
+
+    [Fact]
+    public void Update_RateLimitedChannel_KeepsAverageRateAtTarget()
+    {
+        var entry = new RecordingUpdatable();
+        var channel = new UpdateChannel("limited", targetUpdateRate: 2, entries: [entry]);
+
+        for (var index = 0; index < 10; index++)
+            channel.Update(0.4);
+
+        Assert.Equal(8, entry.Contexts.Count);
+    }
+
+    [Fact]
     public void Update_InitializesCompositionAndConfigurationOnlyOnce()
     {
         var entry = new RecordingUpdatable();

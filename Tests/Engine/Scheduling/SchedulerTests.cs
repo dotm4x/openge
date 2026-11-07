@@ -29,6 +29,28 @@ public class SchedulerTests
     }
 
     [Fact]
+    public void Constructor_UsesDefaultMaximumDeltaTime()
+    {
+        var scheduler = new Scheduler();
+
+        Assert.Equal(0.25, scheduler.MaximumDeltaTime);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    public void Constructor_InvalidMaximumDeltaTime_ThrowsArgumentOutOfRangeException(
+        double maximumDeltaTime
+    )
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new Scheduler(maximumDeltaTime: maximumDeltaTime)
+        );
+    }
+
+    [Fact]
     public void Run_WhenSchedulerIsNotRunning_ThrowsWithoutEnteringLoop()
     {
         var scheduler = new Scheduler();
