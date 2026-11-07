@@ -120,6 +120,7 @@ public abstract class InputHandler : Module, IUpdatable
     /// <summary>
     /// Composes the devices managed by this object.
     /// </summary>
+    /// <returns>The devices to register, in enumeration order.</returns>
     protected virtual IEnumerable<InputDevice> Compose()
     {
         yield break;

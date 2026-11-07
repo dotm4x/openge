@@ -89,18 +89,18 @@ public interface IReadOnlyIdentifiableSet<TIdentifier, TItem> : IEnumerable<TIte
 /// Represents a mutable collection of uniquely identifiable items, providing
 /// reactive events and an optional capacity limit with automatic truncation.
 /// </summary>
-/// <remarks>
-/// Items are indexed by their <see cref="IIdentifiable{TIdentifier}.Identifier"/>.
-/// Two items with the same identifier cannot be contained in the set at the same time.
-///
-/// When the limit is reached, adding an item removes the oldest item first.
-/// </remarks>
 /// <typeparam name="TIdentifier">
 /// The type used to identify items in the set.
 /// </typeparam>
 /// <typeparam name="TItem">
 /// The type of items stored in the set.
 /// </typeparam>
+/// <remarks>
+/// Items are indexed by their <see cref="IIdentifiable{TIdentifier}.Identifier"/>.
+/// Two items with the same identifier cannot be contained in the set at the same time.
+///
+/// When the limit is reached, adding an item removes the oldest item first.
+/// </remarks>
 /// <remarks>
 /// Items are borrowed. Removing, clearing, or destroying the set does not destroy them.
 /// Destruction disconnects events and clears references without firing mutation events.

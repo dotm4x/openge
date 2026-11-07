@@ -103,7 +103,6 @@ public class WindowManager : Module, IUpdatable
     /// <summary>
     /// Composes the windows managed by this object.
     /// </summary>
-    /// <returns>The windows to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once when the manager first starts, before windows are opened.
     /// Constructor-provided objects are registered before composed objects.
@@ -113,6 +112,7 @@ public class WindowManager : Module, IUpdatable
     /// with another owning manager.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The windows to register, in enumeration order.</returns>
     protected virtual IEnumerable<Window> Compose()
     {
         yield break;

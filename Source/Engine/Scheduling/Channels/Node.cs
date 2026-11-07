@@ -4,10 +4,9 @@ using OpenGE.Scheduling.Interfaces;
 namespace OpenGE.Scheduling.Channels;
 
 /// <summary>
-/// Initializes a new instance of the <see cref="NodeUpdateChannel"/> class.
+/// Updates loaded <see cref="IUpdatable"/> nodes in the graph's active root.
 /// </summary>
 /// <remarks>
-/// Updates loaded <see cref="IUpdatable"/> nodes in the graph's active root.
 /// The node manager and its nodes are borrowed and are never destroyed by this object.
 /// </remarks>
 /// <param name="manager">The node manager providing the active root.</param>

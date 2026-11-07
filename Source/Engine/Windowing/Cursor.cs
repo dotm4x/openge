@@ -42,7 +42,7 @@ public class CursorOptions
     public SystemCursor SystemIcon { get; init; } = SystemCursor.Default;
 
     /// <summary>
-    /// Gets whether the cursor is initially visible while active.
+    /// Gets a value indicating whether the cursor is initially visible while active.
     /// </summary>
     /// <remarks>
     /// The default is <see langword="true"/>.
@@ -155,7 +155,7 @@ public abstract class Cursor : Destroyable, IIdentifiable<string>
     public readonly Store<SystemCursor> SystemIcon;
 
     /// <summary>
-    /// Gets whether this cursor should be visible while active.
+    /// Gets a value indicating whether this cursor should be visible while active.
     /// </summary>
     public readonly Store<bool> Visible;
 

@@ -71,7 +71,6 @@ public class Logger : Module
     /// <summary>
     /// Composes the outputs managed by this logger.
     /// </summary>
-    /// <returns>The outputs to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once when the logger first starts.
     /// Constructor-provided outputs are registered before composed outputs.
@@ -79,6 +78,7 @@ public class Logger : Module
     /// The logger owns and destroys its registered outputs.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The outputs to register, in enumeration order.</returns>
     protected virtual IEnumerable<LogOutput> Compose()
     {
         yield break;

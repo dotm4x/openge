@@ -41,18 +41,18 @@ public sealed class Preparator
     public PreparationState State { get; private set; }
 
     /// <summary>
-    /// Gets whether composition and configuration have completed successfully.
+    /// Gets a value indicating whether composition and configuration have completed successfully.
     /// </summary>
     public bool Prepared => State == PreparationState.Prepared;
 
     /// <summary>
     /// Ensures that composition completes once, without configuring the object.
     /// </summary>
-    /// <param name="compose">The operation that composes and registers contents.</param>
     /// <remarks>
     /// Use this phase separately when dependencies must be injected into composed contents
     /// before configuration. Later calls to <see cref="Ensure"/> reuse that composition.
     /// </remarks>
+    /// <param name="compose">The operation that composes and registers contents.</param>
     /// <exception cref="InvalidOperationException">Preparation is active or has failed.</exception>
     public void EnsureComposed(Action compose)
     {

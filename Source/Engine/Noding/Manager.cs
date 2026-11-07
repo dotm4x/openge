@@ -1,6 +1,7 @@
 using OpenGE.Common;
 using OpenGE.Common.Collections;
 using OpenGE.Common.Events;
+using OpenGE.Common.Lifecycle;
 using OpenGE.Common.Primitives;
 using OpenGE.Logging;
 
@@ -372,7 +373,6 @@ public class NodeManager : Module
     /// <summary>
     /// Composes the additional roots managed by this node manager.
     /// </summary>
-    /// <returns>The roots to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once when the node manager first starts.
     /// The initial and constructor-provided roots are registered before composed roots.
@@ -382,6 +382,7 @@ public class NodeManager : Module
     /// The node manager owns and destroys all registered roots.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The roots to register, in enumeration order.</returns>
     protected virtual IEnumerable<Node> Compose()
     {
         yield break;
@@ -475,7 +476,6 @@ public class NodeManager : Module
     /// <summary>
     /// Selects the root with the specified identifier.
     /// </summary>
-    /// <param name="identifier">The identifier of the root to select.</param>
     /// <remarks>
     /// When the node manager is idle, the root is selected without being loaded.
     /// When the node manager is running, the current root is unloaded and the selected
@@ -485,7 +485,8 @@ public class NodeManager : Module
     /// Recovery failures are aggregated with the original error. Shutdown also cleans
     /// up roots left loaded by a failed recovery.
     /// </remarks>
-    /// <exception cref="OpenGE.Common.Lifecycle.DestroyedObjectException">
+    /// <param name="identifier">The identifier of the root to select.</param>
+    /// <exception cref="DestroyedObjectException">
     /// Thrown when the manager has been destroyed.
     /// </exception>
     /// <exception cref="ArgumentException">

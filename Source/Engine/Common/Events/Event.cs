@@ -162,12 +162,12 @@ public abstract class Event<TPayload> : Destroyable, IEvent<TPayload>
     /// <summary>
     /// Dispatches a payload to all currently connected listeners.
     /// </summary>
-    /// <param name="payload">The value passed to each event listener.</param>
     /// <remarks>
     /// A snapshot of the current connections is used so listeners can safely
     /// connect, disconnect, or clear connections while the event is being dispatched.
     /// Connections removed during dispatch are not invoked afterward.
     /// </remarks>
+    /// <param name="payload">The value passed to each event listener.</param>
     /// <exception cref="DestroyedObjectException">
     /// Thrown when the event has already been destroyed.
     /// </exception>

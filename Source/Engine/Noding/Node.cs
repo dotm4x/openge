@@ -24,7 +24,8 @@ public class NodeOptions
     public Node? Parent { get; init; }
 
     /// <summary>
-    /// Gets whether the node remains loaded when its parent is unloaded. The default is <see langword="false"/>.
+    /// Gets a value indicating whether the node remains loaded when its parent is
+    /// unloaded. The default is <see langword="false"/>.
     /// </summary>
     public bool Persistent { get; init; }
 
@@ -39,24 +40,21 @@ public class NodeOptions
     public IEnumerable<string>? Tags { get; init; }
 
     /// <summary>
-    /// Gets whether the node participates in rendering. The default is
+    /// Gets a value indicating whether the node participates in rendering. The default is
     /// <see langword="true"/>.
     /// </summary>
     public bool Visible { get; init; } = true;
 }
 
 /// <summary>
-/// Initializes a new instance of the <see cref="NodeReactiveSet"/> class.
-/// </summary>
-/// <param name="owner">The node that owns this collection.</param>
-/// <remarks>
-/// <para>
 /// Represents a collection of <see cref="Node"/> instances belonging to a parent node.
-/// </para>
+/// </summary>
+/// <remarks>
 /// In addition to the standard <see cref="ReactiveSet{TItem}"/> collection operations,
 /// this class provides methods for locating nodes by identifier, name, path, or tag.
 /// Searches can optionally include descendant nodes recursively.
 /// </remarks>
+/// <param name="owner">The node that owns this collection.</param>
 public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
 {
     private IEnumerable<Node> Enumerate(bool recursive)
@@ -162,6 +160,9 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// <summary>
     /// Gets a node using a path relative to the owner of this collection.
     /// </summary>
+    /// <remarks>
+    /// Path resolution begins at the node that owns this collection.
+    /// </remarks>
     /// <param name="path">
     /// The path to resolve. A path is composed of node names separated by
     /// <c>/</c>. The <c>.</c> segment refers to the current node and the
@@ -171,9 +172,6 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// The node resolved by the path, or <see langword="null"/> if the path
     /// cannot be resolved.
     /// </returns>
-    /// <remarks>
-    /// Path resolution begins at the node that owns this collection.
-    /// </remarks>
     public Node? GetByPath(string path)
     {
         var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
@@ -227,6 +225,10 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// <summary>
     /// Gets all nodes containing the specified tag.
     /// </summary>
+    /// <remarks>
+    /// When <paramref name="recursive"/> is <see langword="false"/>, only direct
+    /// subnodes are searched.
+    /// </remarks>
     /// <param name="tag">The tag to search for.</param>
     /// <param name="recursive">
     /// Whether to search descendant nodes recursively.
@@ -234,10 +236,6 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// <returns>
     /// An enumerable sequence containing all matching nodes.
     /// </returns>
-    /// <remarks>
-    /// When <paramref name="recursive"/> is <see langword="false"/>, only direct
-    /// subnodes are searched.
-    /// </remarks>
     public IEnumerable<Node> GetByTag(string tag, bool recursive = false)
     {
         foreach (var node in Enumerate(recursive))
@@ -253,6 +251,10 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// <typeparam name="TNode">
     /// The type of node to locate.
     /// </typeparam>
+    /// <remarks>
+    /// When <paramref name="recursive"/> is <see langword="false"/>, only direct
+    /// subnodes are searched.
+    /// </remarks>
     /// <param name="tag">The tag to search for.</param>
     /// <param name="recursive">
     /// Whether to search descendant nodes recursively.
@@ -260,10 +262,6 @@ public class NodeReactiveSet(Node owner) : ReactiveSet<Node>
     /// <returns>
     /// An enumerable sequence containing all matching nodes of the requested type.
     /// </returns>
-    /// <remarks>
-    /// When <paramref name="recursive"/> is <see langword="false"/>, only direct
-    /// subnodes are searched.
-    /// </remarks>
     public IEnumerable<TNode> GetByTag<TNode>(string tag, bool recursive = false)
         where TNode : Node
     {
@@ -315,7 +313,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
     public readonly Store<Node?> Parent;
 
     /// <summary>
-    /// Gets whether the node remains loaded when its parent is unloaded.
+    /// Gets a value indicating whether the node remains loaded when its parent is unloaded.
     /// </summary>
     /// <remarks>
     /// Persistent nodes are loaded with their parent, but are not automatically
@@ -571,7 +569,6 @@ public class Node : Destroyable, IIdentifiable<Guid>
     /// <summary>
     /// Composes the subnodes managed by this object.
     /// </summary>
-    /// <returns>The subnodes to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once before the first load, before this node or its subnodes start loading.
     /// Constructor-provided objects are registered before composed objects.
@@ -580,6 +577,7 @@ public class Node : Destroyable, IIdentifiable<Guid>
     /// The node owns and destroys its subnodes.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The subnodes to register, in enumeration order.</returns>
     protected virtual IEnumerable<Node> Compose()
     {
         yield break;

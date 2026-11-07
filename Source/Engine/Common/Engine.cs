@@ -34,7 +34,7 @@ public enum EngineState
 }
 
 /// <summary>
-/// Coordinates the lifecycle, dependency resolution and its registered modules.
+/// Coordinates the lifecycle and dependency resolution of its registered modules.
 /// </summary>
 /// <remarks>
 /// An engine manages its modules by resolving their dependencies, injecting their
@@ -190,7 +190,6 @@ public abstract class Engine : Destroyable
     /// <summary>
     /// Composes the modules managed by this object.
     /// </summary>
-    /// <returns>The modules to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once when the engine first starts, before dependency resolution and injection.
     /// Constructor-provided objects are registered before composed objects.
@@ -198,6 +197,7 @@ public abstract class Engine : Destroyable
     /// The engine owns and destroys its registered modules.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The modules to register, in enumeration order.</returns>
     protected virtual IEnumerable<Module> Compose()
     {
         yield break;

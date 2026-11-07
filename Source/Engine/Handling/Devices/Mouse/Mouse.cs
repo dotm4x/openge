@@ -85,7 +85,6 @@ public abstract class Mouse : InputDevice
     /// <summary>
     /// Composes the button events managed by this mouse.
     /// </summary>
-    /// <returns>The events to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once before the first input processing call.
     /// Constructor-provided objects are registered before composed objects.
@@ -93,6 +92,7 @@ public abstract class Mouse : InputDevice
     /// The mouse owns and destroys its registered events.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The events to register, in enumeration order.</returns>
     protected virtual IEnumerable<MouseButtonEvent> Compose()
     {
         yield break;

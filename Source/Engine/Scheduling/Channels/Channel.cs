@@ -163,7 +163,6 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
     /// <summary>
     /// Composes the entries managed by this object.
     /// </summary>
-    /// <returns>The entries to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once when prepared by the scheduler or before the first update.
     /// Constructor-provided objects are registered before composed objects.
@@ -173,6 +172,7 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
     /// their lifetime to this processing collection.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The entries to register, in enumeration order.</returns>
     protected virtual IEnumerable<IUpdatable> Compose()
     {
         yield break;
@@ -210,10 +210,6 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
     /// <summary>
     /// Receives elapsed scheduler time and updates this channel when required.
     /// </summary>
-    /// <param name="deltaTime">
-    /// The real elapsed time since the previous scheduler iteration, in
-    /// seconds.
-    /// </param>
     /// <remarks>
     /// Direct calls use the channel's own target rate. When driven by a scheduler,
     /// its positive target rate also caps the channel's effective target rate.
@@ -227,6 +223,10 @@ public class UpdateChannel : Destroyable, IIdentifiable<string>
     /// A channel never performs more than one update during a single scheduler
     /// iteration.
     /// </remarks>
+    /// <param name="deltaTime">
+    /// The real elapsed time since the previous scheduler iteration, in
+    /// seconds.
+    /// </param>
     /// <exception cref="DestroyedObjectException">
     /// Thrown when the channel has already been destroyed.
     /// </exception>

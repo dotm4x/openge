@@ -12,12 +12,9 @@ public interface IReadOnlyDestroyable
 }
 
 /// <summary>
-/// Initializes a new instance of the <see cref="DestroyedObjectException"/> class.
-/// </summary>
-/// <remarks>
 /// Represents an exception thrown when an operation is attempted on an object
 /// that has already been destroyed.
-/// </remarks>
+/// </summary>
 /// <param name="message">
 /// The message that describes the invalid operation.
 /// </param>

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using OpenGE.Common;
 using OpenGE.Common.Collections;
+using OpenGE.Common.Lifecycle;
 using OpenGE.Common.Primitives;
 using OpenGE.Logging;
 using OpenGE.Scheduling.Channels;
@@ -164,7 +165,6 @@ public class Scheduler : Module
     /// <summary>
     /// Composes the channels managed by this object.
     /// </summary>
-    /// <returns>The channels to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once when the scheduler first starts, before channels are prepared.
     /// Constructor-provided objects are registered before composed objects.
@@ -172,6 +172,7 @@ public class Scheduler : Module
     /// The scheduler owns and destroys its registered channels.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The channels to register, in enumeration order.</returns>
     protected virtual IEnumerable<UpdateChannel> Compose()
     {
         yield break;
@@ -247,7 +248,7 @@ public class Scheduler : Module
     /// must stop its owning engine before destroying it; the scheduler does not own modules.
     /// </remarks>
     /// <exception cref="InvalidOperationException">The scheduler is not running.</exception>
-    /// <exception cref="OpenGE.Common.Lifecycle.DestroyedObjectException">The scheduler has been destroyed.</exception>
+    /// <exception cref="DestroyedObjectException">The scheduler has been destroyed.</exception>
     /// <exception cref="AggregateException">An update and reporting its failure both failed.</exception>
     public void Run()
     {

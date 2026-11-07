@@ -285,9 +285,6 @@ public class Renderer : Module, IUpdatable
     /// <summary>
     /// Composes the additional rendering backends managed by this renderer.
     /// </summary>
-    /// <returns>
-    /// The rendering backends to register, in enumeration order.
-    /// </returns>
     /// <remarks>
     /// Composition occurs once when the renderer first starts.
     /// The initial and constructor-provided backends are registered before
@@ -302,6 +299,9 @@ public class Renderer : Module, IUpdatable
     ///
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>
+    /// The rendering backends to register, in enumeration order.
+    /// </returns>
     protected virtual IEnumerable<RenderBackend> ComposeBackends()
     {
         yield break;
@@ -310,9 +310,6 @@ public class Renderer : Module, IUpdatable
     /// <summary>
     /// Composes the additional rendering spaces managed by this renderer.
     /// </summary>
-    /// <returns>
-    /// The rendering spaces to register, in enumeration order.
-    /// </returns>
     /// <remarks>
     /// Composition occurs once when the renderer first starts.
     /// Constructor-provided spaces are registered before composed spaces.
@@ -323,6 +320,9 @@ public class Renderer : Module, IUpdatable
     ///
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>
+    /// The rendering spaces to register, in enumeration order.
+    /// </returns>
     protected virtual IEnumerable<RenderSpace> ComposeSpaces()
     {
         yield break;

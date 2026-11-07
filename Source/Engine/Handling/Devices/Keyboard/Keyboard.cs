@@ -65,7 +65,6 @@ public abstract class Keyboard : InputDevice
     /// <summary>
     /// Composes the events managed by this keyboard.
     /// </summary>
-    /// <returns>The events to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once before the first input processing call.
     /// Constructor-provided objects are registered before composed objects.
@@ -73,6 +72,7 @@ public abstract class Keyboard : InputDevice
     /// The keyboard owns and destroys its registered events.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The events to register, in enumeration order.</returns>
     protected virtual IEnumerable<InputEvent<KeyboardEventPayload, KeyboardKey>> Compose()
     {
         yield break;

@@ -100,7 +100,7 @@ public class WindowOptions : IIdentifiable<string>
     public Vector2? Position { get; init; }
 
     /// <summary>
-    /// Gets whether the user can resize the window.
+    /// Gets a value indicating whether the user can resize the window.
     /// </summary>
     /// <remarks>
     /// The default is <see langword="true"/>.
@@ -125,7 +125,7 @@ public class WindowOptions : IIdentifiable<string>
         $"OpenGE - {DefaultTitleMessages[Random.Shared.Next(DefaultTitleMessages.Length)]}";
 
     /// <summary>
-    /// Gets whether the window is initially visible.
+    /// Gets a value indicating whether the window is initially visible.
     /// </summary>
     /// <remarks>
     /// The default is <see langword="true"/>.
@@ -194,7 +194,7 @@ public abstract class Window : Destroyable, IUpdatable, IIdentifiable<string>
     private object? _publishingValue;
 
     /// <summary>
-    /// Gets whether an initial position was explicitly configured.
+    /// Gets a value indicating whether an initial position was explicitly configured.
     /// </summary>
     protected readonly bool HasInitialPosition;
 

@@ -12,9 +12,7 @@ namespace OpenGE.Graphics.Resources.Targets;
 /// </remarks>
 public sealed class RenderTarget : Texture
 {
-    /// <summary>
-    /// Gets the dimensions of the render target, in pixels.
-    /// </summary>
+    /// <inheritdoc />
     public override Vector2 Size { get; }
 
     /// <summary>

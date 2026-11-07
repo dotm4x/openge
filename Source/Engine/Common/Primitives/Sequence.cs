@@ -37,7 +37,7 @@ public sealed class Sequence
     private bool _runningLoop;
 
     /// <summary>
-    /// Gets whether all steps have been consumed.
+    /// Gets a value indicating whether all steps have been consumed.
     /// </summary>
     public bool Completed => _index == Count && !_executing;
 
@@ -56,12 +56,12 @@ public sealed class Sequence
     public int Index => _index;
 
     /// <summary>
-    /// Gets whether automatic execution is paused.
+    /// Gets a value indicating whether automatic execution is paused.
     /// </summary>
     public bool Paused { get; private set; }
 
     /// <summary>
-    /// Gets whether automatic execution is running.
+    /// Gets a value indicating whether automatic execution is running.
     /// </summary>
     public bool Running { get; private set; }
 
@@ -143,11 +143,11 @@ public sealed class Sequence
     /// <summary>
     /// Moves execution to a specified step.
     /// </summary>
-    /// <param name="index">The destination index.</param>
     /// <remarks>
     /// Moving backward does not undo previously executed actions.
     /// Navigation during a step changes which step executes next.
     /// </remarks>
+    /// <param name="index">The destination index.</param>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown when the destination is outside the valid range.
     /// </exception>
@@ -291,7 +291,7 @@ public sealed class Sequence
     /// <param name="action">The action to execute.</param>
     /// <returns>The current sequence.</returns>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when the action is null.
+    /// Thrown when the action is <see langword="null"/>.
     /// </exception>
     /// <exception cref="InvalidOperationException">
     /// Thrown when a step is executing.

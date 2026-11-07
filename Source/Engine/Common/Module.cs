@@ -98,12 +98,9 @@ public enum ModuleState
 }
 
 /// <summary>
-/// Initializes a new instance of the <see cref="Module"/> class.
+/// Represents an engine module with a managed lifecycle and declared dependencies.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Represents an engine module with a managed lifecycle and declared dependencies.
-/// </para>
 /// Modules are initialized and managed by a <see cref="Engine"/> instance.
 /// Their dependencies are injected before the module is started.
 /// </remarks>

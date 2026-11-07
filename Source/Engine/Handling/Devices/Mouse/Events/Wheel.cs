@@ -4,11 +4,8 @@ using OpenGE.Common.Events;
 namespace OpenGE.Handling.Devices.Mouse.Events;
 
 /// <summary>
-/// Initializes a new instance of the <see cref="MouseWheelEventPayload"/> class.
-/// </summary>
-/// <remarks>
 /// Describes a mouse wheel movement.
-/// </remarks>
+/// </summary>
 /// <param name="Delta">
 /// The horizontal and vertical scroll amounts.
 /// </param>

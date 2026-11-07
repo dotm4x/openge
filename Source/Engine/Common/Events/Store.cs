@@ -33,14 +33,14 @@ public interface IStore<TValue> : IReadOnlyStore<TValue>, IEvent<TValue>
 }
 
 /// <summary>
-/// Initializes a new instance of the <see cref="Store{TValue}"/> class.
-/// </summary>
-/// <remarks>
 /// Represents a reactive state container that holds a value and notifies listeners
-/// when the value changes. The current and previous values are borrowed; changing or
-/// destroying the store never destroys them.
-/// </remarks>
+/// when the value changes.
+/// </summary>
 /// <typeparam name="TValue">The type of value stored in the container.</typeparam>
+/// <remarks>
+/// The current and previous values are borrowed; changing or destroying the store
+/// never destroys them.
+/// </remarks>
 /// <example>
 /// <code>
 /// var store = new Store&lt;int&gt;(0);
@@ -67,6 +67,7 @@ public class Store<TValue>(TValue value, Func<TValue, TValue, bool>? equals = nu
     /// <summary>
     /// Gets the current value of the store.
     /// </summary>
+    /// <returns>The current value.</returns>
     public TValue Get()
     {
         return _value;

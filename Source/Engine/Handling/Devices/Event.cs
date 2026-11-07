@@ -4,11 +4,8 @@ using OpenGE.Common.Interfaces;
 namespace OpenGE.Handling.Devices;
 
 /// <summary>
-/// Initializes a new instance of the <see cref="InputEvent{TPayload, TSource}"/> class.
-/// </summary>
-/// <remarks>
 /// Associates an input source with a signal that publishes its payloads.
-/// </remarks>
+/// </summary>
 /// <typeparam name="TPayload">The payload delivered to subscribers.</typeparam>
 /// <typeparam name="TSource">The type identifying the source of this action.</typeparam>
 /// <param name="identifier">The stable registration identifier.</param>

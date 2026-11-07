@@ -636,9 +636,10 @@ public sealed class SDL3RenderBackend : RenderBackend
         }
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// Selects the swapchain or an offscreen GPU texture for subsequent commands.
-    /// </summary>
+    /// </remarks>
     protected override void OnBeginRender(RenderTarget? target)
     {
         CheckThread();

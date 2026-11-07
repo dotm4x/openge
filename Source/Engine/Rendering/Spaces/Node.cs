@@ -65,15 +65,11 @@ public class NodeRenderSpace(
         }
     }
 
-    /// <summary>
-    /// Collects rendering commands from loaded renderable nodes under the active root.
-    /// </summary>
-    /// <param name="context">
-    /// The rendering context used by nodes to produce their rendering data.
-    /// </param>
-    /// <returns>
-    /// The rendering commands produced by the active node hierarchy, in traversal order.
-    /// </returns>
+    /// <inheritdoc />
+    /// <remarks>
+    /// Collects the rendering commands of the loaded, visible nodes under the active
+    /// root, in traversal order.
+    /// </remarks>
     protected override IEnumerable<IRenderCommand> OnCollect(IRenderContext context)
     {
         return CollectNode(manager.ActiveRoot.Get(), context);

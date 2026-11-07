@@ -1,17 +1,15 @@
 using OpenGE.Common;
 using OpenGE.Common.Collections;
 using OpenGE.Common.Interfaces;
+using OpenGE.Common.Lifecycle;
 using OpenGE.Common.Primitives;
 using OpenGE.Logging;
 
 namespace OpenGE.Importing;
 
 /// <summary>
-/// Initializes a new instance of the <see cref="ImportContext"/> class.
-/// </summary>
-/// <remarks>
 /// Describes a resource importing operation.
-/// </remarks>
+/// </summary>
 /// <param name="Identifier">
 /// The normalized resource identifier relative to the importer root.
 /// </param>
@@ -137,7 +135,6 @@ public class Importer : Module
     /// <summary>
     /// Composes the decoders managed by this object.
     /// </summary>
-    /// <returns>The decoders to register, in enumeration order.</returns>
     /// <remarks>
     /// Composition occurs once when the importer first starts or first imports a resource.
     /// Constructor-provided objects are registered before composed objects.
@@ -145,6 +142,7 @@ public class Importer : Module
     /// The importer owns and destroys its registered decoders.
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>The decoders to register, in enumeration order.</returns>
     protected virtual IEnumerable<Decoder> Compose()
     {
         yield break;
@@ -217,12 +215,6 @@ public class Importer : Module
     /// <typeparam name="TResource">
     /// The type of resource to import.
     /// </typeparam>
-    /// <param name="path">
-    /// The resource path relative to <see cref="Root"/>.
-    /// </param>
-    /// <returns>
-    /// The imported resource.
-    /// </returns>
     /// <remarks>
     /// Resources are cached by requested type and normalized relative path.
     /// The importer owns the returned resource. A decoded resource is destroyed if
@@ -231,7 +223,13 @@ public class Importer : Module
     /// Cleanup failures are aggregated with the original import error. Resources whose
     /// cleanup failed remain owned by the importer and are retried during its destruction.
     /// </remarks>
-    /// <exception cref="OpenGE.Common.Lifecycle.DestroyedObjectException">
+    /// <param name="path">
+    /// The resource path relative to <see cref="Root"/>.
+    /// </param>
+    /// <returns>
+    /// The imported resource.
+    /// </returns>
+    /// <exception cref="DestroyedObjectException">
     /// Thrown when the importer has been destroyed.
     /// </exception>
     /// <exception cref="ArgumentException">

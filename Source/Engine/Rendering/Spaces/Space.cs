@@ -64,7 +64,7 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     public readonly RenderSpacePriority Priority;
 
     /// <summary>
-    /// Gets the offscreen rendering target, or null to render to the window.
+    /// Gets the offscreen rendering target, or <see langword="null"/> to render to the window.
     /// </summary>
     /// <remarks>
     /// The target is borrowed and is not destroyed with the space.
@@ -133,9 +133,6 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     /// <summary>
     /// Composes the renderable entries contained in this space.
     /// </summary>
-    /// <returns>
-    /// The renderable entries to register, in enumeration order.
-    /// </returns>
     /// <remarks>
     /// Composition occurs once before the first collection.
     /// Constructor-provided entries are registered before composed entries.
@@ -148,6 +145,9 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     ///
     /// If composition fails, later lifecycle calls reject further initialization.
     /// </remarks>
+    /// <returns>
+    /// The renderable entries to register, in enumeration order.
+    /// </returns>
     protected virtual IEnumerable<IRenderable> Compose()
     {
         yield break;
@@ -197,13 +197,6 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     /// <summary>
     /// Collects the rendering commands produced by this space's entries.
     /// </summary>
-    /// <param name="context">
-    /// The rendering context used by entries to produce their rendering data.
-    /// </param>
-    /// <returns>
-    /// The rendering commands produced by the space, preserving entry and
-    /// command order.
-    /// </returns>
     /// <remarks>
     /// Entries are evaluated in their registration order. Commands produced
     /// by each entry are appended in the order in which they appear in its
@@ -212,6 +205,13 @@ public class RenderSpace : Destroyable, IIdentifiable<string>
     /// The returned commands are not executed by the space. Execution is the
     /// responsibility of the rendering system and its active backend.
     /// </remarks>
+    /// <param name="context">
+    /// The rendering context used by entries to produce their rendering data.
+    /// </param>
+    /// <returns>
+    /// The rendering commands produced by the space, preserving entry and
+    /// command order.
+    /// </returns>
     /// <exception cref="DestroyedObjectException">
     /// Thrown when this space has been destroyed.
     /// </exception>

@@ -17,17 +17,17 @@ public interface IPoolable : IRestorable
 }
 
 /// <summary>
-/// Initializes a new instance of the <see cref="Pool{TItem}"/> class.
+/// Represents a pool of reusable objects.
 /// </summary>
-/// <remarks>
-/// Represents a pool of reusable objects. The pool owns available items and destroys
-/// those implementing IDestroyable when the pool is destroyed. Acquire transfers ownership
-/// to the caller; Release transfers it back. Acquired items remain the caller's responsibility
-/// even if the pool is destroyed. An item must not belong to multiple pools.
-/// </remarks>
 /// <typeparam name="TItem">
 /// The type of objects managed by the pool.
 /// </typeparam>
+/// <remarks>
+/// The pool owns available items and destroys those implementing
+/// <see cref="IDestroyable"/> when the pool is destroyed. Acquire transfers ownership
+/// to the caller; Release transfers it back. Acquired items remain the caller's
+/// responsibility even if the pool is destroyed. An item must not belong to multiple pools.
+/// </remarks>
 /// <param name="factory">
 /// The factory used to create objects when no available objects exist.
 /// </param>
