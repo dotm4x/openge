@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\OpenGE.Common.csproj" />
+    <ProjectReference Include="..\Rendering\OpenGE.Rendering.csproj" />
     <ProjectReference Include="..\Windowing\OpenGE.Windowing.csproj" />
   </ItemGroup>
 </Project>

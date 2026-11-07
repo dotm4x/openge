@@ -12,6 +12,9 @@ public sealed class RaylibWindow : Window
     private static RaylibWindow? _active;
     private int _threadId;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaylibWindow"/> class.
+    /// </summary>
     public RaylibWindow(WindowOptions? options = null)
         : base(options) { }
 
