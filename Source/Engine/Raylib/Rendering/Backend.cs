@@ -37,7 +37,6 @@ public sealed class RaylibRenderBackend : RenderBackend
 
     protected override void OnBeginRender(RenderTarget? target)
     {
-        return;
         if (target is not null)
             throw new NotSupportedException("Offscreen rendering is not implemented yet.");
     }
