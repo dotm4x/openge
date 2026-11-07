@@ -4,53 +4,39 @@ The same composition, lifecycle, and state patterns repeat across every area. Fo
 
 ## Reactive state
 
-- Mutable state that observers react to is a `Store<T>`, exposed as a `public readonly` field. The store notifies only when the value changes.
-- Read-only exposure uses `IReadOnlyStore<T>`, `IReadOnlyEvent<T>`, `IReadOnlyIdentifiableSet<...>`, or `IReadOnlyReactiveSet<T>`. Read-only views restrict access; they do not imply ownership.
-- Fire-only notifications use `Signal<T>`; values that new listeners must be able to read use `Event<T>` and `Store<T>`. Persistent connections survive `Clear()` and are used for internal wiring.
-- Base classes that own a store publish reported values through their own helper methods, so a reported value is not treated as a new request from the consumer.
+- State that observers react to is held in a reactive store and exposed as read-only data. Notifications occur only when the value changes.
+- Read-only views restrict access; they do not imply ownership or guarantee that the underlying value never changes.
+- Use fire-only notifications for events nobody reads back, and readable reactive values for state new listeners must observe.
+- Persistent subscriptions survive ordinary clearing and are used for internal wiring; transient subscriptions are cleared between uses.
+- Base classes that own observable state publish externally reported values through their own helpers, so a reported value is not mistaken for a new request.
 
-## Options and records
+## Configuration and value types
 
-- Configuration bags derive from the base options type and use `init` properties with inline defaults:
-
-```csharp
-public class Camera2DOptions : Node2DOptions
-{
-    /// <summary>
-    /// Gets the initial zoom factor.
-    /// The default is <c>1</c>, which means no zoom.
-    /// </summary>
-    public float Zoom { get; init; } = 1f;
-}
-```
-
-- Small immutable payloads and commands are `readonly record struct`; data that needs identity or behavior is a class.
-- Types with a primary constructor describe the type in `<summary>` and document the constructor parameters with `<param>` tags on the type.
+- Configuration objects are immutable after construction, expose optional values with documented defaults, and derive from the base configuration of their area.
+- Small immutable payloads and commands are value types; data that needs identity or behavior is a reference type.
+- Types with a primary constructor describe the type and document its parameters on the type declaration.
 
 ## Composition and configuration
 
-- One-time setup is expressed through two hooks: `Compose()`, which returns the objects the owner adopts, and `Configure()`, which connects already registered objects.
-- Both hooks run at most once. `Preparator` enforces the order and makes failure permanent:
+- One-time setup is split into two hooks: one returns the objects the owner adopts, the other connects already registered objects.
+- Both hooks run at most once, and failure is permanent: later lifecycle calls reject further initialization instead of repeating side effects.
+- Constructor-provided objects are registered before adopted objects, and everything is registered before connection hooks run.
+- Composition hooks that return borrowed objects must document that they do not transfer ownership.
+- When dependencies must be available while connecting, composition may be forced separately from configuration.
 
-```csharp
-_preparator.Ensure(ComposeContents, ConfigureContents);
-```
+## Modules and the engine
 
-- Use `EnsureComposed(...)` only when dependencies must be injected into composed contents before configuration.
-- Constructor-provided objects are registered before composed objects, and every object is registered before `Configure()` runs.
-- If composition or configuration throws, later lifecycle calls must reject further initialization instead of repeating side effects.
-
-## Modules and engines
-
-- A module derives from `Module`, declares a unique identifier, and lists its dependencies by identifier, for example `base("Renderer-0", ["Logger"])`.
-- Retrieve dependencies through `Require<TModule>(identifier)`; they are borrowed and never destroyed by the consumer.
-- `Engine` resolves dependencies, injects them, starts modules in dependency order, and stops them in reverse order. Startup and shutdown roll back completed work and aggregate the original failure first.
-- Lifecycle state is observable through `State` and is enforced: operations that require a running module throw `InvalidOperationException`, and destroyed objects throw `DestroyedObjectException`.
+- A module has a unique identifier and declares the identifiers of the modules it depends on.
+- Dependencies are looked up by identifier, are always borrowed, and are never destroyed by the consumer.
+- The engine resolves dependencies, injects them, starts modules in dependency order, and stops them in reverse order.
+- Startup and shutdown roll back completed work, aggregate the original failure first, and leave the system in a state that can still be stopped or retried.
+- Lifecycle state is observable and enforced: operations that require a running module are rejected, and destroyed objects reject further use.
 
 ## Collections
 
-- `IdentifiableSet<TIdentifier, TItem>` keys items by identifier, supports an optional `Limit`, and exposes `OnAdd`, `OnRemove`, and `OnClear`. Duplicate identifiers throw `InvalidOperationException`.
-- `ReactiveSet<TItem>` and `ReactiveDictionary<TKey, TValue>` provide reactive events. Destruction disconnects signals and drops references without firing ordinary mutation events.
-- Removing or clearing entries returns ownership of the objects to the caller without destroying them. Document that contract on every owning collection.
-- Prefer one ownership contract per managed collection. Do not add ownership flags or separate owned and borrowed registration methods without a real use case.
-- Expose mutable registries as read-only views when mutation could invalidate internal invariants, such as an active selection held internally.
+- Registries key items by a stable identifier and report additions, removals, and clearing through notifications.
+- Reactive collections report their mutations; destruction disconnects notifications and drops references without firing ordinary mutation events.
+- Collections never own their elements. The surrounding owner destroys them explicitly.
+- Removing or clearing entries returns ownership of the objects to the caller without destroying them, and the owning collection documents that contract.
+- Prefer one ownership contract per managed collection; do not add ownership flags or parallel registration methods without a real use case.
+- Expose mutable registries as read-only views when external mutation could invalidate internal invariants.

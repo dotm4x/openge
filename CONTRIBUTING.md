@@ -2,6 +2,9 @@
 
 Contribution guidance is maintained in the [`Contributing/`](Contributing/) directory. Start with the document that matches your change, and follow the documents it links to.
 
+> [!NOTE]
+> OpenGE is experimental and its identifiers change regularly. These documents describe stable rules and concepts rather than current type, member, or path names. Locate the concept you need in the codebase instead of relying on a name quoted from a guide.
+
 ## Working in this repository
 
 - [Repository structure](Contributing/Structure.md): projects, platform separation, build and test commands, CI expectations.
