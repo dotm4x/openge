@@ -68,7 +68,7 @@ public abstract class InputHandler : Module, IUpdatable
 
         var context = CreateContext();
 
-        foreach (var device in _devices)
+        foreach (var device in _devices.ToArray())
         {
             try
             {
@@ -139,8 +139,6 @@ public abstract class InputHandler : Module, IUpdatable
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-
         foreach (var device in _devices.ToArray())
         {
             device.Destroy();
@@ -155,6 +153,8 @@ public abstract class InputHandler : Module, IUpdatable
 
         if (InjectedDependencies is not null)
             Logger.Log("Module resources destroyed.");
+
+        base.OnDestroy();
     }
 
     /// <inheritdoc />
@@ -179,6 +179,5 @@ public abstract class InputHandler : Module, IUpdatable
     protected override void OnStop()
     {
         Logger.Log("Module stopped.");
-        base.OnStop();
     }
 }

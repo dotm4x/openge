@@ -28,7 +28,8 @@ public abstract class InputEvent<TPayload, TSource>(string identifier, TSource s
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        base.OnDestroy();
         Source.Destroy();
+
+        base.OnDestroy();
     }
 }

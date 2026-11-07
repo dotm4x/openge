@@ -6,7 +6,6 @@
     <Project Path="Source/Engine/Common/OpenGE.Common.csproj" />
     <Project Path="Source/Engine/Graphics/OpenGE.Graphics.csproj" />
     <Project Path="Source/Engine/DXC/OpenGE.DXC.csproj" />
-    <Project Path="Source/Engine/Presentating/OpenGE.Presentating.csproj" />
     <Project Path="Source/Engine/Noding/OpenGE.Noding.csproj" />
     <Project Path="Source/Engine/Importing/OpenGE.Importing.csproj" />
     <Project Path="Source/Engine/Scheduling/OpenGE.Scheduling.csproj" />

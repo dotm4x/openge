@@ -401,8 +401,6 @@ public class NodeManager : Module
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-
         var active = _activeRoot.Get();
 
         if (active.Loaded)
@@ -430,6 +428,8 @@ public class NodeManager : Module
         _activeRoot.Destroy();
         if (InjectedDependencies is not null)
             Logger.Log("Module resources destroyed.");
+
+        base.OnDestroy();
     }
 
     /// <inheritdoc />

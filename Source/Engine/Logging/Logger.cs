@@ -13,6 +13,8 @@ namespace OpenGE.Logging;
 public class Logger : Module
 {
     private readonly Preparator _preparator = new();
+    private LogOutput[] _orderedOutputs = [];
+    private bool _outputsDirty = true;
 
     /// <summary>
     /// Gets the outputs registered with the logger.
@@ -33,6 +35,10 @@ public class Logger : Module
     public Logger(IEnumerable<LogOutput>? outputs = null)
         : base("Logger")
     {
+        Outputs.OnAdd.Connect(_ => _outputsDirty = true);
+        Outputs.OnRemove.Connect(_ => _outputsDirty = true);
+        Outputs.OnClear.Connect(_ => _outputsDirty = true);
+
         foreach (var output in outputs ?? [])
         {
             Outputs.Add(output);
@@ -92,13 +98,14 @@ public class Logger : Module
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-
         foreach (var output in Outputs.ToArray())
         {
             output.Destroy();
         }
         Outputs.Destroy();
+        _orderedOutputs = [];
+
+        base.OnDestroy();
     }
 
     /// <summary>
@@ -162,16 +169,25 @@ public class Logger : Module
     {
         ThrowIfDestroyed();
 
-        LogOutput[] sortedOutputs = [.. Outputs.OrderByDescending(output => output.Priority)];
-
         foreach (var message in messages)
         {
-            foreach (var output in sortedOutputs)
+            foreach (var output in GetOrderedOutputs())
             {
                 output.Log(message);
             }
 
             OnLog(message);
         }
+    }
+
+    private LogOutput[] GetOrderedOutputs()
+    {
+        if (_outputsDirty)
+        {
+            _orderedOutputs = [.. Outputs.OrderByDescending(output => output.Priority)];
+            _outputsDirty = false;
+        }
+
+        return _orderedOutputs;
     }
 }

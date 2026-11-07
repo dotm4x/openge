@@ -20,11 +20,15 @@ namespace OpenGE.Windowing;
 public class WindowManager : Module, IUpdatable
 {
     private readonly Dictionary<string, Window> _windows = [];
+    private readonly List<Window> _orderedWindows = [];
     private readonly Preparator _preparator = new();
 
     /// <summary>
     /// Gets the managed windows, indexed by identifier.
     /// </summary>
+    /// <remarks>
+    /// Windows are updated, opened, and closed in registration order.
+    /// </remarks>
     public readonly IReadOnlyDictionary<string, Window> Windows;
 
     /// <summary>
@@ -43,6 +47,8 @@ public class WindowManager : Module, IUpdatable
                 throw new InvalidOperationException(
                     $"Duplicate window identifier found: '{window.Identifier}'."
                 );
+
+            _orderedWindows.Add(window);
         }
 
         Windows = _windows.AsReadOnly();
@@ -63,7 +69,7 @@ public class WindowManager : Module, IUpdatable
                 "The module must be running before processing updates."
             );
 
-        foreach (var window in _windows.Values)
+        foreach (var window in _orderedWindows.ToArray())
             window.Update(context);
     }
 
@@ -81,6 +87,8 @@ public class WindowManager : Module, IUpdatable
                     $"Duplicate window identifier found: '{window.Identifier}'."
                 );
             }
+
+            _orderedWindows.Add(window);
         }
         Logger.Log("Composition completed.", LogMessageKind.Debug);
     }
@@ -124,9 +132,7 @@ public class WindowManager : Module, IUpdatable
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-
-        foreach (var window in _windows.Values.ToArray())
+        foreach (var window in _orderedWindows.ToArray())
         {
             window.Destroy();
             if (InjectedDependencies is not null)
@@ -134,8 +140,11 @@ public class WindowManager : Module, IUpdatable
         }
 
         _windows.Clear();
+        _orderedWindows.Clear();
         if (InjectedDependencies is not null)
             Logger.Log("Module resources destroyed.");
+
+        base.OnDestroy();
     }
 
     /// <inheritdoc />
@@ -152,7 +161,7 @@ public class WindowManager : Module, IUpdatable
 
         try
         {
-            foreach (var window in _windows.Values)
+            foreach (var window in _orderedWindows)
             {
                 window.Open();
                 openedWindows.Add(window);
@@ -192,7 +201,7 @@ public class WindowManager : Module, IUpdatable
     /// </remarks>
     protected override void OnStop()
     {
-        foreach (var window in _windows.Values.Reverse())
+        foreach (var window in Enumerable.Reverse(_orderedWindows))
         {
             if (window.Opened.Get())
             {

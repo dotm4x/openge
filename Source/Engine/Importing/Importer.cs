@@ -18,11 +18,7 @@ namespace OpenGE.Importing;
 /// <param name="Path">
 /// The absolute path of the resource.
 /// </param>
-public record ImportContext(string Identifier, string Path) : IIdentifiable<string>
-{
-    /// <inheritdoc />
-    public string Identifier { get; init; } = Identifier;
-}
+public record ImportContext(string Identifier, string Path) : IIdentifiable<string>;
 
 /// <summary>
 /// Imports and caches resources.
@@ -168,8 +164,6 @@ public class Importer : Module
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-
         foreach (var resource in _resources.Values.Where(resource => !resource.Destroyed))
         {
             resource.Destroy();
@@ -199,6 +193,8 @@ public class Importer : Module
             Decoders.Destroy();
         if (InjectedDependencies is not null)
             Logger.Log("Module resources destroyed.");
+
+        base.OnDestroy();
     }
 
     /// <inheritdoc />
@@ -213,7 +209,6 @@ public class Importer : Module
     protected override void OnStop()
     {
         Logger.Log("Module stopped.");
-        base.OnStop();
     }
 
     /// <summary>

@@ -244,11 +244,11 @@ public class Node2D : Node
     /// <inheritdoc />
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-
         Origin.Destroy();
         Position.Destroy();
         Rotation.Destroy();
         Scale.Destroy();
+
+        base.OnDestroy();
     }
 }

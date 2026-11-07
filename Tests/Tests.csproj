@@ -24,7 +24,6 @@
     <ProjectReference Include="..\Source\Engine\Logging\OpenGE.Logging.csproj" />
     <ProjectReference Include="..\Source\Engine\Noding\OpenGE.Noding.csproj" />
     <ProjectReference Include="..\Source\Engine\Numerics\OpenGE.Numerics.csproj" />
-    <ProjectReference Include="..\Source\Engine\Presentating\OpenGE.Presentating.csproj" />
     <ProjectReference Include="..\Source\Engine\Raylib\OpenGE.Raylib.csproj" />
     <ProjectReference Include="..\Source\Engine\Rendering\OpenGE.Rendering.csproj" />
     <ProjectReference Include="..\Source\Engine\Scheduling\OpenGE.Scheduling.csproj" />
