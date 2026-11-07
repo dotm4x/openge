@@ -1,51 +1,64 @@
-using System.Numerics;
 using OpenGE.Common;
-using OpenGE.Logging;
-using OpenGE.Logging.Outputs;
-using OpenGE.Noding;
-using OpenGE.Spatial.Nodes;
+using OpenGE.Sandbox;
+using OpenGE.Sandbox.Handling;
+using OpenGE.Sandbox.Importing;
+using OpenGE.Sandbox.Logging;
+using OpenGE.Sandbox.Noding;
+using OpenGE.Sandbox.Rendering;
+using OpenGE.Sandbox.Scheduling;
+using OpenGE.Sandbox.Windowing;
 
-var engine = new SandboxEngine();
+var engine = new MyGame();
 
 try
 {
     engine.Start();
-
-    // Experiment here. The engine and its modules are running, and any
-    // project referenced by this playground is available.
-    engine
-        .Get<Logger>()
-        .From("Sandbox")
-        .Log("Sandbox is running. Edit Sandbox/Program.cs to experiment.");
-
-    engine.Stop();
 }
 finally
 {
-    engine.Destroy();
+    engine.Stop();
+
+    if (!engine.Destroyed)
+        engine.Destroy();
 }
 
-internal sealed class SandboxEngine : Engine
+namespace OpenGE.Sandbox
 {
-    public TModule Get<TModule>()
-        where TModule : Module => Require<TModule>();
-
-    protected override IEnumerable<Module> Compose()
+    internal sealed class MyGame : Engine
     {
-        yield return new Logger([new ConsoleOutput()]);
-        yield return new NodeManager(new SandboxRoot("Root"));
-    }
+        public readonly MyLogger Logger;
+        public readonly MyWindowManager Windows;
+        public readonly MyImporter Importer;
+        public readonly MyInputHandler Input;
+        public readonly MyNodeManager Nodes;
+        public readonly MyRenderer Renderer;
+        public readonly MyScheduler Scheduler;
 
-    protected override void Configure()
-    {
-        Require<Logger>().Log("Sandbox configured.", "Sandbox", LogMessageKind.Debug);
-    }
-}
+        public MyGame()
+        {
+            Logger = new MyLogger();
+            Windows = new MyWindowManager();
+            Importer = new MyImporter();
+            Input = new MyInputHandler(Windows.Main);
+            Nodes = new MyNodeManager();
+            Renderer = new MyRenderer(Nodes.Main.Camera, Windows.Main);
+            Scheduler = new MyScheduler(Windows, Nodes, Renderer);
+        }
 
-internal sealed class SandboxRoot(string name) : Node(name)
-{
-    protected override IEnumerable<Node> Compose()
-    {
-        yield return new Node2D("Child") { Position = new Vector2(1, 2) };
+        protected override IEnumerable<Module> Compose()
+        {
+            yield return Logger;
+            yield return Windows;
+            yield return Importer;
+            yield return Input;
+            yield return Nodes;
+            yield return Renderer;
+            yield return Scheduler;
+        }
+
+        protected override void OnStart()
+        {
+            Scheduler.Run();
+        }
     }
 }
